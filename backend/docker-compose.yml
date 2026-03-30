@@ -1,0 +1,19 @@
+version: '3.8'
+
+services:
+  qwen-model:
+    build: .
+    image: qwen-api
+    container_name: qwen-model
+    ports:
+      - "9000:9000"
+    volumes:
+      - ~/.cache/huggingface:/root/.cache/huggingface
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+    restart: unless-stopped

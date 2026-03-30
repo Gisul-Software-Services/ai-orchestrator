@@ -1,0 +1,20 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --console-accent: 34 211 238;
+}
+
+/* Dark UI: ensure typed text and placeholders are readable on zinc-950 fields */
+@layer base {
+  input:not([type="checkbox"]):not([type="radio"]):not([type="range"]),
+  textarea,
+  select {
+    @apply text-zinc-100;
+  }
+  input::placeholder,
+  textarea::placeholder {
+    @apply text-zinc-400;
+  }
+}

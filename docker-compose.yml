@@ -1,0 +1,55 @@
+version: '3.8'
+
+services:
+
+  qwen-model:
+
+    image: aaptor/qwen-api:latest
+
+    container_name: aaptor-qwen-api
+
+    ports:
+
+      - '9000:9000'
+
+    volumes:
+
+      - ~/.cache/huggingface:/root/.cache/huggingface
+      - /mnt/c/Users/adity/documents/gisul/gisul_model/assets:/app/assets
+
+    deploy:
+
+      resources:
+
+        reservations:
+
+          devices:
+
+            - driver: nvidia
+
+              count: all
+
+              capabilities: [gpu]
+
+    restart: unless-stopped
+
+  qwen-frontend:
+
+    image: aaptor/qwen-frontend:latest
+
+    container_name: aaptor-qwen-frontend
+
+    ports:
+
+      - '8501:8501'
+
+    environment:
+
+      - API_BASE=http://qwen-model:9000/api/v1
+
+    depends_on:
+
+      - qwen-model
+
+    restart: unless-stopped
+

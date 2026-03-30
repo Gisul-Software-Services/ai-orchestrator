@@ -1,0 +1,67 @@
+name: Build and Deploy
+ 
+on:
+  push:
+    branches:
+      - dev
+ 
+jobs:
+  build:
+    runs-on: ubuntu-latest
+ 
+    steps:
+      - uses: actions/checkout@v4
+ 
+      - uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+ 
+      - name: Build and push backend
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./backend/Dockerfile
+          push: true
+          tags: aaptor/qwen-api:latest
+ 
+      - name: Build and push frontend
+        uses: docker/build-push-action@v5
+        with:
+          context: ./frontend
+          push: true
+          tags: aaptor/qwen-frontend:latest
+ 
+  deploy:
+    needs: build
+    runs-on: self-hosted
+ 
+    steps:
+      - uses: actions/checkout@v4
+ 
+      - name: Login to Docker Hub
+        run: |
+          mkdir -p /tmp/docker-config
+          echo '{"credsStore":""}' > /tmp/docker-config/config.json
+          echo "${{ secrets.DOCKERHUB_TOKEN }}" | docker login --username "${{ secrets.DOCKERHUB_USERNAME }}" --password-stdin
+        env:
+          DOCKER_CONFIG: /tmp/docker-config
+ 
+      - name: Deploy containers
+        run: |
+          cp docker-compose.yml /mnt/c/Users/adity/documents/gisul/gisul_model/docker-compose.yml
+          cd /mnt/c/Users/adity/documents/gisul/gisul_model
+ 
+          docker compose down --remove-orphans 2>/dev/null || true
+          docker rm -f aaptor-qwen-api aaptor-qwen-frontend 2>/dev/null || true
+          docker network rm gisul_model_default 2>/dev/null || true
+ 
+          sleep 2
+ 
+          docker pull aaptor/qwen-api:latest
+          docker pull aaptor/qwen-frontend:latest
+ 
+          docker compose up -d --remove-orphans
+          docker compose ps
+        env:
+          DOCKER_CONFIG: /tmp/docker-config

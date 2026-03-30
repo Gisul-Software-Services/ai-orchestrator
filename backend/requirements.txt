@@ -1,0 +1,19 @@
+fastapi
+uvicorn[standard]
+pydantic-settings
+torch
+transformers
+# Keras 3 + TensorFlow: Transformers imports TF/Keras shims; without tf-keras,
+# SentenceTransformer (AIML FAISS embeddings) fails → keyword fallback.
+# Keep tf-keras aligned with your TensorFlow minor (2.18.x TF → 2.18.x tf-keras).
+tf-keras>=2.18.0,<2.19.0
+bitsandbytes
+accelerate
+sentence-transformers
+faiss-cpu
+cachetools
+motor
+pymongo
+numpy
+pandas
+pynvml

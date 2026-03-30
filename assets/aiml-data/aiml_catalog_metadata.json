@@ -1,0 +1,3915 @@
+[
+  {
+    "index": 0,
+    "id": "sklearn-iris",
+    "name": "Iris Flower Classification",
+    "source": "sklearn",
+    "domain": "Biology",
+    "tags": [
+      "classification",
+      "multiclass",
+      "beginner",
+      "flowers",
+      "benchmark",
+      "sklearn"
+    ],
+    "difficulty": [
+      "Easy"
+    ],
+    "target_type": "multiclass",
+    "size": "150 rows x 5 columns",
+    "direct_load": true
+  },
+  {
+    "index": 1,
+    "id": "sklearn-breast-cancer",
+    "name": "Breast Cancer Wisconsin Diagnostic",
+    "source": "sklearn",
+    "domain": "Healthcare",
+    "tags": [
+      "classification",
+      "binary",
+      "medical",
+      "cancer",
+      "diagnosis",
+      "healthcare"
+    ],
+    "difficulty": [
+      "Medium"
+    ],
+    "target_type": "binary",
+    "size": "569 rows x 31 columns",
+    "direct_load": true
+  },
+  {
+    "index": 2,
+    "id": "sklearn-diabetes",
+    "name": "Diabetes Disease Progression",
+    "source": "sklearn",
+    "domain": "Healthcare",
+    "tags": [
+      "regression",
+      "medical",
+      "diabetes",
+      "healthcare",
+      "continuous"
+    ],
+    "difficulty": [
+      "Medium"
+    ],
+    "target_type": "continuous",
+    "size": "442 rows x 11 columns",
+    "direct_load": true
+  },
+  {
+    "index": 3,
+    "id": "sklearn-wine",
+    "name": "Wine Quality Classification",
+    "source": "sklearn",
+    "domain": "Food & Beverage",
+    "tags": [
+      "classification",
+      "multiclass",
+      "chemistry",
+      "wine",
+      "food"
+    ],
+    "difficulty": [
+      "Easy",
+      "Medium"
+    ],
+    "target_type": "multiclass",
+    "size": "178 rows x 14 columns",
+    "direct_load": true
+  },
+  {
+    "index": 4,
+    "id": "sklearn-california-housing",
+    "name": "California Housing Prices",
+    "source": "sklearn",
+    "domain": "Real Estate",
+    "tags": [
+      "regression",
+      "housing",
+      "real-estate",
+      "geography",
+      "real-world"
+    ],
+    "difficulty": [
+      "Medium"
+    ],
+    "target_type": "continuous",
+    "size": "20640 rows x 9 columns",
+    "direct_load": true
+  },
+  {
+    "index": 5,
+    "id": "sklearn-digits",
+    "name": "Handwritten Digits Recognition",
+    "source": "sklearn",
+    "domain": "Computer Vision",
+    "tags": [
+      "classification",
+      "image",
+      "digits",
+      "pixel",
+      "multiclass"
+    ],
+    "difficulty": [
+      "Easy",
+      "Medium"
+    ],
+    "target_type": "multiclass",
+    "size": "1797 rows x 65 columns",
+    "direct_load": true
+  },
+  {
+    "index": 6,
+    "id": "sklearn-make-classification",
+    "name": "Synthetic Binary Classification Dataset",
+    "source": "sklearn",
+    "domain": "Finance",
+    "tags": [
+      "classification",
+      "binary",
+      "synthetic",
+      "fraud",
+      "churn",
+      "customer"
+    ],
+    "difficulty": [
+      "Easy",
+      "Medium"
+    ],
+    "target_type": "binary",
+    "size": "1000 rows x 21 columns (configurable)",
+    "direct_load": true
+  },
+  {
+    "index": 7,
+    "id": "sklearn-make-regression",
+    "name": "Synthetic Regression Dataset",
+    "source": "sklearn",
+    "domain": "Business",
+    "tags": [
+      "regression",
+      "synthetic",
+      "forecasting",
+      "sales",
+      "continuous"
+    ],
+    "difficulty": [
+      "Easy",
+      "Medium"
+    ],
+    "target_type": "continuous",
+    "size": "1000 rows x 21 columns (configurable)",
+    "direct_load": true
+  },
+  {
+    "index": 8,
+    "id": "sklearn-make-blobs",
+    "name": "Synthetic Clustering Dataset",
+    "source": "sklearn",
+    "domain": "General",
+    "tags": [
+      "clustering",
+      "unsupervised",
+      "segmentation",
+      "synthetic",
+      "kmeans"
+    ],
+    "difficulty": [
+      "Easy"
+    ],
+    "target_type": "multiclass",
+    "size": "500 rows x 3 columns (configurable)",
+    "direct_load": true
+  },
+  {
+    "index": 9,
+    "id": "sklearn-make-moons",
+    "name": "Synthetic Non-Linear Classification (Moons)",
+    "source": "sklearn",
+    "domain": "General",
+    "tags": [
+      "classification",
+      "non-linear",
+      "synthetic",
+      "svm",
+      "neural-network"
+    ],
+    "difficulty": [
+      "Medium"
+    ],
+    "target_type": "binary",
+    "size": "500 rows x 3 columns (configurable)",
+    "direct_load": true
+  },
+  {
+    "index": 10,
+    "id": "sklearn-make-circles",
+    "name": "Synthetic Concentric Circles Classification",
+    "source": "sklearn",
+    "domain": "General",
+    "tags": [
+      "classification",
+      "non-linear",
+      "synthetic",
+      "kernel",
+      "svm"
+    ],
+    "difficulty": [
+      "Medium"
+    ],
+    "target_type": "binary",
+    "size": "500 rows x 3 columns (configurable)",
+    "direct_load": true
+  },
+  {
+    "index": 11,
+    "id": "sklearn-fetch-20newsgroups",
+    "name": "20 Newsgroups Text Classification",
+    "source": "sklearn",
+    "domain": "NLP",
+    "tags": [
+      "nlp",
+      "text",
+      "classification",
+      "multiclass",
+      "tfidf",
+      "newsgroups"
+    ],
+    "difficulty": [
+      "Medium",
+      "Hard"
+    ],
+    "target_type": "multiclass",
+    "size": "18846 documents x 20 categories",
+    "direct_load": true
+  },
+  {
+    "index": 12,
+    "id": "sklearn-fetch-olivetti",
+    "name": "Olivetti Faces Recognition",
+    "source": "sklearn",
+    "domain": "Computer Vision",
+    "tags": [
+      "image",
+      "face-recognition",
+      "dimensionality-reduction",
+      "pca",
+      "clustering"
+    ],
+    "difficulty": [
+      "Hard"
+    ],
+    "target_type": "multiclass",
+    "size": "400 rows x 4097 columns",
+    "direct_load": true
+  },
+  {
+    "index": 13,
+    "id": "seaborn-titanic",
+    "name": "Titanic Passenger Survival",
+    "source": "seaborn",
+    "domain": "Transportation",
+    "tags": [
+      "classification",
+      "binary",
+      "real-world",
+      "missing-data",
+      "feature-engineering",
+      "survival"
+    ],
+    "difficulty": [
+      "Easy",
+      "Medium"
+    ],
+    "target_type": "binary",
+    "size": "891 rows x 15 columns",
+    "direct_load": true
+  },
+  {
+    "index": 14,
+    "id": "seaborn-tips",
+    "name": "Restaurant Tips Dataset",
+    "source": "seaborn",
+    "domain": "Hospitality",
+    "tags": [
+      "regression",
+      "hospitality",
+      "restaurant",
+      "tips",
+      "categorical"
+    ],
+    "difficulty": [
+      "Easy"
+    ],
+    "target_type": "continuous",
+    "size": "244 rows x 7 columns",
+    "direct_load": true
+  },
+  {
+    "index": 15,
+    "id": "seaborn-diamonds",
+    "name": "Diamond Prices and Characteristics",
+    "source": "seaborn",
+    "domain": "Retail",
+    "tags": [
+      "regression",
+      "price-prediction",
+      "ordinal",
+      "retail",
+      "large-dataset"
+    ],
+    "difficulty": [
+      "Medium"
+    ],
+    "target_type": "continuous",
+    "size": "53940 rows x 10 columns",
+    "direct_load": true
+  },
+  {
+    "index": 16,
+    "id": "seaborn-penguins",
+    "name": "Palmer Penguins Species Classification",
+    "source": "seaborn",
+    "domain": "Biology",
+    "tags": [
+      "classification",
+      "multiclass",
+      "biology",
+      "penguins",
+      "missing-data"
+    ],
+    "difficulty": [
+      "Easy",
+      "Medium"
+    ],
+    "target_type": "multiclass",
+    "size": "333 rows x 7 columns (after dropna)",
+    "direct_load": true
+  },
+  {
+    "index": 17,
+    "id": "seaborn-flights",
+    "name": "Monthly Airline Passengers Time Series",
+    "source": "seaborn",
+    "domain": "Transportation",
+    "tags": [
+      "time-series",
+      "forecasting",
+      "seasonality",
+      "airline",
+      "arima"
+    ],
+    "difficulty": [
+      "Medium"
+    ],
+    "target_type": "continuous",
+    "size": "144 rows x 3 columns",
+    "direct_load": true
+  },
+  {
+    "index": 18,
+    "id": "seaborn-mpg",
+    "name": "Auto MPG Fuel Efficiency",
+    "source": "seaborn",
+    "domain": "Automotive",
+    "tags": [
+      "regression",
+      "automotive",
+      "fuel-efficiency",
+      "continuous",
+      "real-world"
+    ],
+    "difficulty": [
+      "Easy",
+      "Medium"
+    ],
+    "target_type": "continuous",
+    "size": "392 rows x 9 columns (after dropna)",
+    "direct_load": true
+  },
+  {
+    "index": 19,
+    "id": "seaborn-planets",
+    "name": "Exoplanet Discovery Dataset",
+    "source": "seaborn",
+    "domain": "Astronomy",
+    "tags": [
+      "regression",
+      "astronomy",
+      "missing-data",
+      "imputation",
+      "science"
+    ],
+    "difficulty": [
+      "Medium"
+    ],
+    "target_type": "continuous",
+    "size": "1035 rows x 6 columns",
+    "direct_load": true
+  },
+  {
+    "index": 20,
+    "id": "statsmodels-sunspots",
+    "name": "Sunspot Activity Time Series",
+    "source": "statsmodels",
+    "domain": "Astronomy",
+    "tags": [
+      "time-series",
+      "forecasting",
+      "cyclic",
+      "astronomy",
+      "arima"
+    ],
+    "difficulty": [
+      "Medium"
+    ],
+    "target_type": "continuous",
+    "size": "309 rows x 2 columns",
+    "direct_load": true
+  },
+  {
+    "index": 21,
+    "id": "statsmodels-macrodata",
+    "name": "US Macroeconomic Quarterly Data",
+    "source": "statsmodels",
+    "domain": "Economics",
+    "tags": [
+      "time-series",
+      "economics",
+      "gdp",
+      "forecasting",
+      "multivariate"
+    ],
+    "difficulty": [
+      "Hard"
+    ],
+    "target_type": "continuous",
+    "size": "202 rows x 14 columns",
+    "direct_load": true
+  },
+  {
+    "index": 22,
+    "id": "statsmodels-longley",
+    "name": "Longley Macroeconomic Dataset",
+    "source": "statsmodels",
+    "domain": "Economics",
+    "tags": [
+      "regression",
+      "multicollinearity",
+      "economics",
+      "regularization",
+      "ridge"
+    ],
+    "difficulty": [
+      "Hard"
+    ],
+    "target_type": "continuous",
+    "size": "16 rows x 7 columns",
+    "direct_load": true
+  },
+  {
+    "index": 23,
+    "id": "statsmodels-nile",
+    "name": "Nile River Annual Flow",
+    "source": "statsmodels",
+    "domain": "Environmental",
+    "tags": [
+      "time-series",
+      "changepoint",
+      "structural-break",
+      "univariate",
+      "environment"
+    ],
+    "difficulty": [
+      "Medium"
+    ],
+    "target_type": "continuous",
+    "size": "100 rows x 2 columns",
+    "direct_load": true
+  },
+  {
+    "index": 24,
+    "id": "statsmodels-spector",
+    "name": "Spector Teaching Program Effectiveness",
+    "source": "statsmodels",
+    "domain": "Education",
+    "tags": [
+      "classification",
+      "education",
+      "logistic-regression",
+      "binary",
+      "small-dataset"
+    ],
+    "difficulty": [
+      "Easy"
+    ],
+    "target_type": "binary",
+    "size": "32 rows x 4 columns",
+    "direct_load": true
+  },
+  {
+    "index": 25,
+    "id": "statsmodels-heart",
+    "name": "South African Heart Disease",
+    "source": "statsmodels",
+    "domain": "Healthcare",
+    "tags": [
+      "classification",
+      "healthcare",
+      "heart-disease",
+      "medical",
+      "risk-prediction"
+    ],
+    "difficulty": [
+      "Medium"
+    ],
+    "target_type": "binary",
+    "size": "462 rows x 10 columns",
+    "direct_load": true
+  },
+  {
+    "index": 26,
+    "id": "keras-mnist",
+    "name": "MNIST Handwritten Digits",
+    "source": "keras",
+    "domain": "Computer Vision",
+    "tags": [
+      "image",
+      "cnn",
+      "deep-learning",
+      "classification",
+      "benchmark",
+      "digits"
+    ],
+    "difficulty": [
+      "Easy",
+      "Medium"
+    ],
+    "target_type": "multiclass",
+    "size": "70000 images (60000 train + 10000 test)",
+    "direct_load": true
+  },
+  {
+    "index": 27,
+    "id": "keras-fashion-mnist",
+    "name": "Fashion MNIST Clothing Classification",
+    "source": "keras",
+    "domain": "Retail",
+    "tags": [
+      "image",
+      "cnn",
+      "fashion",
+      "retail",
+      "deep-learning",
+      "classification"
+    ],
+    "difficulty": [
+      "Medium"
+    ],
+    "target_type": "multiclass",
+    "size": "70000 images (60000 train + 10000 test)",
+    "direct_load": true
+  },
+  {
+    "index": 28,
+    "id": "keras-cifar10",
+    "name": "CIFAR-10 Object Recognition",
+    "source": "keras",
+    "domain": "Computer Vision",
+    "tags": [
+      "image",
+      "cnn",
+      "object-recognition",
+      "color",
+      "deep-learning",
+      "augmentation",
+      "keras"
+    ],
+    "difficulty": [
+      "Medium",
+      "Hard"
+    ],
+    "target_type": "multiclass",
+    "size": "60000 images (50000 train + 10000 test)",
+    "direct_load": true
+  },
+  {
+    "index": 29,
+    "id": "keras-cifar100",
+    "name": "CIFAR-100 Fine-Grained Recognition",
+    "source": "keras",
+    "domain": "Computer Vision",
+    "tags": [
+      "image",
+      "cnn",
+      "fine-grained",
+      "deep-learning",
+      "hierarchical",
+      "100-classes"
+    ],
+    "difficulty": [
+      "Hard"
+    ],
+    "target_type": "multiclass",
+    "size": "60000 images (50000 train + 10000 test)",
+    "direct_load": true
+  },
+  {
+    "index": 30,
+    "id": "keras-imdb",
+    "name": "IMDB Movie Sentiment Reviews",
+    "source": "keras",
+    "domain": "NLP",
+    "tags": [
+      "nlp",
+      "sentiment",
+      "lstm",
+      "rnn",
+      "text-classification",
+      "movies"
+    ],
+    "difficulty": [
+      "Medium"
+    ],
+    "target_type": "binary",
+    "size": "50000 reviews (25000 train + 25000 test)",
+    "direct_load": true
+  },
+  {
+    "index": 31,
+    "id": "keras-reuters",
+    "name": "Reuters News Topic Classification",
+    "source": "keras",
+    "domain": "NLP",
+    "tags": [
+      "nlp",
+      "multiclass",
+      "news",
+      "lstm",
+      "text-classification",
+      "topics"
+    ],
+    "difficulty": [
+      "Medium",
+      "Hard"
+    ],
+    "target_type": "multiclass",
+    "size": "11228 articles (8982 train + 2246 test)",
+    "direct_load": true
+  },
+  {
+    "index": 32,
+    "id": "nltk-movie-reviews",
+    "name": "NLTK Movie Reviews Sentiment Corpus",
+    "source": "nltk",
+    "domain": "NLP",
+    "tags": [
+      "nlp",
+      "sentiment",
+      "text",
+      "bag-of-words",
+      "tfidf",
+      "movies"
+    ],
+    "difficulty": [
+      "Medium"
+    ],
+    "target_type": "binary",
+    "size": "2000 documents",
+    "direct_load": true
+  },
+  {
+    "index": 33,
+    "id": "nltk-brown",
+    "name": "Brown Corpus - POS Tagging",
+    "source": "nltk",
+    "domain": "NLP",
+    "tags": [
+      "nlp",
+      "pos-tagging",
+      "sequence-labeling",
+      "language-model",
+      "corpus"
+    ],
+    "difficulty": [
+      "Hard"
+    ],
+    "target_type": "multiclass",
+    "size": "1+ million words",
+    "direct_load": true
+  },
+  {
+    "index": 34,
+    "id": "hf-imdb",
+    "name": "IMDB Movie Reviews (HuggingFace)",
+    "source": "huggingface",
+    "domain": "NLP",
+    "tags": [
+      "nlp",
+      "sentiment",
+      "transformer",
+      "bert",
+      "text-classification",
+      "huggingface"
+    ],
+    "difficulty": [
+      "Medium"
+    ],
+    "target_type": "binary",
+    "size": "50000 reviews (25000 train + 25000 test)",
+    "direct_load": true
+  },
+  {
+    "index": 35,
+    "id": "hf-ag-news",
+    "name": "AG News Topic Classification",
+    "source": "huggingface",
+    "domain": "NLP",
+    "tags": [
+      "nlp",
+      "news",
+      "multiclass",
+      "text-classification",
+      "transformer",
+      "balanced"
+    ],
+    "difficulty": [
+      "Easy",
+      "Medium"
+    ],
+    "target_type": "multiclass",
+    "size": "120000 train + 7600 test articles",
+    "direct_load": true
+  },
+  {
+    "index": 36,
+    "id": "hf-emotion",
+    "name": "Twitter Emotion Detection",
+    "source": "huggingface",
+    "domain": "NLP",
+    "tags": [
+      "nlp",
+      "emotion",
+      "twitter",
+      "social-media",
+      "multiclass",
+      "imbalanced"
+    ],
+    "difficulty": [
+      "Medium"
+    ],
+    "target_type": "multiclass",
+    "size": "20000 train + 2000 validation + 2000 test",
+    "direct_load": true
+  },
+  {
+    "index": 37,
+    "id": "hf-sst2",
+    "name": "Stanford Sentiment Treebank (SST-2)",
+    "source": "huggingface",
+    "domain": "NLP",
+    "tags": [
+      "nlp",
+      "sentiment",
+      "glue",
+      "bert",
+      "benchmark",
+      "binary"
+    ],
+    "difficulty": [
+      "Medium"
+    ],
+    "target_type": "binary",
+    "size": "67349 train + 872 validation sentences",
+    "direct_load": true
+  },
+  {
+    "index": 38,
+    "id": "hf-squad",
+    "name": "Stanford Question Answering Dataset (SQuAD)",
+    "source": "huggingface",
+    "domain": "NLP",
+    "tags": [
+      "nlp",
+      "question-answering",
+      "reading-comprehension",
+      "bert",
+      "squad",
+      "extractive"
+    ],
+    "difficulty": [
+      "Hard"
+    ],
+    "target_type": "span_extraction",
+    "size": "87599 train + 10570 validation examples",
+    "direct_load": true
+  },
+  {
+    "index": 39,
+    "id": "hf-conll2003",
+    "name": "CoNLL-2003 Named Entity Recognition",
+    "source": "huggingface",
+    "domain": "NLP",
+    "tags": [
+      "nlp",
+      "ner",
+      "sequence-labeling",
+      "token-classification",
+      "bert",
+      "entities"
+    ],
+    "difficulty": [
+      "Hard"
+    ],
+    "target_type": "sequence_labeling",
+    "size": "14041 train + 3250 validation + 3453 test sentences",
+    "direct_load": true
+  },
+  {
+    "index": 40,
+    "id": "hf-wmt16-en-de",
+    "name": "WMT16 English-German Translation",
+    "source": "huggingface",
+    "domain": "NLP",
+    "tags": [
+      "nlp",
+      "translation",
+      "seq2seq",
+      "multilingual",
+      "transformer",
+      "wmt"
+    ],
+    "difficulty": [
+      "Hard"
+    ],
+    "target_type": "sequence_generation",
+    "size": "4.5M+ sentence pairs",
+    "direct_load": true
+  },
+  {
+    "index": 41,
+    "id": "hf-yelp-review",
+    "name": "Yelp Review Full Star Rating",
+    "source": "huggingface",
+    "domain": "NLP",
+    "tags": [
+      "nlp",
+      "sentiment",
+      "reviews",
+      "yelp",
+      "ordinal",
+      "large-scale"
+    ],
+    "difficulty": [
+      "Medium"
+    ],
+    "target_type": "multiclass",
+    "size": "650000 train + 50000 test reviews",
+    "direct_load": true
+  },
+  {
+    "index": 42,
+    "id": "hf-common-voice",
+    "name": "Mozilla Common Voice Speech Dataset",
+    "source": "huggingface",
+    "domain": "Audio/Speech",
+    "tags": [
+      "speech",
+      "audio",
+      "asr",
+      "multilingual",
+      "voice",
+      "transcription"
+    ],
+    "difficulty": [
+      "Hard"
+    ],
+    "target_type": "sequence_generation",
+    "size": "1000+ hours per language",
+    "direct_load": true
+  },
+  {
+    "index": 43,
+    "id": "hf-glue-mrpc",
+    "name": "GLUE MRPC Sentence Pair Similarity",
+    "source": "huggingface",
+    "domain": "NLP",
+    "tags": [
+      "nlp",
+      "sentence-similarity",
+      "paraphrase",
+      "glue",
+      "bert",
+      "nlu"
+    ],
+    "difficulty": [
+      "Hard"
+    ],
+    "target_type": "binary",
+    "size": "3668 train + 408 validation + 1725 test pairs",
+    "direct_load": true
+  },
+  {
+    "index": 44,
+    "id": "hf-coco-captions",
+    "name": "MS COCO Image Captioning",
+    "source": "huggingface",
+    "domain": "Computer Vision",
+    "tags": [
+      "image",
+      "captioning",
+      "multimodal",
+      "vision-language",
+      "coco"
+    ],
+    "difficulty": [
+      "Hard"
+    ],
+    "target_type": "sequence_generation",
+    "size": "330000+ images with 5 captions each",
+    "direct_load": true
+  },
+  {
+    "index": 45,
+    "id": "hf-beans",
+    "name": "Bean Disease Image Classification",
+    "source": "huggingface",
+    "domain": "Agriculture",
+    "tags": [
+      "image",
+      "agriculture",
+      "disease-detection",
+      "transfer-learning",
+      "cnn",
+      "plant"
+    ],
+    "difficulty": [
+      "Medium"
+    ],
+    "target_type": "multiclass",
+    "size": "1034 train + 133 validation + 128 test images",
+    "direct_load": true
+  },
+  {
+    "index": 46,
+    "id": "hf-food101",
+    "name": "Food-101 Image Classification",
+    "source": "huggingface",
+    "domain": "Food & Beverage",
+    "tags": [
+      "image",
+      "food",
+      "fine-grained",
+      "transfer-learning",
+      "cnn",
+      "resnet"
+    ],
+    "difficulty": [
+      "Hard"
+    ],
+    "target_type": "multiclass",
+    "size": "101000 images across 101 categories",
+    "direct_load": true
+  },
+  {
+    "index": 47,
+    "id": "openml-adult-income",
+    "name": "Adult Income Census Dataset",
+    "source": "openml",
+    "domain": "Socioeconomics",
+    "tags": [
+      "classification",
+      "binary",
+      "census",
+      "income",
+      "imbalanced",
+      "fairness",
+      "demographic"
+    ],
+    "difficulty": [
+      "Medium"
+    ],
+    "target_type": "binary",
+    "size": "48842 rows x 15 columns",
+    "direct_load": true
+  },
+  {
+    "index": 48,
+    "id": "openml-credit-g",
+    "name": "German Credit Risk Dataset",
+    "source": "openml",
+    "domain": "Finance",
+    "tags": [
+      "classification",
+      "credit-risk",
+      "finance",
+      "banking",
+      "imbalanced",
+      "fairness"
+    ],
+    "difficulty": [
+      "Medium"
+    ],
+    "target_type": "binary",
+    "size": "1000 rows x 21 columns",
+    "direct_load": true
+  },
+  {
+    "index": 49,
+    "id": "openml-electricity",
+    "name": "Electricity Market Price Prediction",
+    "source": "openml",
+    "domain": "Energy",
+    "tags": [
+      "classification",
+      "electricity",
+      "concept-drift",
+      "online-learning",
+      "energy"
+    ],
+    "difficulty": [
+      "Medium"
+    ],
+    "target_type": "binary",
+    "size": "45312 rows x 9 columns",
+    "direct_load": true
+  },
+  {
+    "index": 50,
+    "id": "openml-covertype",
+    "name": "Forest Cover Type Prediction",
+    "source": "openml",
+    "domain": "Environmental",
+    "tags": [
+      "classification",
+      "multiclass",
+      "geospatial",
+      "forest",
+      "environment",
+      "large-dataset"
+    ],
+    "difficulty": [
+      "Hard"
+    ],
+    "target_type": "multiclass",
+    "size": "581012 rows x 55 columns (sample recommended)",
+    "direct_load": true
+  },
+  {
+    "index": 51,
+    "id": "openml-bank-marketing",
+    "name": "Bank Marketing Campaign",
+    "source": "openml",
+    "domain": "Finance",
+    "tags": [
+      "classification",
+      "banking",
+      "marketing",
+      "imbalanced",
+      "customer",
+      "campaign"
+    ],
+    "difficulty": [
+      "Medium"
+    ],
+    "target_type": "binary",
+    "size": "45211 rows x 17 columns",
+    "direct_load": true
+  },
+  {
+    "index": 52,
+    "id": "openml-higgs",
+    "name": "HIGGS Boson Detection",
+    "source": "openml",
+    "domain": "Science",
+    "tags": [
+      "classification",
+      "physics",
+      "particle",
+      "deep-learning",
+      "binary",
+      "science"
+    ],
+    "difficulty": [
+      "Hard"
+    ],
+    "target_type": "binary",
+    "size": "11M rows (sampling recommended)",
+    "direct_load": true
+  },
+  {
+    "index": 53,
+    "id": "hf-tweet-eval-hate",
+    "name": "TweetEval Hate Speech Detection",
+    "source": "huggingface",
+    "domain": "NLP",
+    "tags": [
+      "nlp",
+      "hate-speech",
+      "moderation",
+      "twitter",
+      "imbalanced",
+      "social-media"
+    ],
+    "difficulty": [
+      "Medium",
+      "Hard"
+    ],
+    "target_type": "binary",
+    "size": "9000 train + 1000 validation + 2970 test tweets",
+    "direct_load": true
+  },
+  {
+    "index": 54,
+    "id": "hf-commonsense-qa",
+    "name": "CommonsenseQA Multiple Choice QA",
+    "source": "huggingface",
+    "domain": "NLP",
+    "tags": [
+      "nlp",
+      "question-answering",
+      "commonsense",
+      "multiple-choice",
+      "reasoning",
+      "bert"
+    ],
+    "difficulty": [
+      "Hard"
+    ],
+    "target_type": "multiclass",
+    "size": "9741 train + 1221 validation + 1140 test questions",
+    "direct_load": true
+  },
+  {
+    "index": 55,
+    "id": "hf-cifar10-hf",
+    "name": "CIFAR-10 via HuggingFace",
+    "source": "huggingface",
+    "domain": "Computer Vision",
+    "tags": [
+      "image",
+      "cnn",
+      "vit",
+      "huggingface",
+      "vision-transformer",
+      "classification"
+    ],
+    "difficulty": [
+      "Medium"
+    ],
+    "target_type": "multiclass",
+    "size": "60000 images (50000 train + 10000 test)",
+    "direct_load": true
+  },
+  {
+    "index": 56,
+    "id": "hf-financial-phrasebank",
+    "name": "Financial News Sentiment Analysis",
+    "source": "huggingface",
+    "domain": "Finance",
+    "tags": [
+      "nlp",
+      "finance",
+      "sentiment",
+      "domain-specific",
+      "transformer",
+      "financial"
+    ],
+    "difficulty": [
+      "Medium"
+    ],
+    "target_type": "multiclass",
+    "size": "4846 sentences",
+    "direct_load": true
+  },
+  {
+    "index": 57,
+    "id": "hf-medical-transcriptions",
+    "name": "Medical Transcriptions Classification",
+    "source": "huggingface",
+    "domain": "Healthcare",
+    "tags": [
+      "nlp",
+      "medical",
+      "healthcare",
+      "clinical",
+      "text-classification",
+      "domain-specific"
+    ],
+    "difficulty": [
+      "Hard"
+    ],
+    "target_type": "multiclass",
+    "size": "4999 transcriptions",
+    "direct_load": true
+  },
+  {
+    "index": 58,
+    "id": "hf-amazon-reviews",
+    "name": "Amazon Product Reviews Sentiment",
+    "source": "huggingface",
+    "domain": "E-commerce",
+    "tags": [
+      "nlp",
+      "sentiment",
+      "amazon",
+      "e-commerce",
+      "large-scale",
+      "product-reviews"
+    ],
+    "difficulty": [
+      "Medium"
+    ],
+    "target_type": "binary",
+    "size": "3.6M train + 400K test reviews",
+    "direct_load": true
+  },
+  {
+    "index": 59,
+    "id": "hf-codexglue-code-search",
+    "name": "CodeSearchNet Code-Comment Matching",
+    "source": "huggingface",
+    "domain": "Software Engineering",
+    "tags": [
+      "nlp",
+      "code",
+      "programming",
+      "code-search",
+      "software",
+      "documentation"
+    ],
+    "difficulty": [
+      "Hard"
+    ],
+    "target_type": "binary",
+    "size": "2.1M code-comment pairs across 6 languages",
+    "direct_load": true
+  },
+  {
+    "index": 60,
+    "id": "hf-hate-speech-offensive",
+    "name": "Hate Speech and Offensive Language",
+    "source": "huggingface",
+    "domain": "NLP",
+    "tags": [
+      "nlp",
+      "hate-speech",
+      "offensive",
+      "moderation",
+      "twitter",
+      "multiclass"
+    ],
+    "difficulty": [
+      "Medium"
+    ],
+    "target_type": "multiclass",
+    "size": "24783 tweets",
+    "direct_load": true
+  },
+  {
+    "index": 61,
+    "id": "hf-daily-dialog",
+    "name": "DailyDialog Conversation Dataset",
+    "source": "huggingface",
+    "domain": "NLP",
+    "tags": [
+      "nlp",
+      "dialogue",
+      "conversation",
+      "chatbot",
+      "emotion",
+      "dialog-act"
+    ],
+    "difficulty": [
+      "Hard"
+    ],
+    "target_type": "multiclass",
+    "size": "11118 dialogues",
+    "direct_load": true
+  },
+  {
+    "index": 62,
+    "id": "hf-glue-cola",
+    "name": "GLUE CoLA Linguistic Acceptability",
+    "source": "huggingface",
+    "domain": "NLP",
+    "tags": [
+      "nlp",
+      "grammar",
+      "glue",
+      "bert",
+      "linguistics",
+      "acceptability"
+    ],
+    "difficulty": [
+      "Hard"
+    ],
+    "target_type": "binary",
+    "size": "8551 train + 1043 validation sentences",
+    "direct_load": true
+  },
+  {
+    "index": 63,
+    "id": "hf-chest-xray",
+    "name": "Chest X-Ray Pneumonia Detection",
+    "source": "huggingface",
+    "domain": "Healthcare",
+    "tags": [
+      "image",
+      "medical",
+      "x-ray",
+      "pneumonia",
+      "healthcare",
+      "transfer-learning"
+    ],
+    "difficulty": [
+      "Medium",
+      "Hard"
+    ],
+    "target_type": "multiclass",
+    "size": "5856 images",
+    "direct_load": true
+  },
+  {
+    "index": 64,
+    "id": "hf-skin-cancer",
+    "name": "Skin Cancer Dermoscopy Classification",
+    "source": "huggingface",
+    "domain": "Healthcare",
+    "tags": [
+      "image",
+      "medical",
+      "skin-cancer",
+      "dermatology",
+      "imbalanced",
+      "transfer-learning"
+    ],
+    "difficulty": [
+      "Hard"
+    ],
+    "target_type": "multiclass",
+    "size": "10015 dermoscopy images",
+    "direct_load": true
+  },
+  {
+    "index": 65,
+    "id": "hf-tweet-disaster",
+    "name": "Natural Language Processing with Disaster Tweets",
+    "source": "huggingface",
+    "domain": "NLP",
+    "tags": [
+      "nlp",
+      "disaster",
+      "crisis",
+      "twitter",
+      "binary",
+      "emergency"
+    ],
+    "difficulty": [
+      "Medium"
+    ],
+    "target_type": "binary",
+    "size": "7613 tweets",
+    "direct_load": true
+  },
+  {
+    "index": 66,
+    "id": "hf-speech-commands",
+    "name": "Google Speech Commands Audio Classification",
+    "source": "huggingface",
+    "domain": "Audio/Speech",
+    "tags": [
+      "audio",
+      "speech",
+      "commands",
+      "keyword-spotting",
+      "classification"
+    ],
+    "difficulty": [
+      "Medium"
+    ],
+    "target_type": "multiclass",
+    "size": "105000 audio clips",
+    "direct_load": true
+  },
+  {
+    "index": 67,
+    "id": "hf-banking77",
+    "name": "Banking77 Intent Classification",
+    "source": "huggingface",
+    "domain": "Finance",
+    "tags": [
+      "nlp",
+      "intent",
+      "banking",
+      "customer-support",
+      "chatbot",
+      "fine-grained"
+    ],
+    "difficulty": [
+      "Hard"
+    ],
+    "target_type": "multiclass",
+    "size": "10003 train + 3080 test queries",
+    "direct_load": true
+  },
+  {
+    "index": 68,
+    "id": "hf-go-emotions",
+    "name": "GoEmotions Fine-Grained Emotion",
+    "source": "huggingface",
+    "domain": "NLP",
+    "tags": [
+      "nlp",
+      "emotion",
+      "fine-grained",
+      "multi-label",
+      "reddit",
+      "sentiment"
+    ],
+    "difficulty": [
+      "Hard"
+    ],
+    "target_type": "multi-label",
+    "size": "58000 comments",
+    "direct_load": true
+  },
+  {
+    "index": 69,
+    "id": "openml-kr-vs-kp",
+    "name": "Chess King-Rook vs King-Pawn",
+    "source": "openml",
+    "domain": "Games",
+    "tags": [
+      "classification",
+      "chess",
+      "categorical",
+      "decision-tree",
+      "game"
+    ],
+    "difficulty": [
+      "Easy",
+      "Medium"
+    ],
+    "target_type": "binary",
+    "size": "3196 rows x 37 columns",
+    "direct_load": true
+  },
+  {
+    "index": 70,
+    "id": "openml-segment",
+    "name": "Image Segment Classification",
+    "source": "openml",
+    "domain": "Computer Vision",
+    "tags": [
+      "classification",
+      "image-segmentation",
+      "scene",
+      "multiclass",
+      "visual-features"
+    ],
+    "difficulty": [
+      "Medium"
+    ],
+    "target_type": "multiclass",
+    "size": "2310 rows x 20 columns",
+    "direct_load": true
+  },
+  {
+    "index": 71,
+    "id": "openml-phoneme",
+    "name": "Phoneme Speech Classification",
+    "source": "openml",
+    "domain": "Audio/Speech",
+    "tags": [
+      "classification",
+      "speech",
+      "audio-features",
+      "binary",
+      "calibration"
+    ],
+    "difficulty": [
+      "Medium"
+    ],
+    "target_type": "binary",
+    "size": "5404 rows x 6 columns",
+    "direct_load": true
+  },
+  {
+    "index": 72,
+    "id": "openml-steel-plates",
+    "name": "Steel Plates Fault Detection",
+    "source": "openml",
+    "domain": "Manufacturing",
+    "tags": [
+      "classification",
+      "manufacturing",
+      "quality-control",
+      "fault-detection",
+      "industrial"
+    ],
+    "difficulty": [
+      "Medium"
+    ],
+    "target_type": "multiclass",
+    "size": "1941 rows x 28 columns",
+    "direct_load": true
+  },
+  {
+    "index": 73,
+    "id": "openml-vehicle",
+    "name": "Vehicle Silhouette Classification",
+    "source": "openml",
+    "domain": "Automotive",
+    "tags": [
+      "classification",
+      "automotive",
+      "silhouette",
+      "shape-features",
+      "multiclass"
+    ],
+    "difficulty": [
+      "Medium"
+    ],
+    "target_type": "multiclass",
+    "size": "846 rows x 19 columns",
+    "direct_load": true
+  },
+  {
+    "index": 74,
+    "id": "hf-ett-time-series",
+    "name": "ETDataset - Electricity Transformer Temperature",
+    "source": "huggingface",
+    "domain": "Energy",
+    "tags": [
+      "time-series",
+      "forecasting",
+      "energy",
+      "transformer-model",
+      "benchmark",
+      "long-range"
+    ],
+    "difficulty": [
+      "Medium",
+      "Hard"
+    ],
+    "target_type": "regression",
+    "size": "17420 rows (ETTh1)",
+    "direct_load": true
+  },
+  {
+    "index": 75,
+    "id": "statsmodels-airline",
+    "name": "Airline Passengers Monthly Time Series",
+    "source": "statsmodels",
+    "domain": "Transportation",
+    "tags": [
+      "time-series",
+      "arima",
+      "seasonality",
+      "forecasting",
+      "transportation",
+      "classic"
+    ],
+    "difficulty": [
+      "Beginner",
+      "Medium"
+    ],
+    "target_type": "regression",
+    "size": "144 rows",
+    "direct_load": true
+  },
+  {
+    "index": 76,
+    "id": "hf-weather-jena",
+    "name": "Jena Climate Time Series",
+    "source": "huggingface",
+    "domain": "Environmental",
+    "tags": [
+      "time-series",
+      "weather",
+      "lstm",
+      "gru",
+      "multivariate",
+      "forecasting",
+      "deep-learning"
+    ],
+    "difficulty": [
+      "Medium",
+      "Hard"
+    ],
+    "target_type": "regression",
+    "size": "~420,000 rows",
+    "direct_load": true
+  },
+  {
+    "index": 77,
+    "id": "hf-librispeech",
+    "name": "LibriSpeech ASR Corpus (Clean 100h)",
+    "source": "huggingface",
+    "domain": "Audio/Speech",
+    "tags": [
+      "audio",
+      "speech",
+      "asr",
+      "librispeech",
+      "whisper",
+      "wav2vec",
+      "benchmark"
+    ],
+    "difficulty": [
+      "Hard"
+    ],
+    "target_type": "sequence_generation",
+    "size": "100 hours (clean split)",
+    "direct_load": true
+  },
+  {
+    "index": 78,
+    "id": "hf-gtzan-music",
+    "name": "GTZAN Music Genre Classification",
+    "source": "huggingface",
+    "domain": "Audio/Speech",
+    "tags": [
+      "audio",
+      "music",
+      "genre-classification",
+      "mfcc",
+      "spectrogram",
+      "classification"
+    ],
+    "difficulty": [
+      "Medium"
+    ],
+    "target_type": "multiclass",
+    "size": "1000 clips (10 genres × 100 clips)",
+    "direct_load": true
+  },
+  {
+    "index": 79,
+    "id": "pyg-karate-club",
+    "name": "Zachary Karate Club Graph Network",
+    "source": "torch_geometric",
+    "domain": "Social Science",
+    "tags": [
+      "graph",
+      "gnn",
+      "node-classification",
+      "community-detection",
+      "social-network",
+      "gcn",
+      "gat"
+    ],
+    "difficulty": [
+      "Beginner"
+    ],
+    "target_type": "multiclass",
+    "size": "34 nodes, 78 edges",
+    "direct_load": true
+  },
+  {
+    "index": 80,
+    "id": "pyg-cora",
+    "name": "Cora Citation Network Graph Dataset",
+    "source": "torch_geometric",
+    "domain": "Academic",
+    "tags": [
+      "graph",
+      "gnn",
+      "node-classification",
+      "citation-network",
+      "gcn",
+      "semi-supervised",
+      "benchmark"
+    ],
+    "difficulty": [
+      "Medium"
+    ],
+    "target_type": "multiclass",
+    "size": "2708 nodes, 5429 edges",
+    "direct_load": true
+  },
+  {
+    "index": 81,
+    "id": "openml-mnist-784",
+    "name": "MNIST as Flat Tabular Features (OpenML)",
+    "source": "openml",
+    "domain": "Computer Vision",
+    "tags": [
+      "tabular",
+      "mnist",
+      "digits",
+      "pca",
+      "svm",
+      "benchmark",
+      "classification"
+    ],
+    "difficulty": [
+      "Beginner",
+      "Medium"
+    ],
+    "target_type": "multiclass",
+    "size": "70000 rows × 784 features",
+    "direct_load": true
+  },
+  {
+    "index": 82,
+    "id": "openml-titanic",
+    "name": "Titanic Survival (OpenML Full Version)",
+    "source": "openml",
+    "domain": "Transportation",
+    "tags": [
+      "tabular",
+      "titanic",
+      "binary-classification",
+      "feature-engineering",
+      "missing-values",
+      "classic"
+    ],
+    "difficulty": [
+      "Beginner"
+    ],
+    "target_type": "binary",
+    "size": "1309 rows × 13 features",
+    "direct_load": true
+  },
+  {
+    "index": 83,
+    "id": "hf-medical-qa",
+    "name": "MedQuAD Medical Question Answering",
+    "source": "huggingface",
+    "domain": "Healthcare",
+    "tags": [
+      "nlp",
+      "medical",
+      "qa",
+      "question-answering",
+      "rag",
+      "llm",
+      "biomedical",
+      "fine-tuning"
+    ],
+    "difficulty": [
+      "Medium",
+      "Hard"
+    ],
+    "target_type": "sequence_generation",
+    "size": "16,407 QA pairs",
+    "direct_load": true
+  },
+  {
+    "index": 84,
+    "id": "hf-arxiv-abstracts",
+    "name": "ArXiv Scientific Paper Abstracts",
+    "source": "huggingface",
+    "domain": "Academic",
+    "tags": [
+      "nlp",
+      "multi-label",
+      "scientific",
+      "embeddings",
+      "topic-modelling",
+      "summarization",
+      "bert"
+    ],
+    "difficulty": [
+      "Medium"
+    ],
+    "target_type": "multilabel",
+    "size": "1.7M+ papers",
+    "direct_load": true
+  },
+  {
+    "index": 85,
+    "id": "hf-winogrande",
+    "name": "WinoGrande Commonsense Reasoning Benchmark",
+    "source": "huggingface",
+    "domain": "NLP",
+    "tags": [
+      "nlp",
+      "commonsense",
+      "reasoning",
+      "benchmark",
+      "winograd",
+      "llm-eval",
+      "nlu"
+    ],
+    "difficulty": [
+      "Hard"
+    ],
+    "target_type": "binary",
+    "size": "44,000 problems",
+    "direct_load": true
+  },
+  {
+    "index": 86,
+    "id": "hf-cc-news",
+    "name": "CC-News Common Crawl News Articles",
+    "source": "huggingface",
+    "domain": "Media",
+    "tags": [
+      "nlp",
+      "news",
+      "summarization",
+      "text-generation",
+      "pretraining",
+      "roberta"
+    ],
+    "difficulty": [
+      "Medium"
+    ],
+    "target_type": "sequence_generation",
+    "size": "708,241 articles",
+    "direct_load": true
+  },
+  {
+    "index": 87,
+    "id": "hf-celeba",
+    "name": "CelebA Large-Scale Face Attributes Dataset",
+    "source": "huggingface",
+    "domain": "Computer Vision",
+    "tags": [
+      "cv",
+      "faces",
+      "attributes",
+      "gan",
+      "multi-label",
+      "facial-analysis",
+      "generation"
+    ],
+    "difficulty": [
+      "Medium",
+      "Hard"
+    ],
+    "target_type": "multilabel",
+    "size": "202,599 images",
+    "direct_load": true
+  },
+  {
+    "index": 88,
+    "id": "hf-oxford-pets",
+    "name": "Oxford-IIIT Pet Dataset (37 Breeds)",
+    "source": "huggingface",
+    "domain": "Biology",
+    "tags": [
+      "cv",
+      "segmentation",
+      "fine-grained",
+      "pets",
+      "transfer-learning",
+      "oxford",
+      "benchmark"
+    ],
+    "difficulty": [
+      "Medium"
+    ],
+    "target_type": "multiclass",
+    "size": "7390 images, 37 breeds",
+    "direct_load": true
+  },
+  {
+    "index": 89,
+    "id": "hf-eurosat",
+    "name": "EuroSAT Satellite Land Cover Classification",
+    "source": "huggingface",
+    "domain": "Environmental",
+    "tags": [
+      "cv",
+      "satellite",
+      "remote-sensing",
+      "geospatial",
+      "land-cover",
+      "classification",
+      "resnet"
+    ],
+    "difficulty": [
+      "Medium"
+    ],
+    "target_type": "multiclass",
+    "size": "27,000 images, 10 classes",
+    "direct_load": true
+  },
+  {
+    "index": 90,
+    "id": "openml-poker-hand",
+    "name": "Poker Hand Classification (OpenML)",
+    "source": "openml",
+    "domain": "Games",
+    "tags": [
+      "tabular",
+      "multiclass",
+      "class-imbalance",
+      "games",
+      "benchmark",
+      "ensemble"
+    ],
+    "difficulty": [
+      "Medium"
+    ],
+    "target_type": "multiclass",
+    "size": "1,025,010 rows",
+    "direct_load": true
+  },
+  {
+    "index": 91,
+    "id": "hf-pubmed-summarization",
+    "name": "PubMed Biomedical Article Summarization",
+    "source": "huggingface",
+    "domain": "Healthcare",
+    "tags": [
+      "nlp",
+      "summarization",
+      "biomedical",
+      "pubmed",
+      "long-document",
+      "abstractive",
+      "fine-tuning"
+    ],
+    "difficulty": [
+      "Hard"
+    ],
+    "target_type": "sequence_generation",
+    "size": "133,215 articles",
+    "direct_load": true
+  },
+  {
+    "index": 92,
+    "id": "hf-stanford-cars",
+    "name": "Stanford Cars Fine-Grained Vehicle Classification",
+    "source": "huggingface",
+    "domain": "Automotive",
+    "tags": [
+      "cv",
+      "fine-grained",
+      "vehicles",
+      "cars",
+      "transfer-learning",
+      "classification",
+      "benchmark"
+    ],
+    "difficulty": [
+      "Hard"
+    ],
+    "target_type": "multiclass",
+    "size": "16,185 images, 196 classes",
+    "direct_load": true
+  },
+  {
+    "index": 93,
+    "id": "hf-snli",
+    "name": "Stanford Natural Language Inference (SNLI)",
+    "source": "huggingface",
+    "domain": "NLP",
+    "tags": [
+      "nlp",
+      "nli",
+      "entailment",
+      "inference",
+      "bert",
+      "sentence-similarity",
+      "benchmark",
+      "transformer"
+    ],
+    "difficulty": [
+      "Medium"
+    ],
+    "target_type": "multiclass",
+    "size": "570,000 sentence pairs",
+    "direct_load": true
+  },
+  {
+    "index": 94,
+    "id": "openml-telco-churn",
+    "name": "IBM Telco Customer Churn",
+    "source": "openml",
+    "domain": "Telecom",
+    "tags": [
+      "churn",
+      "telecom",
+      "customer-retention",
+      "binary-classification",
+      "imbalanced",
+      "business",
+      "saas",
+      "real-world"
+    ],
+    "difficulty": [
+      "Medium"
+    ],
+    "target_type": "binary",
+    "size": "7043 rows x 21 features",
+    "direct_load": true
+  },
+  {
+    "index": 95,
+    "id": "openml-hr-attrition",
+    "name": "IBM HR Employee Attrition",
+    "source": "openml",
+    "domain": "HR",
+    "tags": [
+      "hr",
+      "attrition",
+      "employee",
+      "retention",
+      "binary-classification",
+      "imbalanced",
+      "business",
+      "workforce"
+    ],
+    "difficulty": [
+      "Medium"
+    ],
+    "target_type": "binary",
+    "size": "1470 rows x 35 features",
+    "direct_load": true
+  },
+  {
+    "index": 96,
+    "id": "openml-bank-churn",
+    "name": "Bank Customer Churn Prediction",
+    "source": "openml",
+    "domain": "Finance",
+    "tags": [
+      "churn",
+      "banking",
+      "customer-retention",
+      "binary-classification",
+      "finance",
+      "imbalanced",
+      "real-world"
+    ],
+    "difficulty": [
+      "Medium"
+    ],
+    "target_type": "binary",
+    "size": "10000 rows x 14 features",
+    "direct_load": true
+  },
+  {
+    "index": 97,
+    "id": "openml-online-shoppers",
+    "name": "Online Shoppers Purchase Intention",
+    "source": "openml",
+    "domain": "E-commerce",
+    "tags": [
+      "e-commerce",
+      "purchase-intent",
+      "conversion",
+      "binary-classification",
+      "web-analytics",
+      "consumer-behaviour"
+    ],
+    "difficulty": [
+      "Medium"
+    ],
+    "target_type": "binary",
+    "size": "12330 rows x 18 features",
+    "direct_load": true
+  },
+  {
+    "index": 98,
+    "id": "openml-default-credit",
+    "name": "Default of Credit Card Clients (Taiwan)",
+    "source": "openml",
+    "domain": "Finance",
+    "tags": [
+      "credit",
+      "default",
+      "finance",
+      "binary-classification",
+      "payment-history",
+      "risk-modeling",
+      "imbalanced"
+    ],
+    "difficulty": [
+      "Medium",
+      "Hard"
+    ],
+    "target_type": "binary",
+    "size": "30000 rows x 24 features",
+    "direct_load": true
+  },
+  {
+    "index": 99,
+    "id": "openml-insurance-charges",
+    "name": "Medical Insurance Cost Prediction",
+    "source": "openml",
+    "domain": "Insurance",
+    "tags": [
+      "insurance",
+      "healthcare",
+      "regression",
+      "premium-prediction",
+      "bmi",
+      "smoking",
+      "actuarial"
+    ],
+    "difficulty": [
+      "Easy",
+      "Medium"
+    ],
+    "target_type": "continuous",
+    "size": "1338 rows x 7 features",
+    "direct_load": true
+  },
+  {
+    "index": 100,
+    "id": "openml-ecommerce-shipping",
+    "name": "E-Commerce Shipping Dataset",
+    "source": "openml",
+    "domain": "Supply Chain",
+    "tags": [
+      "supply-chain",
+      "logistics",
+      "shipping",
+      "binary-classification",
+      "e-commerce",
+      "delivery",
+      "operations"
+    ],
+    "difficulty": [
+      "Easy",
+      "Medium"
+    ],
+    "target_type": "binary",
+    "size": "10999 rows x 12 features",
+    "direct_load": true
+  },
+  {
+    "index": 101,
+    "id": "openml-marketing-response",
+    "name": "Bank Marketing Campaign Response",
+    "source": "openml",
+    "domain": "Marketing",
+    "tags": [
+      "marketing",
+      "campaign",
+      "banking",
+      "binary-classification",
+      "imbalanced",
+      "telemarketing",
+      "lead-scoring"
+    ],
+    "difficulty": [
+      "Medium"
+    ],
+    "target_type": "binary",
+    "size": "45211 rows x 17 features",
+    "direct_load": true
+  },
+  {
+    "index": 102,
+    "id": "openml-retail-sales",
+    "name": "Rossmann Store Sales Forecasting",
+    "source": "openml",
+    "domain": "Retail",
+    "tags": [
+      "retail",
+      "sales-forecasting",
+      "time-series",
+      "regression",
+      "store-analytics",
+      "promotions",
+      "real-world"
+    ],
+    "difficulty": [
+      "Medium",
+      "Hard"
+    ],
+    "target_type": "continuous",
+    "size": "1017209 rows x 9 features (sample recommended)",
+    "direct_load": true
+  },
+  {
+    "index": 103,
+    "id": "openml-customer-satisfaction",
+    "name": "Airline Customer Satisfaction Survey",
+    "source": "openml",
+    "domain": "Transportation",
+    "tags": [
+      "airline",
+      "customer-satisfaction",
+      "binary-classification",
+      "service-quality",
+      "nps",
+      "transportation"
+    ],
+    "difficulty": [
+      "Medium"
+    ],
+    "target_type": "binary",
+    "size": "129880 rows x 24 features",
+    "direct_load": true
+  },
+  {
+    "index": 104,
+    "id": "openml-pima-diabetes",
+    "name": "Pima Indians Diabetes Dataset",
+    "source": "openml",
+    "domain": "Healthcare",
+    "tags": [
+      "diabetes",
+      "medical",
+      "binary-classification",
+      "imbalanced",
+      "clinical",
+      "healthcare",
+      "benchmark"
+    ],
+    "difficulty": [
+      "Easy",
+      "Medium"
+    ],
+    "target_type": "binary",
+    "size": "768 rows x 9 features",
+    "direct_load": true
+  },
+  {
+    "index": 105,
+    "id": "openml-heart-disease",
+    "name": "Heart Disease Cleveland UCI",
+    "source": "openml",
+    "domain": "Healthcare",
+    "tags": [
+      "heart-disease",
+      "cardiac",
+      "medical",
+      "binary-classification",
+      "healthcare",
+      "clinical",
+      "uci-benchmark"
+    ],
+    "difficulty": [
+      "Easy",
+      "Medium"
+    ],
+    "target_type": "multiclass",
+    "size": "303 rows x 14 features",
+    "direct_load": true
+  },
+  {
+    "index": 106,
+    "id": "openml-stroke-prediction",
+    "name": "Stroke Prediction Dataset",
+    "source": "openml",
+    "domain": "Healthcare",
+    "tags": [
+      "stroke",
+      "healthcare",
+      "binary-classification",
+      "imbalanced",
+      "rare-event",
+      "clinical",
+      "risk-prediction"
+    ],
+    "difficulty": [
+      "Medium",
+      "Hard"
+    ],
+    "target_type": "binary",
+    "size": "5110 rows x 11 features",
+    "direct_load": true
+  },
+  {
+    "index": 107,
+    "id": "openml-maternal-risk",
+    "name": "Maternal Health Risk Prediction",
+    "source": "openml",
+    "domain": "Healthcare",
+    "tags": [
+      "maternal-health",
+      "healthcare",
+      "multiclass",
+      "iot",
+      "risk-prediction",
+      "clinical",
+      "developing-world"
+    ],
+    "difficulty": [
+      "Easy",
+      "Medium"
+    ],
+    "target_type": "multiclass",
+    "size": "1014 rows x 7 features",
+    "direct_load": true
+  },
+  {
+    "index": 108,
+    "id": "openml-obesity-levels",
+    "name": "Obesity Level Estimation Dataset",
+    "source": "openml",
+    "domain": "Healthcare",
+    "tags": [
+      "obesity",
+      "healthcare",
+      "multiclass",
+      "nutrition",
+      "lifestyle",
+      "public-health",
+      "smote"
+    ],
+    "difficulty": [
+      "Easy",
+      "Medium"
+    ],
+    "target_type": "multiclass",
+    "size": "2111 rows x 17 features",
+    "direct_load": true
+  },
+  {
+    "index": 109,
+    "id": "openml-drug-classification",
+    "name": "Drug Type Classification",
+    "source": "openml",
+    "domain": "Healthcare",
+    "tags": [
+      "drug",
+      "medical",
+      "multiclass",
+      "decision-tree",
+      "prescription",
+      "clinical",
+      "teaching"
+    ],
+    "difficulty": [
+      "Easy"
+    ],
+    "target_type": "multiclass",
+    "size": "200 rows x 6 features",
+    "direct_load": true
+  },
+  {
+    "index": 110,
+    "id": "openml-covid-symptoms",
+    "name": "COVID-19 Symptom-Based Prediction",
+    "source": "openml",
+    "domain": "Healthcare",
+    "tags": [
+      "covid-19",
+      "healthcare",
+      "binary-classification",
+      "symptoms",
+      "pandemic",
+      "public-health",
+      "triage"
+    ],
+    "difficulty": [
+      "Medium"
+    ],
+    "target_type": "binary",
+    "size": "278848 rows x 10 features",
+    "direct_load": true
+  },
+  {
+    "index": 111,
+    "id": "openml-mental-health-tech",
+    "name": "Mental Health in Tech Workplace Survey",
+    "source": "openml",
+    "domain": "Healthcare",
+    "tags": [
+      "mental-health",
+      "hr",
+      "workplace",
+      "survey",
+      "binary-classification",
+      "social-good",
+      "tech"
+    ],
+    "difficulty": [
+      "Medium"
+    ],
+    "target_type": "binary",
+    "size": "1259 rows x 27 features",
+    "direct_load": true
+  },
+  {
+    "index": 112,
+    "id": "openml-lung-cancer",
+    "name": "Lung Cancer Prediction Survey",
+    "source": "openml",
+    "domain": "Healthcare",
+    "tags": [
+      "cancer",
+      "lung",
+      "healthcare",
+      "binary-classification",
+      "symptom-based",
+      "screening",
+      "medical"
+    ],
+    "difficulty": [
+      "Easy"
+    ],
+    "target_type": "binary",
+    "size": "309 rows x 16 features",
+    "direct_load": true
+  },
+  {
+    "index": 113,
+    "id": "openml-kidney-disease",
+    "name": "Chronic Kidney Disease Prediction",
+    "source": "openml",
+    "domain": "Healthcare",
+    "tags": [
+      "kidney-disease",
+      "healthcare",
+      "binary-classification",
+      "missing-data",
+      "clinical",
+      "imputation",
+      "medical"
+    ],
+    "difficulty": [
+      "Medium"
+    ],
+    "target_type": "binary",
+    "size": "400 rows x 25 features",
+    "direct_load": true
+  },
+  {
+    "index": 114,
+    "id": "openml-fraud-detection",
+    "name": "Credit Card Fraud Detection",
+    "source": "openml",
+    "domain": "Finance",
+    "tags": [
+      "fraud",
+      "anomaly-detection",
+      "binary-classification",
+      "extreme-imbalance",
+      "finance",
+      "pca",
+      "security"
+    ],
+    "difficulty": [
+      "Hard"
+    ],
+    "target_type": "binary",
+    "size": "284807 rows x 31 features",
+    "direct_load": true
+  },
+  {
+    "index": 115,
+    "id": "openml-loan-approval",
+    "name": "Loan Approval Prediction",
+    "source": "openml",
+    "domain": "Finance",
+    "tags": [
+      "loan",
+      "finance",
+      "binary-classification",
+      "credit-risk",
+      "approval",
+      "lending",
+      "fairness"
+    ],
+    "difficulty": [
+      "Easy",
+      "Medium"
+    ],
+    "target_type": "binary",
+    "size": "614 rows x 13 features",
+    "direct_load": true
+  },
+  {
+    "index": 116,
+    "id": "openml-bitcoin-price",
+    "name": "Bitcoin Historical Price Features",
+    "source": "openml",
+    "domain": "Finance",
+    "tags": [
+      "bitcoin",
+      "cryptocurrency",
+      "time-series",
+      "finance",
+      "price-prediction",
+      "technical-indicators",
+      "ohlcv"
+    ],
+    "difficulty": [
+      "Medium",
+      "Hard"
+    ],
+    "target_type": "continuous",
+    "size": "2000+ rows x 10+ features",
+    "direct_load": true
+  },
+  {
+    "index": 117,
+    "id": "openml-givemecredit",
+    "name": "Give Me Some Credit — Financial Distress",
+    "source": "openml",
+    "domain": "Finance",
+    "tags": [
+      "credit-scoring",
+      "financial-distress",
+      "binary-classification",
+      "imbalanced",
+      "delinquency",
+      "risk-modeling",
+      "finance"
+    ],
+    "difficulty": [
+      "Medium",
+      "Hard"
+    ],
+    "target_type": "binary",
+    "size": "150000 rows x 11 features",
+    "direct_load": true
+  },
+  {
+    "index": 118,
+    "id": "openml-income-inequality",
+    "name": "Income Inequality Prediction (World Bank)",
+    "source": "openml",
+    "domain": "Socioeconomics",
+    "tags": [
+      "income",
+      "inequality",
+      "fairness",
+      "binary-classification",
+      "demographic",
+      "socioeconomics",
+      "bias-detection"
+    ],
+    "difficulty": [
+      "Medium"
+    ],
+    "target_type": "binary",
+    "size": "32561 rows x 15 features",
+    "direct_load": true
+  },
+  {
+    "index": 119,
+    "id": "openml-air-quality",
+    "name": "Air Quality UCI (Hourly Sensor Data)",
+    "source": "openml",
+    "domain": "Environmental",
+    "tags": [
+      "air-quality",
+      "environmental",
+      "time-series",
+      "regression",
+      "sensor",
+      "pollution",
+      "iot"
+    ],
+    "difficulty": [
+      "Medium"
+    ],
+    "target_type": "continuous",
+    "size": "9358 rows x 13 features",
+    "direct_load": true
+  },
+  {
+    "index": 120,
+    "id": "openml-water-potability",
+    "name": "Water Quality and Potability",
+    "source": "openml",
+    "domain": "Environmental",
+    "tags": [
+      "water-quality",
+      "environmental",
+      "binary-classification",
+      "chemistry",
+      "public-health",
+      "potability"
+    ],
+    "difficulty": [
+      "Easy",
+      "Medium"
+    ],
+    "target_type": "binary",
+    "size": "3276 rows x 10 features",
+    "direct_load": true
+  },
+  {
+    "index": 121,
+    "id": "openml-wildfire-risk",
+    "name": "Forest Fire Weather Index Prediction",
+    "source": "openml",
+    "domain": "Environmental",
+    "tags": [
+      "wildfire",
+      "forest-fire",
+      "environmental",
+      "regression",
+      "skewed-target",
+      "meteorological",
+      "portugal"
+    ],
+    "difficulty": [
+      "Medium"
+    ],
+    "target_type": "continuous",
+    "size": "517 rows x 13 features",
+    "direct_load": true
+  },
+  {
+    "index": 122,
+    "id": "openml-energy-efficiency",
+    "name": "Building Energy Efficiency",
+    "source": "openml",
+    "domain": "Energy",
+    "tags": [
+      "energy",
+      "building",
+      "regression",
+      "multi-output",
+      "efficiency",
+      "simulation",
+      "green-tech"
+    ],
+    "difficulty": [
+      "Easy",
+      "Medium"
+    ],
+    "target_type": "continuous",
+    "size": "768 rows x 10 features",
+    "direct_load": true
+  },
+  {
+    "index": 123,
+    "id": "openml-wine-quality",
+    "name": "Wine Quality Prediction (Red & White)",
+    "source": "openml",
+    "domain": "Food & Beverage",
+    "tags": [
+      "wine",
+      "quality",
+      "multiclass",
+      "regression",
+      "food-beverage",
+      "chemistry",
+      "ordinal"
+    ],
+    "difficulty": [
+      "Medium"
+    ],
+    "target_type": "multiclass",
+    "size": "6497 rows x 13 features",
+    "direct_load": true
+  },
+  {
+    "index": 124,
+    "id": "openml-concrete-strength",
+    "name": "Concrete Compressive Strength",
+    "source": "openml",
+    "domain": "Engineering",
+    "tags": [
+      "concrete",
+      "engineering",
+      "regression",
+      "non-linear",
+      "materials",
+      "construction",
+      "ensemble"
+    ],
+    "difficulty": [
+      "Medium"
+    ],
+    "target_type": "continuous",
+    "size": "1030 rows x 9 features",
+    "direct_load": true
+  },
+  {
+    "index": 125,
+    "id": "openml-nasa-airfoil",
+    "name": "NASA Airfoil Self-Noise Prediction",
+    "source": "openml",
+    "domain": "Engineering",
+    "tags": [
+      "nasa",
+      "aerodynamics",
+      "engineering",
+      "regression",
+      "aerospace",
+      "noise",
+      "physics"
+    ],
+    "difficulty": [
+      "Medium"
+    ],
+    "target_type": "continuous",
+    "size": "1503 rows x 6 features",
+    "direct_load": true
+  },
+  {
+    "index": 126,
+    "id": "openml-abalone",
+    "name": "Abalone Age Prediction",
+    "source": "openml",
+    "domain": "Biology",
+    "tags": [
+      "abalone",
+      "biology",
+      "regression",
+      "age-prediction",
+      "uci-benchmark",
+      "marine",
+      "physical-measurements"
+    ],
+    "difficulty": [
+      "Easy",
+      "Medium"
+    ],
+    "target_type": "continuous",
+    "size": "4177 rows x 9 features",
+    "direct_load": true
+  },
+  {
+    "index": 127,
+    "id": "openml-student-performance",
+    "name": "Student Academic Performance",
+    "source": "openml",
+    "domain": "Education",
+    "tags": [
+      "education",
+      "student",
+      "regression",
+      "grade-prediction",
+      "social-factors",
+      "academic",
+      "early-warning"
+    ],
+    "difficulty": [
+      "Easy",
+      "Medium"
+    ],
+    "target_type": "continuous",
+    "size": "649 rows x 33 features",
+    "direct_load": true
+  },
+  {
+    "index": 128,
+    "id": "openml-speed-dating",
+    "name": "Speed Dating Match Prediction",
+    "source": "openml",
+    "domain": "Social Science",
+    "tags": [
+      "dating",
+      "social-science",
+      "binary-classification",
+      "behavioural",
+      "high-dimensional",
+      "experiment"
+    ],
+    "difficulty": [
+      "Medium",
+      "Hard"
+    ],
+    "target_type": "binary",
+    "size": "8378 rows x 123 features",
+    "direct_load": true
+  },
+  {
+    "index": 129,
+    "id": "openml-mushroom",
+    "name": "Mushroom Edibility Classification",
+    "source": "openml",
+    "domain": "Biology",
+    "tags": [
+      "mushroom",
+      "biology",
+      "binary-classification",
+      "categorical",
+      "encoding",
+      "decision-tree",
+      "benchmark"
+    ],
+    "difficulty": [
+      "Easy"
+    ],
+    "target_type": "binary",
+    "size": "8124 rows x 23 features",
+    "direct_load": true
+  },
+  {
+    "index": 130,
+    "id": "openml-car-evaluation",
+    "name": "Car Evaluation Classification",
+    "source": "openml",
+    "domain": "Automotive",
+    "tags": [
+      "car",
+      "automotive",
+      "multiclass",
+      "ordinal",
+      "categorical",
+      "evaluation",
+      "teaching"
+    ],
+    "difficulty": [
+      "Easy"
+    ],
+    "target_type": "multiclass",
+    "size": "1728 rows x 7 features",
+    "direct_load": true
+  },
+  {
+    "index": 131,
+    "id": "openml-dry-bean",
+    "name": "Dry Bean Variety Classification",
+    "source": "openml",
+    "domain": "Agriculture",
+    "tags": [
+      "agriculture",
+      "food",
+      "multiclass",
+      "shape-features",
+      "image-derived",
+      "bean",
+      "correlated-features"
+    ],
+    "difficulty": [
+      "Medium"
+    ],
+    "target_type": "multiclass",
+    "size": "13611 rows x 17 features",
+    "direct_load": true
+  },
+  {
+    "index": 132,
+    "id": "openml-bike-sharing",
+    "name": "Bike Sharing Demand (Washington DC)",
+    "source": "openml",
+    "domain": "Transportation",
+    "tags": [
+      "bike-sharing",
+      "demand-forecasting",
+      "time-series",
+      "regression",
+      "weather",
+      "transportation",
+      "datetime-features"
+    ],
+    "difficulty": [
+      "Medium"
+    ],
+    "target_type": "continuous",
+    "size": "17379 rows x 17 features",
+    "direct_load": true
+  },
+  {
+    "index": 133,
+    "id": "openml-pm25-beijing",
+    "name": "Beijing PM2.5 Air Pollution Forecasting",
+    "source": "openml",
+    "domain": "Environmental",
+    "tags": [
+      "pm2.5",
+      "air-pollution",
+      "time-series",
+      "regression",
+      "environmental",
+      "beijing",
+      "weather"
+    ],
+    "difficulty": [
+      "Medium",
+      "Hard"
+    ],
+    "target_type": "continuous",
+    "size": "43824 rows x 12 features",
+    "direct_load": true
+  },
+  {
+    "index": 134,
+    "id": "openml-metro-traffic",
+    "name": "Metro Interstate Traffic Volume",
+    "source": "openml",
+    "domain": "Transportation",
+    "tags": [
+      "traffic",
+      "time-series",
+      "regression",
+      "transportation",
+      "weather",
+      "holiday",
+      "forecasting"
+    ],
+    "difficulty": [
+      "Medium"
+    ],
+    "target_type": "continuous",
+    "size": "48204 rows x 9 features",
+    "direct_load": true
+  },
+  {
+    "index": 135,
+    "id": "openml-power-consumption",
+    "name": "Household Electric Power Consumption",
+    "source": "openml",
+    "domain": "Energy",
+    "tags": [
+      "energy",
+      "power-consumption",
+      "time-series",
+      "lstm",
+      "smart-meter",
+      "household",
+      "forecasting"
+    ],
+    "difficulty": [
+      "Medium",
+      "Hard"
+    ],
+    "target_type": "continuous",
+    "size": "2075259 rows (sample recommended) x 9 features",
+    "direct_load": true
+  },
+  {
+    "index": 136,
+    "id": "openml-stock-sp500",
+    "name": "S&P 500 Companies Financial Features",
+    "source": "openml",
+    "domain": "Finance",
+    "tags": [
+      "stock",
+      "finance",
+      "time-series",
+      "s&p500",
+      "ohlcv",
+      "regression",
+      "portfolio"
+    ],
+    "difficulty": [
+      "Hard"
+    ],
+    "target_type": "continuous",
+    "size": "619040 rows x 7 features",
+    "direct_load": true
+  },
+  {
+    "index": 137,
+    "id": "openml-iot-predictive-maintenance",
+    "name": "IoT Predictive Maintenance (NASA CMAPSS)",
+    "source": "openml",
+    "domain": "Manufacturing",
+    "tags": [
+      "predictive-maintenance",
+      "iot",
+      "sensor",
+      "rul",
+      "time-series",
+      "nasa",
+      "regression",
+      "industrial"
+    ],
+    "difficulty": [
+      "Hard"
+    ],
+    "target_type": "continuous",
+    "size": "20631 rows x 26 features",
+    "direct_load": true
+  },
+  {
+    "index": 138,
+    "id": "openml-web-traffic",
+    "name": "Wikipedia Web Traffic Forecasting",
+    "source": "openml",
+    "domain": "Media",
+    "tags": [
+      "web-traffic",
+      "forecasting",
+      "time-series",
+      "wikipedia",
+      "seasonality",
+      "internet",
+      "regression"
+    ],
+    "difficulty": [
+      "Hard"
+    ],
+    "target_type": "continuous",
+    "size": "145063 pages x 550 days",
+    "direct_load": true
+  },
+  {
+    "index": 139,
+    "id": "openml-superstore-sales",
+    "name": "Superstore Sales Analysis Dataset",
+    "source": "openml",
+    "domain": "Retail",
+    "tags": [
+      "retail",
+      "sales",
+      "regression",
+      "business-intelligence",
+      "profit",
+      "e-commerce",
+      "analytics"
+    ],
+    "difficulty": [
+      "Easy",
+      "Medium"
+    ],
+    "target_type": "continuous",
+    "size": "9994 rows x 21 features",
+    "direct_load": true
+  },
+  {
+    "index": 140,
+    "id": "hf-fake-news",
+    "name": "ISOT Fake News Detection Dataset",
+    "source": "huggingface",
+    "domain": "Media",
+    "tags": [
+      "fake-news",
+      "misinformation",
+      "nlp",
+      "binary-classification",
+      "text",
+      "journalism",
+      "bert"
+    ],
+    "difficulty": [
+      "Medium"
+    ],
+    "target_type": "binary",
+    "size": "44898 articles",
+    "direct_load": true
+  },
+  {
+    "index": 141,
+    "id": "hf-spam-detection",
+    "name": "SMS Spam Collection Dataset",
+    "source": "huggingface",
+    "domain": "NLP",
+    "tags": [
+      "spam",
+      "sms",
+      "nlp",
+      "binary-classification",
+      "naive-bayes",
+      "short-text",
+      "imbalanced"
+    ],
+    "difficulty": [
+      "Easy"
+    ],
+    "target_type": "binary",
+    "size": "5574 SMS messages",
+    "direct_load": true
+  },
+  {
+    "index": 142,
+    "id": "hf-twitter-airline-sentiment",
+    "name": "Twitter US Airline Sentiment",
+    "source": "huggingface",
+    "domain": "NLP",
+    "tags": [
+      "sentiment",
+      "twitter",
+      "airline",
+      "nlp",
+      "multiclass",
+      "social-media",
+      "imbalanced"
+    ],
+    "difficulty": [
+      "Medium"
+    ],
+    "target_type": "multiclass",
+    "size": "14640 tweets",
+    "direct_load": true
+  },
+  {
+    "index": 143,
+    "id": "hf-news-category",
+    "name": "HuffPost News Category Classification",
+    "source": "huggingface",
+    "domain": "NLP",
+    "tags": [
+      "news",
+      "nlp",
+      "multiclass",
+      "headlines",
+      "topic-classification",
+      "bert",
+      "fine-grained"
+    ],
+    "difficulty": [
+      "Medium",
+      "Hard"
+    ],
+    "target_type": "multiclass",
+    "size": "210294 articles, 42 categories",
+    "direct_load": true
+  },
+  {
+    "index": 144,
+    "id": "hf-toxic-comments",
+    "name": "Jigsaw Toxic Comment Classification",
+    "source": "huggingface",
+    "domain": "NLP",
+    "tags": [
+      "toxicity",
+      "content-moderation",
+      "nlp",
+      "multi-label",
+      "online-safety",
+      "imbalanced",
+      "bert"
+    ],
+    "difficulty": [
+      "Hard"
+    ],
+    "target_type": "multilabel",
+    "size": "159571 comments, 6 labels",
+    "direct_load": true
+  },
+  {
+    "index": 145,
+    "id": "hf-legal-text",
+    "name": "EURLEX Legal Document Classification",
+    "source": "huggingface",
+    "domain": "Legal",
+    "tags": [
+      "legal",
+      "nlp",
+      "multi-label",
+      "long-document",
+      "eu-law",
+      "bert",
+      "domain-specific"
+    ],
+    "difficulty": [
+      "Hard"
+    ],
+    "target_type": "multilabel",
+    "size": "52515 EU legal documents",
+    "direct_load": true
+  },
+  {
+    "index": 146,
+    "id": "hf-customer-support-tickets",
+    "name": "Customer Support Ticket Classification",
+    "source": "huggingface",
+    "domain": "NLP",
+    "tags": [
+      "customer-support",
+      "intent",
+      "nlp",
+      "multiclass",
+      "chatbot",
+      "enterprise",
+      "e-commerce"
+    ],
+    "difficulty": [
+      "Medium"
+    ],
+    "target_type": "multiclass",
+    "size": "26872 support conversations, 27 intents",
+    "direct_load": true
+  },
+  {
+    "index": 147,
+    "id": "hf-product-reviews-multiclass",
+    "name": "Amazon Multi-Domain Product Reviews",
+    "source": "huggingface",
+    "domain": "E-commerce",
+    "tags": [
+      "amazon",
+      "reviews",
+      "sentiment",
+      "nlp",
+      "multiclass",
+      "recommendation",
+      "e-commerce",
+      "rating"
+    ],
+    "difficulty": [
+      "Medium"
+    ],
+    "target_type": "multiclass",
+    "size": "Millions of reviews across categories",
+    "direct_load": true
+  },
+  {
+    "index": 148,
+    "id": "hf-multilingual-sentiment",
+    "name": "Multilingual Sentiment Analysis (5 Languages)",
+    "source": "huggingface",
+    "domain": "NLP",
+    "tags": [
+      "multilingual",
+      "sentiment",
+      "nlp",
+      "amazon",
+      "multiclass",
+      "cross-lingual",
+      "xlm-r",
+      "mbert"
+    ],
+    "difficulty": [
+      "Medium",
+      "Hard"
+    ],
+    "target_type": "multiclass",
+    "size": "210000 reviews across 5 languages",
+    "direct_load": true
+  },
+  {
+    "index": 149,
+    "id": "hf-abstractive-summarization",
+    "name": "CNN/DailyMail News Summarization",
+    "source": "huggingface",
+    "domain": "NLP",
+    "tags": [
+      "summarization",
+      "nlp",
+      "seq2seq",
+      "bart",
+      "t5",
+      "rouge",
+      "news",
+      "abstractive"
+    ],
+    "difficulty": [
+      "Hard"
+    ],
+    "target_type": "sequence_generation",
+    "size": "311971 article-summary pairs",
+    "direct_load": true
+  },
+  {
+    "index": 150,
+    "id": "hf-named-entity-medical",
+    "name": "Medical NER — Clinical Named Entity Recognition",
+    "source": "huggingface",
+    "domain": "Healthcare",
+    "tags": [
+      "ner",
+      "medical",
+      "nlp",
+      "token-classification",
+      "biobert",
+      "clinical",
+      "ehr",
+      "information-extraction"
+    ],
+    "difficulty": [
+      "Hard"
+    ],
+    "target_type": "sequence_labeling",
+    "size": "500+ clinical documents",
+    "direct_load": true
+  },
+  {
+    "index": 151,
+    "id": "hf-stance-detection",
+    "name": "SemEval Stance Detection Dataset",
+    "source": "huggingface",
+    "domain": "NLP",
+    "tags": [
+      "stance-detection",
+      "opinion-mining",
+      "nlp",
+      "multiclass",
+      "political",
+      "twitter",
+      "semeval"
+    ],
+    "difficulty": [
+      "Medium",
+      "Hard"
+    ],
+    "target_type": "multiclass",
+    "size": "4870 tweets, 5 targets",
+    "direct_load": true
+  },
+  {
+    "index": 152,
+    "id": "hf-natural-language-inference",
+    "name": "MultiNLI — Multi-Genre Natural Language Inference",
+    "source": "huggingface",
+    "domain": "NLP",
+    "tags": [
+      "nli",
+      "entailment",
+      "nlp",
+      "multiclass",
+      "bert",
+      "cross-genre",
+      "sentence-pairs"
+    ],
+    "difficulty": [
+      "Medium"
+    ],
+    "target_type": "multiclass",
+    "size": "433k sentence pairs across 10 genres",
+    "direct_load": true
+  },
+  {
+    "index": 153,
+    "id": "hf-code-generation",
+    "name": "HumanEval Code Generation Benchmark",
+    "source": "huggingface",
+    "domain": "Software Engineering",
+    "tags": [
+      "code-generation",
+      "llm",
+      "benchmark",
+      "python",
+      "programming",
+      "pass-at-k",
+      "humaneval"
+    ],
+    "difficulty": [
+      "Hard"
+    ],
+    "target_type": "sequence_generation",
+    "size": "164 programming problems",
+    "direct_load": true
+  },
+  {
+    "index": 154,
+    "id": "hf-question-generation",
+    "name": "SQuAD 2.0 Reading Comprehension",
+    "source": "huggingface",
+    "domain": "NLP",
+    "tags": [
+      "question-answering",
+      "reading-comprehension",
+      "nlp",
+      "bert",
+      "squad",
+      "extractive",
+      "span-extraction"
+    ],
+    "difficulty": [
+      "Hard"
+    ],
+    "target_type": "sequence_generation",
+    "size": "150373 QA pairs from 505 Wikipedia articles",
+    "direct_load": true
+  },
+  {
+    "index": 155,
+    "id": "hf-brain-tumor-mri",
+    "name": "Brain Tumor MRI Classification",
+    "source": "huggingface",
+    "domain": "Healthcare",
+    "tags": [
+      "brain-tumor",
+      "mri",
+      "medical-imaging",
+      "cv",
+      "transfer-learning",
+      "resnet",
+      "healthcare",
+      "deep-learning"
+    ],
+    "difficulty": [
+      "Medium",
+      "Hard"
+    ],
+    "target_type": "multiclass",
+    "size": "7023 MRI images, 4 classes",
+    "direct_load": true
+  },
+  {
+    "index": 156,
+    "id": "hf-pneumonia-xray",
+    "name": "Chest X-Ray Pneumonia Detection",
+    "source": "huggingface",
+    "domain": "Healthcare",
+    "tags": [
+      "pneumonia",
+      "chest-xray",
+      "medical-imaging",
+      "cv",
+      "binary-classification",
+      "transfer-learning",
+      "healthcare"
+    ],
+    "difficulty": [
+      "Medium"
+    ],
+    "target_type": "binary",
+    "size": "5863 X-ray images",
+    "direct_load": true
+  },
+  {
+    "index": 157,
+    "id": "hf-garbage-classification",
+    "name": "Garbage and Waste Classification",
+    "source": "huggingface",
+    "domain": "Environmental",
+    "tags": [
+      "garbage",
+      "recycling",
+      "cv",
+      "multiclass",
+      "environmental",
+      "sustainability",
+      "cnn"
+    ],
+    "difficulty": [
+      "Easy",
+      "Medium"
+    ],
+    "target_type": "multiclass",
+    "size": "2527 images, 6 waste categories",
+    "direct_load": true
+  },
+  {
+    "index": 158,
+    "id": "hf-traffic-signs",
+    "name": "GTSRB German Traffic Sign Recognition",
+    "source": "huggingface",
+    "domain": "Transportation",
+    "tags": [
+      "traffic-signs",
+      "autonomous-driving",
+      "cv",
+      "multiclass",
+      "gtsrb",
+      "real-world",
+      "transportation"
+    ],
+    "difficulty": [
+      "Medium",
+      "Hard"
+    ],
+    "target_type": "multiclass",
+    "size": "51839 images, 43 traffic sign classes",
+    "direct_load": true
+  },
+  {
+    "index": 159,
+    "id": "hf-plant-village",
+    "name": "PlantVillage Plant Disease Detection",
+    "source": "huggingface",
+    "domain": "Agriculture",
+    "tags": [
+      "plant-disease",
+      "agriculture",
+      "cv",
+      "multiclass",
+      "transfer-learning",
+      "precision-agriculture",
+      "deep-learning"
+    ],
+    "difficulty": [
+      "Medium"
+    ],
+    "target_type": "multiclass",
+    "size": "87000 images, 38 disease classes",
+    "direct_load": true
+  },
+  {
+    "index": 160,
+    "id": "hf-sign-language",
+    "name": "Sign Language MNIST Hand Gesture",
+    "source": "huggingface",
+    "domain": "Computer Vision",
+    "tags": [
+      "sign-language",
+      "asl",
+      "cv",
+      "multiclass",
+      "gesture-recognition",
+      "accessibility",
+      "mnist-format"
+    ],
+    "difficulty": [
+      "Medium"
+    ],
+    "target_type": "multiclass",
+    "size": "27455 training, 7172 test images",
+    "direct_load": true
+  },
+  {
+    "index": 161,
+    "id": "hf-satellite-land-use",
+    "name": "UC Merced Land Use Satellite Classification",
+    "source": "huggingface",
+    "domain": "Environmental",
+    "tags": [
+      "satellite",
+      "remote-sensing",
+      "cv",
+      "multiclass",
+      "geospatial",
+      "aerial",
+      "land-use"
+    ],
+    "difficulty": [
+      "Medium"
+    ],
+    "target_type": "multiclass",
+    "size": "2100 aerial images, 21 land use categories",
+    "direct_load": true
+  },
+  {
+    "index": 162,
+    "id": "hf-retinal-oct",
+    "name": "Retinal OCT Medical Image Classification",
+    "source": "huggingface",
+    "domain": "Healthcare",
+    "tags": [
+      "retinal",
+      "oct",
+      "medical-imaging",
+      "cv",
+      "multiclass",
+      "ophthalmology",
+      "grad-cam",
+      "healthcare"
+    ],
+    "difficulty": [
+      "Hard"
+    ],
+    "target_type": "multiclass",
+    "size": "84495 OCT scans, 4 retinal classes",
+    "direct_load": true
+  },
+  {
+    "index": 163,
+    "id": "hf-emotion-face",
+    "name": "FER-2013 Facial Emotion Recognition",
+    "source": "huggingface",
+    "domain": "Computer Vision",
+    "tags": [
+      "emotion",
+      "face",
+      "cv",
+      "multiclass",
+      "affective-computing",
+      "grayscale",
+      "fer2013"
+    ],
+    "difficulty": [
+      "Hard"
+    ],
+    "target_type": "multiclass",
+    "size": "35887 face images, 7 emotion classes",
+    "direct_load": true
+  },
+  {
+    "index": 164,
+    "id": "hf-document-layout",
+    "name": "Document Layout Analysis (RVL-CDIP)",
+    "source": "huggingface",
+    "domain": "Computer Vision",
+    "tags": [
+      "document",
+      "cv",
+      "multiclass",
+      "document-understanding",
+      "enterprise",
+      "layoutlm",
+      "intelligent-processing"
+    ],
+    "difficulty": [
+      "Hard"
+    ],
+    "target_type": "multiclass",
+    "size": "400000 document images, 16 categories",
+    "direct_load": true
+  },
+  {
+    "index": 165,
+    "id": "openml-movielens-100k",
+    "name": "MovieLens 100K Rating Dataset",
+    "source": "openml",
+    "domain": "Media",
+    "tags": [
+      "recommendation",
+      "collaborative-filtering",
+      "ratings",
+      "svd",
+      "matrix-factorisation",
+      "movies",
+      "user-item"
+    ],
+    "difficulty": [
+      "Medium"
+    ],
+    "target_type": "multiclass",
+    "size": "100000 ratings, 943 users, 1682 movies",
+    "direct_load": true
+  },
+  {
+    "index": 166,
+    "id": "openml-nsl-kdd",
+    "name": "NSL-KDD Network Intrusion Detection",
+    "source": "openml",
+    "domain": "Cybersecurity",
+    "tags": [
+      "network-intrusion",
+      "cybersecurity",
+      "anomaly-detection",
+      "multiclass",
+      "dos",
+      "network-security",
+      "kdd"
+    ],
+    "difficulty": [
+      "Medium",
+      "Hard"
+    ],
+    "target_type": "multiclass",
+    "size": "125973 rows x 42 features",
+    "direct_load": true
+  },
+  {
+    "index": 167,
+    "id": "openml-ecg-heartbeat",
+    "name": "ECG Heartbeat Arrhythmia Classification",
+    "source": "openml",
+    "domain": "Healthcare",
+    "tags": [
+      "ecg",
+      "arrhythmia",
+      "healthcare",
+      "time-series",
+      "1d-cnn",
+      "lstm",
+      "medical",
+      "signal"
+    ],
+    "difficulty": [
+      "Hard"
+    ],
+    "target_type": "multiclass",
+    "size": "109446 heartbeat samples x 188 features",
+    "direct_load": true
+  },
+  {
+    "index": 168,
+    "id": "openml-mall-customers",
+    "name": "Mall Customer Segmentation",
+    "source": "openml",
+    "domain": "Retail",
+    "tags": [
+      "clustering",
+      "segmentation",
+      "unsupervised",
+      "kmeans",
+      "retail",
+      "customer",
+      "beginner"
+    ],
+    "difficulty": [
+      "Easy"
+    ],
+    "target_type": "continuous",
+    "size": "200 rows x 5 features",
+    "direct_load": true
+  },
+  {
+    "index": 169,
+    "id": "openml-country-clustering",
+    "name": "Country Socioeconomic Clustering (HELP)",
+    "source": "openml",
+    "domain": "Socioeconomics",
+    "tags": [
+      "clustering",
+      "socioeconomics",
+      "humanitarian",
+      "kmeans",
+      "pca",
+      "development",
+      "world-data"
+    ],
+    "difficulty": [
+      "Easy",
+      "Medium"
+    ],
+    "target_type": "multiclass",
+    "size": "167 rows x 10 features",
+    "direct_load": true
+  },
+  {
+    "index": 170,
+    "id": "openml-zomato-restaurants",
+    "name": "Zomato Restaurant Ratings Prediction",
+    "source": "openml",
+    "domain": "Hospitality",
+    "tags": [
+      "restaurant",
+      "hospitality",
+      "regression",
+      "rating",
+      "food",
+      "location",
+      "zomato"
+    ],
+    "difficulty": [
+      "Medium"
+    ],
+    "target_type": "continuous",
+    "size": "51717 rows x 17 features",
+    "direct_load": true
+  },
+  {
+    "index": 171,
+    "id": "openml-black-friday",
+    "name": "Black Friday Sales Purchase Analysis",
+    "source": "openml",
+    "domain": "Retail",
+    "tags": [
+      "retail",
+      "sales",
+      "regression",
+      "black-friday",
+      "purchase",
+      "customer-profiling",
+      "large-scale"
+    ],
+    "difficulty": [
+      "Medium"
+    ],
+    "target_type": "continuous",
+    "size": "537577 rows x 12 features",
+    "direct_load": true
+  },
+  {
+    "index": 172,
+    "id": "openml-olympic-athletes",
+    "name": "120 Years of Olympic Athletes History",
+    "source": "openml",
+    "domain": "Sports",
+    "tags": [
+      "sports",
+      "olympics",
+      "multiclass",
+      "imbalanced",
+      "historical",
+      "athletics",
+      "eda"
+    ],
+    "difficulty": [
+      "Medium"
+    ],
+    "target_type": "multiclass",
+    "size": "271116 rows x 15 features",
+    "direct_load": true
+  },
+  {
+    "index": 173,
+    "id": "hf-human-activity-recognition",
+    "name": "UCI HAR Human Activity Recognition",
+    "source": "huggingface",
+    "domain": "IoT",
+    "tags": [
+      "activity-recognition",
+      "iot",
+      "sensor",
+      "multiclass",
+      "wearable",
+      "accelerometer",
+      "smartphone"
+    ],
+    "difficulty": [
+      "Medium"
+    ],
+    "target_type": "multiclass",
+    "size": "10299 rows x 562 features",
+    "direct_load": true
+  },
+  {
+    "index": 174,
+    "id": "openml-titanic-survival",
+    "name": "Titanic Passenger Survival (Extended)",
+    "source": "openml",
+    "domain": "Transportation",
+    "tags": [
+      "titanic",
+      "survival",
+      "binary-classification",
+      "feature-engineering",
+      "missing-values",
+      "beginner",
+      "teaching"
+    ],
+    "difficulty": [
+      "Easy"
+    ],
+    "target_type": "binary",
+    "size": "1309 rows x 14 features",
+    "direct_load": true
+  },
+  {
+    "index": 175,
+    "id": "hf-audio-emotion",
+    "name": "RAVDESS Speech Emotion Recognition",
+    "source": "huggingface",
+    "domain": "Audio/Speech",
+    "tags": [
+      "speech-emotion",
+      "audio",
+      "multiclass",
+      "mfcc",
+      "ravdess",
+      "affective-computing",
+      "1d-cnn"
+    ],
+    "difficulty": [
+      "Medium",
+      "Hard"
+    ],
+    "target_type": "multiclass",
+    "size": "1440 audio clips, 8 emotion classes",
+    "direct_load": true
+  },
+  {
+    "index": 176,
+    "id": "pyg-citeseer",
+    "name": "CiteSeer Citation Graph Network",
+    "source": "torch_geometric",
+    "domain": "Academic",
+    "tags": [
+      "graph",
+      "gnn",
+      "node-classification",
+      "citation-network",
+      "gcn",
+      "gat",
+      "semi-supervised",
+      "benchmark"
+    ],
+    "difficulty": [
+      "Medium"
+    ],
+    "target_type": "multiclass",
+    "size": "3327 nodes, 4732 edges",
+    "direct_load": true
+  },
+  {
+    "index": 177,
+    "id": "hf-mnist-fashion-extended",
+    "name": "DeepFashion Clothing Attribute Recognition",
+    "source": "huggingface",
+    "domain": "Retail",
+    "tags": [
+      "fashion",
+      "cv",
+      "multi-label",
+      "e-commerce",
+      "segmentation",
+      "attribute-recognition",
+      "fine-grained"
+    ],
+    "difficulty": [
+      "Hard"
+    ],
+    "target_type": "multilabel",
+    "size": "48825 fashion images",
+    "direct_load": true
+  },
+  {
+    "index": 178,
+    "id": "hf-visual-question-answering",
+    "name": "VQA Visual Question Answering",
+    "source": "huggingface",
+    "domain": "Computer Vision",
+    "tags": [
+      "vqa",
+      "multimodal",
+      "cv",
+      "nlp",
+      "vision-language",
+      "blip",
+      "clip",
+      "deep-learning"
+    ],
+    "difficulty": [
+      "Hard"
+    ],
+    "target_type": "multiclass",
+    "size": "1.1M image-question pairs",
+    "direct_load": true
+  },
+  {
+    "index": 179,
+    "id": "hf-speech-to-text-librispeech-clean",
+    "name": "LibriSpeech Clean 360h ASR Dataset",
+    "source": "huggingface",
+    "domain": "Audio/Speech",
+    "tags": [
+      "asr",
+      "speech",
+      "audio",
+      "librispeech",
+      "whisper",
+      "wav2vec",
+      "transcription",
+      "large-scale"
+    ],
+    "difficulty": [
+      "Hard"
+    ],
+    "target_type": "sequence_generation",
+    "size": "360 hours of speech, 104014 utterances",
+    "direct_load": true
+  }
+]

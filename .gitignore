@@ -1,0 +1,83 @@
+# ===============================
+# Python
+# ===============================
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.sqlite3
+*.db
+.env
+backend/.env
+venv/
+env/
+ENV/
+
+# ===============================
+# Node.js / Frontend
+# ===============================
+node_modules/
+frontend/web/node_modules/
+.next/
+out/
+build/
+dist/
+
+# ===============================
+# Logs
+# ===============================
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# ===============================
+# OS files
+# ===============================
+.DS_Store
+Thumbs.db
+
+# ===============================
+# IDE / Editor
+# ===============================
+.vscode/
+.idea/
+
+# ===============================
+# Docker
+# ===============================
+*.pid
+*.seed
+*.pid.lock
+
+# ===============================
+# Temporary / Misc
+# ===============================
+*.lock
+installed.txt
+reference file.txt
+frontend_tester.py
+qwen_model_server_script.py
+
+# ===============================
+# Large / Generated Files
+# ===============================
+*.pdf
+*.zip
+*.tar
+*.gz
+
+# ===============================
+# AI / Model files (IMPORTANT)
+# ===============================
+*.bin
+*.pt
+*.pth
+*.onnx
+*.h5
+
+# ===============================
+# GitHub / Actions
+# ===============================
+*.cache

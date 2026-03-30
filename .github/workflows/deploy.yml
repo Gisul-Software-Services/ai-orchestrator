@@ -54,6 +54,12 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
+      - name: Inject env files
+        run: |
+          echo "${{ secrets.BACKEND_ENV }}" > backend/api_gateway/.env
+          echo "${{ secrets.MODEL_ENV }}" > model-service/.env
+          echo "${{ secrets.FRONTEND_ENV }}" > frontend/web/.env.local
+
       - name: Deploy containers
         run: |
           cd $GITHUB_WORKSPACE

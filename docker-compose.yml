@@ -3,62 +3,46 @@ version: '3.8'
 services:
 
   model-service:
-
-    image: aaptor/model-service:latest
-
+    image: gisul/model-service:latest
     container_name: aaptor-model-service
-
     env_file:
       - ./model-service/.env
-
     ports:
-
-      - '7001:7001'
-
+      - "7001:7001"
     volumes:
-
       - ~/.cache/huggingface:/root/.cache/huggingface
       - /mnt/c/Users/adity/documents/gisul/gisul_model/assets:/app/assets
-
     runtime: nvidia
     environment:
       - NVIDIA_VISIBLE_DEVICES=all
-
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:7001/docs"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
     restart: unless-stopped
 
   backend-api:
-    image: aaptor/backend-api:latest
+    image: gisul/backend-api:latest
     container_name: aaptor-backend-api
-
     env_file:
       - ./backend/api_gateway/.env
-
     ports:
-      - '7000:7000'
+      - "7000:7000"
     depends_on:
-      - model-service
+      model-service:
+        condition: service_healthy
     restart: unless-stopped
 
-  qwen-frontend:
-
-    image: aaptor/qwen-frontend:latest
-
-    container_name: aaptor-qwen-frontend
-
+  frontend:
+    image: gisul/model-frontend:latest
+    container_name: aaptor-frontend
     env_file:
       - ./frontend/web/.env.local
-
     ports:
-
-      - '7002:7002'
-
+      - "7002:7002"
     environment:
-
       - API_BASE=http://backend-api:7000/api/v1
-
     depends_on:
-
       - backend-api
-
     restart: unless-stopped
-

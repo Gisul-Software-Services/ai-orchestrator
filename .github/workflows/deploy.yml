@@ -1,76 +1,75 @@
 name: Build and Deploy
- 
+
 on:
   push:
     branches:
       - dev
       - main
- 
+
 jobs:
   build:
     runs-on: ubuntu-latest
- 
+
     steps:
       - uses: actions/checkout@v4
- 
+
       - uses: docker/login-action@v3
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
- 
+
       - name: Build and push backend
         uses: docker/build-push-action@v5
         with:
           context: .
           file: ./backend/api_gateway/Dockerfile
           push: true
-          tags: aaptor/backend-api:latest
+          tags: gisul/backend-api:latest
 
       - name: Build and push model-service
-        if: github.ref == 'refs/heads/main'
         uses: docker/build-push-action@v5
         with:
           context: .
           file: ./model-service/Dockerfile
           push: true
-          tags: aaptor/model-service:latest
- 
+          tags: gisul/model-service:latest
+
       - name: Build and push frontend
         uses: docker/build-push-action@v5
         with:
-          context: ./frontend
+          context: ./frontend/web
+          file: ./frontend/web/Dockerfile
           push: true
-          tags: aaptor/qwen-frontend:latest
- 
+          tags: gisul/model-frontend:latest
+
   deploy:
     needs: build
     runs-on: self-hosted
- 
+
     steps:
       - uses: actions/checkout@v4
- 
+
       - uses: docker/login-action@v3
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
- 
+
       - name: Deploy containers
         run: |
           cp docker-compose.yml /mnt/c/Users/adity/documents/gisul/gisul_model/docker-compose.yml
           cd /mnt/c/Users/adity/documents/gisul/gisul_model
- 
+
           docker compose down --remove-orphans 2>/dev/null || true
-          docker rm -f aaptor-backend-api aaptor-model-service aaptor-qwen-frontend 2>/dev/null || true
+          docker rm -f aaptor-backend-api aaptor-model-service aaptor-model-frontend 2>/dev/null || true
           docker network rm gisul_model_default 2>/dev/null || true
- 
+
           sleep 2
- 
-          docker pull aaptor/backend-api:latest
-          # model-service is built only on main, but always pull for deploy.
-          docker pull aaptor/model-service:latest
-          docker pull aaptor/qwen-frontend:latest
- 
-          docker compose up -d --remove-orphans
+
+          docker pull gisul/backend-api:latest
+          docker pull gisul/model-service:latest
+          docker pull gisul/model-frontend:latest
+
+          docker compose up -d --remove-orphans --pull always
           docker compose ps
         env:
           DOCKER_CONFIG: /tmp/docker-config

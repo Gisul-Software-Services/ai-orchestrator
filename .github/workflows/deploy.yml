@@ -56,20 +56,14 @@ jobs:
 
       - name: Deploy containers
         run: |
-          cp docker-compose.yml /mnt/c/Users/adity/documents/gisul/gisul_model/docker-compose.yml
-          cd /mnt/c/Users/adity/documents/gisul/gisul_model
+          cd $GITHUB_WORKSPACE
 
-          docker compose down --remove-orphans 2>/dev/null || true
-          docker rm -f aaptor-backend-api aaptor-model-service aaptor-model-frontend 2>/dev/null || true
-          docker network rm gisul_model_default 2>/dev/null || true
-
-          sleep 2
+          docker compose down --remove-orphans || true
 
           docker pull gisul/backend-api:latest
           docker pull gisul/model-service:latest
           docker pull gisul/model-frontend:latest
 
           docker compose up -d --remove-orphans --pull always
+
           docker compose ps
-        env:
-          DOCKER_CONFIG: /tmp/docker-config

@@ -11,7 +11,7 @@ services:
       - "7001:7001"
     volumes:
       - ~/.cache/huggingface:/root/.cache/huggingface
-      - /mnt/c/Users/adity/documents/gisul/gisul_model/assets:/app/assets
+      - ./assets:/app/assets
     runtime: nvidia
     environment:
       - NVIDIA_VISIBLE_DEVICES=all

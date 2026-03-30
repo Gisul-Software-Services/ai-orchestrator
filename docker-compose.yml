@@ -2,35 +2,41 @@ version: '3.8'
 
 services:
 
-  qwen-model:
+  model-service:
 
-    image: aaptor/qwen-api:latest
+    image: aaptor/model-service:latest
 
-    container_name: aaptor-qwen-api
+    container_name: aaptor-model-service
+
+    env_file:
+      - ./model-service/.env
 
     ports:
 
-      - '9000:9000'
+      - '7001:7001'
 
     volumes:
 
       - ~/.cache/huggingface:/root/.cache/huggingface
       - /mnt/c/Users/adity/documents/gisul/gisul_model/assets:/app/assets
 
-    deploy:
+    runtime: nvidia
+    environment:
+      - NVIDIA_VISIBLE_DEVICES=all
 
-      resources:
+    restart: unless-stopped
 
-        reservations:
+  backend-api:
+    image: aaptor/backend-api:latest
+    container_name: aaptor-backend-api
 
-          devices:
+    env_file:
+      - ./backend/api_gateway/.env
 
-            - driver: nvidia
-
-              count: all
-
-              capabilities: [gpu]
-
+    ports:
+      - '7000:7000'
+    depends_on:
+      - model-service
     restart: unless-stopped
 
   qwen-frontend:
@@ -39,17 +45,20 @@ services:
 
     container_name: aaptor-qwen-frontend
 
+    env_file:
+      - ./frontend/web/.env.local
+
     ports:
 
-      - '8501:8501'
+      - '7002:7002'
 
     environment:
 
-      - API_BASE=http://qwen-model:9000/api/v1
+      - API_BASE=http://backend-api:7000/api/v1
 
     depends_on:
 
-      - qwen-model
+      - backend-api
 
     restart: unless-stopped
 

@@ -2,11 +2,13 @@ version: '3.8'
 
 services:
   qwen-frontend:
-    build: .
+    build:
+      context: ..
+      dockerfile: frontend/Dockerfile
     image: aaptor/qwen-frontend:latest
     container_name: aaptor-qwen-frontend
     ports:
-      - "8501:8501"
+      - "7002:7002"
     environment:
-      - API_BASE=http://host.docker.internal:9000/api/v1
+      - NEXT_PUBLIC_API_BASE=http://host.docker.internal:7000/api/v1
     restart: unless-stopped

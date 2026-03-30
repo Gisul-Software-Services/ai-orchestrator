@@ -8,7 +8,10 @@ __pycache__/
 *.sqlite3
 *.db
 .env
+.env.*
 backend/.env
+backend/api_gateway/.env
+model-service/.env
 venv/
 env/
 ENV/
@@ -22,6 +25,7 @@ frontend/web/node_modules/
 out/
 build/
 dist/
+frontend/web/.env.local
 
 # ===============================
 # Logs
@@ -50,6 +54,7 @@ Thumbs.db
 *.pid
 *.seed
 *.pid.lock
+.dockerignore
 
 # ===============================
 # Temporary / Misc

@@ -46,7 +46,7 @@ class Settings(BaseSettings):
     )
 
     mongodb_uri: str = Field(
-        default="mongodb://localhost:27017",
+        default="",
         description="MongoDB connection URI",
         validation_alias=AliasChoices("MONGODB_URI", "mongodb_uri"),
     )
@@ -60,6 +60,14 @@ class Settings(BaseSettings):
         description="Read-only Aaptor database containing organizations collection",
         validation_alias=AliasChoices("ORGANIZATION_DB_NAME", "organization_db_name"),
     )
+
+    @field_validator("mongodb_uri", mode="after")
+    @classmethod
+    def _require_mongodb_uri(cls, v: str) -> str:
+        s = (v or "").strip()
+        if not s:
+            raise ValueError("MONGODB_URI is required (no localhost default).")
+        return s
 
     batch_size_max: int = Field(default=2, ge=1)
     batch_timeout: float = Field(default=0.5, gt=0)

@@ -1,24 +1,31 @@
-FROM python:3.11-slim
+FROM node:20-alpine AS deps
 
-WORKDIR /app
+WORKDIR /app/web
 
-# Install only what the frontend needs
-RUN pip install --no-cache-dir \
-    streamlit==1.36.0 \
-    requests==2.32.3 \
-    pandas==2.2.2 \
-    plotly==5.18.0 \
-    matplotlib==3.9.0
+COPY frontend/web/package.json frontend/web/package-lock.json ./
+RUN npm ci --no-audit --no-fund
 
-# Copy the frontend app
-COPY frontend_app.py /app/frontend_app.py
+FROM node:20-alpine AS builder
 
-# Expose Streamlit port
-EXPOSE 8501
+WORKDIR /app/web
 
-ENV API_BASE=http://localhost:9000/api/v1
+# Next.js inlined env for client-side fetches (via NEXT_PUBLIC_*).
+ENV NEXT_PUBLIC_API_BASE=http://backend-api:7000/api/v1
 
-CMD ["streamlit", "run", "frontend_app.py", \
-     "--server.port=8501", \
-     "--server.address=0.0.0.0", \
-     "--server.headless=true"]
+COPY --from=deps /app/web/node_modules ./node_modules
+COPY frontend/web ./
+
+RUN npm run build
+
+FROM node:20-alpine AS runner
+
+WORKDIR /app/web
+
+ENV NODE_ENV=production
+ENV NEXT_PUBLIC_API_BASE=http://backend-api:7000/api/v1
+
+COPY --from=builder /app/web ./
+
+EXPOSE 7002
+
+CMD ["npm", "run", "start", "--", "-p", "7002"]

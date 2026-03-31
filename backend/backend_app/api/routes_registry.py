@@ -1,5 +1,5 @@
 """
-Optional extra routers (generation/DSA) — the monolith in ``gisul.engine.core``
+Optional extra routers (generation/DSA) — the monolith in ``backend_app.engine.core``
 already registers all HTTP routes on ``app``. This module is a no-op placeholder.
 """
 

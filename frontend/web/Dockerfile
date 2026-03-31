@@ -9,7 +9,7 @@ FROM node:20-alpine AS builder
 
 WORKDIR /app/web
 
-ENV NEXT_PUBLIC_API_BASE=http://backend-api:7000/api/v1
+ENV NEXT_PUBLIC_API_BASE=http://backend-api:7000
 
 COPY --from=deps /app/web/node_modules ./node_modules
 COPY . .
@@ -21,7 +21,7 @@ FROM node:20-alpine AS runner
 WORKDIR /app/web
 
 ENV NODE_ENV=production
-ENV NEXT_PUBLIC_API_BASE=http://backend-api:7000/api/v1
+ENV NEXT_PUBLIC_API_BASE=http://backend-api:7000
 
 COPY --from=builder /app/web ./
 

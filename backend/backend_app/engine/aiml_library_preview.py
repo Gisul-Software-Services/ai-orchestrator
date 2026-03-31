@@ -21,7 +21,7 @@ logger = logging.getLogger(__name__)
 def load_catalog_entry(catalog_id: str) -> dict[str, Any] | None:
     """Return one AIML catalog row by ``id`` (e.g. ``openml-telco-churn``)."""
     try:
-        from gisul.core.settings import get_settings
+        from backend_app.core.settings import get_settings
     except ImportError:
         return None
     path = get_settings().assets_dir / "aiml-data" / "aiml_dataset_catalog.json"
@@ -60,7 +60,7 @@ def preview_catalog_by_id(catalog_id: str) -> tuple[list[dict[str, Any]] | None,
 
 def _preview_enabled() -> bool:
     try:
-        from gisul.core.settings import get_settings
+        from backend_app.core.settings import get_settings
 
         return bool(get_settings().aiml_library_data_preview)
     except Exception:
@@ -70,7 +70,7 @@ def _preview_enabled() -> bool:
 
 def _max_rows() -> int:
     try:
-        from gisul.core.settings import get_settings
+        from backend_app.core.settings import get_settings
 
         return max(1, min(500, int(get_settings().aiml_library_preview_max_rows)))
     except Exception:
@@ -83,7 +83,7 @@ def _max_rows() -> int:
 def _max_catalog_rows() -> int:
     """Skip preview if catalog ``size`` reports more rows than this (avoids huge OpenML pulls)."""
     try:
-        from gisul.core.settings import get_settings
+        from backend_app.core.settings import get_settings
 
         return max(1, int(get_settings().aiml_library_preview_max_catalog_rows))
     except Exception:

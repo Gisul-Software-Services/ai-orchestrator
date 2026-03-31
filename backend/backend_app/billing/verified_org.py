@@ -17,7 +17,7 @@ from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.requests import Request
 from starlette.responses import JSONResponse, Response
 
-from gisul.core.settings import get_settings
+from backend_app.core.settings import get_settings
 
 logger = logging.getLogger(__name__)
 

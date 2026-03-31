@@ -3,7 +3,7 @@ Production FastAPI entrypoint.
 
 Run from ``backend/``::
 
-    PYTHONPATH=. uvicorn gisul.main:app --host 0.0.0.0 --port 9000
+    PYTHONPATH=. uvicorn backend_app.main:app --host 0.0.0.0 --port 9000
 """
 
 from __future__ import annotations
@@ -16,16 +16,16 @@ from fastapi.responses import JSONResponse
 from starlette.exceptions import HTTPException as StarletteHTTPException
 from starlette.requests import Request
 
-from gisul.api.routers import system
-from gisul.api.routers.dashboard import router as dashboard_router
-from gisul.api.routers.dsa import dsa_router
-from gisul.api.routers.generation import generation_router
-from gisul.billing.org_context import OrgContextMiddleware
-from gisul.billing.verified_org import VerifiedOrgRequiredMiddleware
-from gisul.billing.router import router as billing_router
-from gisul.core.settings import get_settings
-from gisul.engine.core import app
-from gisul.middleware.request_log import RequestLogMiddleware
+from backend_app.api.routers import system
+from backend_app.api.routers.dashboard import router as dashboard_router
+from backend_app.api.routers.dsa import dsa_router
+from backend_app.api.routers.generation import generation_router
+from backend_app.billing.org_context import OrgContextMiddleware
+from backend_app.billing.verified_org import VerifiedOrgRequiredMiddleware
+from backend_app.billing.router import router as billing_router
+from backend_app.core.settings import get_settings
+from backend_app.engine.core import app
+from backend_app.middleware.request_log import RequestLogMiddleware
 
 logger = logging.getLogger(__name__)
 

@@ -1,6 +1,6 @@
-"""Pydantic models — re-exported from ``gisul.engine.core`` (single source of truth)."""
+"""Pydantic models — re-exported from ``backend_app.engine.core`` (single source of truth)."""
 
-from gisul.engine.core import (
+from backend_app.engine.core import (
     AIMLBatchResponse,
     AIMLGenerationRequest,
     AIMLGenerationResponse,

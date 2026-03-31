@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from motor.motor_asyncio import AsyncIOMotorClient
 
-from gisul.core.settings import get_settings
+from backend_app.core.settings import get_settings
 
 _client: AsyncIOMotorClient | None = None
 

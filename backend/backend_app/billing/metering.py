@@ -12,7 +12,7 @@ from typing import Any
 
 from starlette.requests import Request
 
-from gisul.billing.db import usage_logs
+from backend_app.billing.db import usage_logs
 
 current_token_counts: ContextVar[dict | None] = ContextVar(
     "current_token_counts", default=None
@@ -25,7 +25,7 @@ current_usage_meta: ContextVar[dict[str, Any] | None] = ContextVar(
 
 def bind_usage_meta_from_request(request: Request | None) -> dict[str, Any]:
     """Snapshot org + client metadata at enqueue time; copy propagates to asyncio tasks."""
-    from gisul.billing.usage_meta import snapshot_usage_meta
+    from backend_app.billing.usage_meta import snapshot_usage_meta
 
     meta = snapshot_usage_meta(request)
     current_usage_meta.set(meta)
@@ -111,8 +111,8 @@ async def emit_usage_after_job(
 ) -> None:
     """Read org snapshot + token counts; write usage log. Never raises."""
     try:
-        from gisul.billing.usage_meta import snapshot_usage_meta
-        from gisul.core.settings import get_settings
+        from backend_app.billing.usage_meta import snapshot_usage_meta
+        from backend_app.core.settings import get_settings
 
         counts = current_token_counts.get(None) or {}
         meta: dict[str, Any]

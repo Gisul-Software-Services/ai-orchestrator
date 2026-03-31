@@ -104,7 +104,7 @@ from collections import deque
 from concurrent.futures import ThreadPoolExecutor
 from starlette.requests import Request
 
-from gisul.billing.metering import bind_usage_meta_from_request, schedule_usage_emit
+from backend_app.billing.metering import bind_usage_meta_from_request, schedule_usage_emit
 import uuid
 import random
 import numpy as np
@@ -116,18 +116,18 @@ logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(
 logger = logging.getLogger(__name__)
 
 # ----------------------------------------------------------------------------
-# BATCH CONFIG (reads from settings — see gisul.core.settings)
+# BATCH CONFIG (reads from settings — see backend_app.core.settings)
 # ----------------------------------------------------------------------------
 
 
 def _batch_size_max() -> int:
-    from gisul.core.settings import get_settings
+    from backend_app.core.settings import get_settings
 
     return max(1, get_settings().batch_size_max)
 
 
 def _batch_timeout() -> float:
-    from gisul.core.settings import get_settings
+    from backend_app.core.settings import get_settings
 
     return float(get_settings().batch_timeout)
 
@@ -181,8 +181,8 @@ REQUEST_LOG = deque(maxlen=2000)
 # ----------------------------------------------------------------------------
 @asynccontextmanager
 async def _app_lifespan(_app: FastAPI):
-    from gisul.billing.db import ensure_indexes
-    from gisul.core.settings import get_settings
+    from backend_app.billing.db import ensure_indexes
+    from backend_app.core.settings import get_settings
 
     s = get_settings()
     for p in (s.dsa_enriched_path, s.aiml_catalog_path):
@@ -377,7 +377,7 @@ class AIMLBatchResponse(BaseModel):
 
 def load_model():
     global MODEL, TOKENIZER
-    from gisul.core.settings import get_settings
+    from backend_app.core.settings import get_settings
 
     s = get_settings()
     mn = s.model_name
@@ -2424,7 +2424,7 @@ async def generate_batch_with_qwen(
     try:
         input_tokens = int(meter_inputs["attention_mask"].sum(dim=-1).max().item())
         output_tokens = int(outputs.shape[1] - input_tokens)
-        from gisul.billing.metering import current_token_counts
+        from backend_app.billing.metering import current_token_counts
 
         current_token_counts.set(
             {
@@ -4155,19 +4155,19 @@ import os as _os
 import numpy as _np
 
 def _dsa_enriched_path() -> str:
-    from gisul.core.settings import get_settings
+    from backend_app.core.settings import get_settings
 
     return str(get_settings().dsa_enriched_path)
 
 
 def _dsa_faiss_path() -> str:
-    from gisul.core.settings import get_settings
+    from backend_app.core.settings import get_settings
 
     return str(get_settings().dsa_faiss_path)
 
 
 def _dsa_metadata_path() -> str:
-    from gisul.core.settings import get_settings
+    from backend_app.core.settings import get_settings
 
     return str(get_settings().dsa_metadata_path)
 
@@ -4444,19 +4444,19 @@ async def generate_dsa_question(body: DSAQuestionRequest, http_request: Request)
 
 # ── AIML catalog paths (from settings.assets_dir) ────────────────────────────
 def _aiml_catalog_path() -> str:
-    from gisul.core.settings import get_settings
+    from backend_app.core.settings import get_settings
 
     return str(get_settings().aiml_catalog_path)
 
 
 def _aiml_faiss_path() -> str:
-    from gisul.core.settings import get_settings
+    from backend_app.core.settings import get_settings
 
     return str(get_settings().aiml_faiss_path)
 
 
 def _aiml_metadata_path() -> str:
-    from gisul.core.settings import get_settings
+    from backend_app.core.settings import get_settings
 
     return str(get_settings().aiml_metadata_path)
 
@@ -5139,7 +5139,7 @@ async def aiml_library_catalog_preview(catalog_id: str):
     Return a small tabular preview for a catalog ``id`` when ``load_code`` uses OpenML
     (same logic as inline preview on generate-aiml-library). Does not call the LLM.
     """
-    from gisul.engine.aiml_library_preview import preview_catalog_by_id
+    from backend_app.engine.aiml_library_preview import preview_catalog_by_id
 
     rows, err = preview_catalog_by_id(catalog_id)
     if err == "not_found":
@@ -5228,7 +5228,7 @@ async def generate_aiml_library(body: AIMLLibraryRequest, http_request: Request)
                     try:
                         _in_tok = int(inputs_tok["attention_mask"].sum(dim=-1).max().item())
                         _out_tok = int(output.shape[1] - _in_tok)
-                        from gisul.billing.metering import current_token_counts
+                        from backend_app.billing.metering import current_token_counts
 
                         current_token_counts.set(
                             {
@@ -5288,7 +5288,7 @@ async def generate_aiml_library(body: AIMLLibraryRequest, http_request: Request)
                     }
 
                     try:
-                        from gisul.engine.aiml_library_preview import try_library_preview_rows
+                        from backend_app.engine.aiml_library_preview import try_library_preview_rows
 
                         _prev_rows = try_library_preview_rows(matched)
                         if _prev_rows:

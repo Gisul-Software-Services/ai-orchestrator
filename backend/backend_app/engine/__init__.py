@@ -4,8 +4,8 @@
 '''
 Engine: model, batching, prompts, and HTTP handler implementations.
 
-Primary module: ``gisul.engine.core`` (large). Import ``load_model`` from here for convenience.
+Primary module: ``backend_app.engine.core`` (large). Import ``load_model`` from here for convenience.
 '''
-from gisul.engine.core import load_model
+from backend_app.engine.core import load_model
 __all__ = [
     'load_model']

@@ -1,7 +1,7 @@
 """
-Generation routes are defined on ``gisul.engine.core:app`` (monolith).
+Generation routes are defined on ``backend_app.engine.core:app`` (monolith).
 
-Kept so imports like ``gisul.api.routers.generation.generation_router`` do not break.
+Kept so imports like ``backend_app.api.routers.generation.generation_router`` do not break.
 """
 
 from __future__ import annotations

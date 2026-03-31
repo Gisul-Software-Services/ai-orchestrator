@@ -10,7 +10,7 @@ from fastapi import Request
 from pydantic import BaseModel, Field
 
 # Reuse the existing heavy monolith app for all /api/v1 and /billing/v1 routes.
-from gisul.main import app as core_app
+from backend_app.main import app as core_app
 
 
 def _assets_dir() -> str:
@@ -27,7 +27,7 @@ def _startup_preload_indexes() -> None:
     try:
         os.environ.setdefault("ASSETS_DIR", _assets_dir())
 
-        from gisul.engine import core as eng
+        from backend_app.engine import core as eng
 
         # These are internal helpers in engine/core.py.
         if hasattr(eng, "_load_faiss_index"):

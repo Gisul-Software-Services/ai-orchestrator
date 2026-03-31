@@ -8,7 +8,7 @@ from typing import Any, Dict
 
 from fastapi import APIRouter
 
-from gisul.engine import core as eng
+from backend_app.engine import core as eng
 
 router = APIRouter(prefix="/api/v1", tags=["dashboard"])
 

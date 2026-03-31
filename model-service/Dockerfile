@@ -31,7 +31,7 @@ RUN pip3 install --no-cache-dir -r /app/requirements.txt \
 COPY model-service/model_service_entrypoint.py /app/model_service_entrypoint.py
 
 # Copy heavy monolith code (FastAPI app + RAG + FAISS) used by model-service.
-COPY backend/gisul /app/gisul
+COPY backend/backend_app /app/backend_app
 
 # Copy assets (FAISS indexes + enriched DSA json, etc.)
 COPY assets /app/assets

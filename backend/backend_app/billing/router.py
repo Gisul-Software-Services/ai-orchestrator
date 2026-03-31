@@ -6,7 +6,7 @@ from datetime import datetime, timezone
 
 from fastapi import APIRouter, HTTPException, Query
 
-from gisul.billing.db import api_keys, aaptor_orgs, usage_logs
+from backend_app.billing.db import api_keys, aaptor_orgs, usage_logs
 
 router = APIRouter(prefix="/billing/v1", tags=["billing"])
 

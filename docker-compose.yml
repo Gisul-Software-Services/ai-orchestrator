@@ -42,7 +42,7 @@ services:
     ports:
       - "7002:7002"
     environment:
-      - API_BASE=http://backend-api:7000/api/v1
+      - API_BASE=http://backend-api:7000
     depends_on:
       - backend-api
     restart: unless-stopped

@@ -1,4 +1,4 @@
-"""DSA routes are defined on ``gisul.engine.core:app`` (monolith)."""
+"""DSA routes are defined on ``backend_app.engine.core:app`` (monolith)."""
 
 from __future__ import annotations
 

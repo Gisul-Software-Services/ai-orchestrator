@@ -9,7 +9,9 @@ function normalizeApiBase(raw: string | undefined): string {
   if (!s || !/^https?:\/\//i.test(s)) {
     return DEFAULT_BASE;
   }
-  return s.replace(/\/$/, "");
+  // Some deployments mistakenly provide NEXT_PUBLIC_API_BASE including `/api/v1`.
+  // Frontend code already prefixes paths with `/api/v1/...`, so we must strip it here.
+  return s.replace(/\/$/, "").replace(/\/api\/v1$/i, "");
 }
 
 /**

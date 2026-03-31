@@ -32,6 +32,20 @@ def _filtered_headers(headers: Iterable[tuple[str, str]]) -> dict[str, str]:
     return out
 
 
+def _normalize_target_path(target_path: str) -> str:
+    """
+    Be tolerant to accidental double-prefixing from misconfigured clients.
+
+    Example:
+      /api/v1/api/v1/generate-aiml-library -> /api/v1/generate-aiml-library
+    """
+    # Collapse only the first duplicated occurrence.
+    target_path = target_path.replace(
+        "/api/v1/api/v1/", "/api/v1/", 1
+    ).replace("/api/v1/api/v1", "/api/v1", 1)
+    return target_path
+
+
 async def _proxy(request: Request, target_path: str) -> Response:
     url = f"{_model_service_url()}{target_path}"
     if request.url.query:
@@ -78,5 +92,6 @@ async def catch_all(request: Request, full_path: str) -> Response:
     Proxy all other paths (/health, /stats, /api/v1/*, /billing/v1/*, etc.)
     so the existing frontend can keep using the original routes.
     """
-    return await _proxy(request, f"/{full_path}")
+    target_path = _normalize_target_path(f"/{full_path}")
+    return await _proxy(request, target_path)
 

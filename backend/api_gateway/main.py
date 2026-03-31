@@ -43,6 +43,13 @@ def _normalize_target_path(target_path: str) -> str:
     target_path = target_path.replace(
         "/api/v1/api/v1/", "/api/v1/", 1
     ).replace("/api/v1/api/v1", "/api/v1", 1)
+
+    # Some deployments route billing admin endpoints as `/api/v1/billing/v1/...`
+    # even though the backend billing router is mounted at `/billing/v1`.
+    # Normalize this so the backend sees the canonical `/billing/v1/...` path.
+    target_path = target_path.replace(
+        "/api/v1/billing/v1/", "/billing/v1/", 1
+    ).replace("/api/v1/billing/v1", "/billing/v1", 1)
     return target_path
 
 

@@ -45,6 +45,12 @@ jobs:
   deploy:
     needs: build
     runs-on: self-hosted
+    env:
+      # Isolate Docker auth config for this job.
+      # On some self-hosted/WSL setups Docker is configured to use a credential helper
+      # that may not be available in the runner environment, causing:
+      # "error getting credentials - err: exit status 1".
+      DOCKER_CONFIG: ${{ runner.temp }}/.docker
 
     steps:
       - uses: actions/checkout@v4
@@ -70,6 +76,9 @@ jobs:
           docker pull gisul/model-service:latest
           docker pull gisul/model-frontend:latest
 
-          docker compose up -d --remove-orphans --pull always
+          # Images are already pulled above; avoid an extra pull during `compose up`.
+          # This prevents Docker from attempting to fetch credentials via a failing
+          # credential helper (seen in the logs).
+          docker compose up -d --remove-orphans
 
           docker compose ps

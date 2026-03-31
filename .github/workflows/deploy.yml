@@ -10,7 +10,6 @@ jobs:
 build:
 runs-on: ubuntu-latest
 
-```
 steps:
   - uses: actions/checkout@v4
 
@@ -42,13 +41,11 @@ steps:
       file: ./frontend/web/Dockerfile
       push: true
       tags: gisul/model-frontend:latest
-```
 
 deploy:
 needs: build
 runs-on: self-hosted
 
-```
 steps:
   - uses: actions/checkout@v4
 
@@ -76,4 +73,3 @@ steps:
       docker-compose up -d --remove-orphans
 
       docker-compose ps
-```

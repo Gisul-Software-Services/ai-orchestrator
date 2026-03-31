@@ -39,6 +39,15 @@ def _cors_is_wide_open(origins: list[str]) -> bool:
 @app.on_event("startup")
 async def _production_startup_checks() -> None:
     """Log once when ENVIRONMENT=production — does not alter request handling."""
+    # Always log effective org-gating config for debugging.
+    # This helps confirm the correct `.env` file was loaded when running uvicorn locally.
+    logger.info(
+        "Effective config: REQUIRE_VERIFIED_ORG_FOR_GENERATION=%s ENVIRONMENT=%s organization_db=%s billing_db=%s",
+        _s.require_verified_org_for_generation,
+        _s.environment,
+        _s.organization_db_name,
+        _s.billing_db_name,
+    )
     if _s.environment != "production":
         return
     if _cors_is_wide_open(_s.allowed_origins):
@@ -59,8 +68,8 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-app.add_middleware(OrgContextMiddleware)
 app.add_middleware(VerifiedOrgRequiredMiddleware)
+app.add_middleware(OrgContextMiddleware)
 app.add_middleware(RequestLogMiddleware)
 
 

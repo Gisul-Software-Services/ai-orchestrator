@@ -69,9 +69,22 @@ jobs:
           cd $GITHUB_WORKSPACE
           docker-compose down --remove-orphans || true
 
-          docker pull gisul/backend-api:latest
-          docker pull gisul/model-service:latest
-          docker pull gisul/model-frontend:latest
+          pull_with_retry () {
+            image="$1"
+            n=0
+            until [ $n -ge 5 ]
+            do
+              docker pull "$image" && return 0
+              n=$((n+1))
+              echo "Pull failed for $image (attempt $n/5). Retrying in 10s..."
+              sleep 10
+            done
+            return 1
+          }
+
+          pull_with_retry gisul/backend-api:latest
+          pull_with_retry gisul/model-service:latest
+          pull_with_retry gisul/model-frontend:latest
 
           docker-compose up -d --remove-orphans
           docker-compose ps

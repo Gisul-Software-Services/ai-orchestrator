@@ -15,7 +15,6 @@ runs-on: ubuntu-latest
 env:
 IMAGE_TAG: ${{ github.sha }}
 
-```
 steps:
   - uses: actions/checkout@v5
 
@@ -63,7 +62,6 @@ steps:
         gisul/model-frontend:latest
         gisul/model-frontend:${{ env.IMAGE_TAG }}
       provenance: false
-```
 
 deploy:
 needs: build
@@ -72,7 +70,6 @@ env:
 DOCKER_CONFIG: /tmp/.docker-ci
 IMAGE_TAG: ${{ github.sha }}
 
-```
 steps:
   - uses: actions/checkout@v5
 
@@ -127,4 +124,4 @@ steps:
 
       docker compose up -d --remove-orphans
       docker compose ps
-```
+

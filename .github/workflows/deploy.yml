@@ -48,7 +48,7 @@ steps:
         gisul/model-service:${{ env.IMAGE_TAG }}
       provenance: false
 
-  # ---------------- FRONTEND (FIXED) ----------------
+  # ---------------- FRONTEND ----------------
   - name: Build and push frontend
     uses: docker/build-push-action@v6
     with:
@@ -76,7 +76,7 @@ IMAGE_TAG: ${{ github.sha }}
 steps:
   - uses: actions/checkout@v5
 
-  - name: Prepare Docker config (no credential helpers)
+  - name: Prepare Docker config
     run: |
       mkdir -p "$DOCKER_CONFIG"
       cat > "$DOCKER_CONFIG/config.json" <<'EOF'
@@ -97,7 +97,6 @@ steps:
       echo "${{ secrets.MODEL_ENV }}" > model-service/.env
       echo "${{ secrets.FRONTEND_ENV }}" > frontend/web/.env.local
 
-      # still needed for backend / compose
       echo "ADMIN_TOKEN=${{ secrets.ADMIN_TOKEN }}" > .env
       echo "ADMIN_API_KEY=${{ secrets.ADMIN_API_KEY }}" >> .env
       echo "IMAGE_TAG=${IMAGE_TAG}" >> .env

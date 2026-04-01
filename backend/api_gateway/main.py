@@ -1,9 +1,11 @@
 from __future__ import annotations
 
 import asyncio
+import hashlib
 import logging
 import os
 import re
+import time
 from typing import Iterable
 
 import httpx
@@ -15,12 +17,28 @@ from pymongo import MongoClient
 app = FastAPI(title="Gisul Backend API (Lightweight)")
 logger = logging.getLogger(__name__)
 
+
+def _cors_allowed_origins() -> list[str]:
+    """
+    Comma-separated origins, or * for all (dev only).
+    Example: ALLOWED_ORIGINS=https://app.example.com,http://localhost:3000
+    """
+    raw = (os.environ.get("ALLOWED_ORIGINS") or "*").strip()
+    if raw == "*":
+        return ["*"]
+    return [o.strip() for o in raw.split(",") if o.strip()]
+
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=_cors_allowed_origins(),
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+_PROXY_TIMEOUT = httpx.Timeout(connect=5.0, read=180.0, write=10.0, pool=5.0)
+
+RATE_LIMIT_PER_ORG_PER_MINUTE = int(os.environ.get("RATE_LIMIT_PER_ORG", "20"))
 
 _ORG_GATED_POST_PATHS = frozenset(
     {
@@ -36,6 +54,9 @@ _ORG_GATED_POST_PATHS = frozenset(
     }
 )
 _mongo_client: MongoClient | None = None
+
+_rate_limit_lock = asyncio.Lock()
+_rate_counts: dict[tuple[str, int], int] = {}
 
 
 def _model_service_url() -> str:
@@ -71,6 +92,42 @@ def _get_mongo_client() -> MongoClient:
     return _mongo_client
 
 
+def _validate_api_key_sync(raw_key: str) -> tuple[bool, str]:
+    """Returns (is_valid, org_id_from_key). Uses billing DB api_keys collection."""
+    key_hash = hashlib.sha256(raw_key.encode()).hexdigest()
+    coll = _get_mongo_client()[_billing_db_name()]["api_keys"]
+    doc = coll.find_one(
+        {"key_hash": key_hash, "status": "active"},
+        projection={"org_id": 1},
+    )
+    if doc:
+        oid = (doc.get("org_id") or "").strip()
+        return True, oid
+    return False, ""
+
+
+async def _check_rate_limit(org_id: str) -> bool:
+    """
+    Per-org requests per clock minute. Returns True if allowed, False if over limit.
+    In-process only (single gateway replica); swap for Redis when scaling horizontally.
+    """
+    if not org_id:
+        return True
+    try:
+        window = int(time.time() // 60)
+        key = (org_id.strip(), window)
+        async with _rate_limit_lock:
+            _rate_counts[key] = _rate_counts.get(key, 0) + 1
+            count = _rate_counts[key]
+            if len(_rate_counts) > 10000:
+                for k in list(_rate_counts):
+                    if k[1] < window - 2:
+                        del _rate_counts[k]
+            return count <= RATE_LIMIT_PER_ORG_PER_MINUTE
+    except Exception:
+        return True
+
+
 def _org_exists_sync(org_id: str) -> bool:
     client = _get_mongo_client()
     db_names = [_organization_db_name()]
@@ -95,20 +152,51 @@ async def _verify_org_header_or_block(request: Request, target_path: str) -> Res
     if request.method != "POST" or target_path not in _ORG_GATED_POST_PATHS:
         return None
 
-    org_id = (request.headers.get("X-Org-Id") or "").strip()
-    if not org_id:
-        logger.info(
-            "org verification failed: missing X-Org-Id method=%s path=%s",
-            request.method,
-            target_path,
-        )
-        return JSONResponse(
-            status_code=401,
-            content={
-                "error": "ORG_HEADER_MISSING",
-                "detail": "X-Org-Id header is required for generation endpoints.",
-            },
-        )
+    api_key = (request.headers.get("X-Api-Key") or "").strip()
+    org_id = ""
+    if api_key:
+        if not _mongodb_uri():
+            logger.warning(
+                "api key validation unavailable: MONGODB_URI missing path=%s",
+                target_path,
+            )
+            return JSONResponse(
+                status_code=503,
+                content={
+                    "error": "ORG_VERIFICATION_UNAVAILABLE",
+                    "detail": "MONGODB_URI is not configured in api-gateway.",
+                },
+            )
+        try:
+            ok, org_from_key = await asyncio.to_thread(_validate_api_key_sync, api_key)
+        except Exception:
+            ok, org_from_key = False, ""
+        if not ok:
+            return JSONResponse(
+                status_code=401,
+                content={"error": "INVALID_API_KEY", "detail": "Invalid or inactive API key."},
+            )
+        org_id = (org_from_key or "").strip()
+        if not org_id:
+            return JSONResponse(
+                status_code=401,
+                content={"error": "INVALID_API_KEY", "detail": "API key has no org_id."},
+            )
+    else:
+        org_id = (request.headers.get("X-Org-Id") or "").strip()
+        if not org_id:
+            logger.info(
+                "org verification failed: missing X-Org-Id method=%s path=%s",
+                request.method,
+                target_path,
+            )
+            return JSONResponse(
+                status_code=401,
+                content={
+                    "error": "ORG_HEADER_MISSING",
+                    "detail": "X-Org-Id header is required for generation endpoints.",
+                },
+            )
 
     if not _mongodb_uri():
         logger.warning(
@@ -160,6 +248,7 @@ async def _verify_org_header_or_block(request: Request, target_path: str) -> Res
                 target_path,
                 org_id,
             )
+            request.state.verified_org_id = org_id
             return None
         logger.info(
             "org verification failed (fallback): method=%s path=%s org=%r status=%s",
@@ -182,6 +271,7 @@ async def _verify_org_header_or_block(request: Request, target_path: str) -> Res
             target_path,
             org_id,
         )
+        request.state.verified_org_id = org_id
         return None
     logger.info(
         "org verification failed method=%s path=%s org=%r",
@@ -242,9 +332,13 @@ async def _proxy(request: Request, target_path: str) -> Response:
         url = f"{url}?{request.url.query}"
 
     headers = _filtered_headers(request.headers.items())
+    verified_org = getattr(request.state, "verified_org_id", None)
+    if verified_org:
+        headers = dict(headers)
+        headers["X-Org-Id"] = str(verified_org).strip()
     body = await request.body()
 
-    async with httpx.AsyncClient(timeout=httpx.Timeout(600.0)) as client:
+    async with httpx.AsyncClient(timeout=_PROXY_TIMEOUT) as client:
         try:
             resp = await client.request(
                 method=request.method,
@@ -277,15 +371,6 @@ async def _proxy(request: Request, target_path: str) -> Response:
     )
 
 
-@app.post("/generate")
-async def generate(request: Request) -> Response:
-    """
-    Architecture endpoint: backend -> model-service.
-    Pass-through to model service /generate.
-    """
-    return await _proxy(request, "/generate")
-
-
 @app.api_route("/{full_path:path}", methods=["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"])
 async def catch_all(request: Request, full_path: str) -> Response:
     """
@@ -296,5 +381,23 @@ async def catch_all(request: Request, full_path: str) -> Response:
     blocked = await _verify_org_header_or_block(request, target_path)
     if blocked is not None:
         return blocked
+    if (
+        _require_verified_org_for_generation()
+        and request.method == "POST"
+        and target_path in _ORG_GATED_POST_PATHS
+    ):
+        org_for_rl = (getattr(request.state, "verified_org_id", None) or "").strip()
+        if org_for_rl and not await _check_rate_limit(org_for_rl):
+            return JSONResponse(
+                status_code=429,
+                content={
+                    "error": "RATE_LIMIT_EXCEEDED",
+                    "detail": (
+                        f"Org {org_for_rl} exceeded "
+                        f"{RATE_LIMIT_PER_ORG_PER_MINUTE} requests/minute"
+                    ),
+                },
+                headers={"Retry-After": "60"},
+            )
     return await _proxy(request, target_path)
 

@@ -18,28 +18,31 @@ jobs:
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
       - name: Build and push backend
-        uses: docker/build-push-action@v5
+        uses: docker/build-push-action@v6
         with:
           context: .
           file: ./backend/api_gateway/Dockerfile
           push: true
           tags: gisul/backend-api:latest
+          provenance: false
 
       - name: Build and push model-service
-        uses: docker/build-push-action@v5
+        uses: docker/build-push-action@v6
         with:
           context: .
           file: ./model-service/Dockerfile
           push: true
           tags: gisul/model-service:latest
+          provenance: false
 
       - name: Build and push frontend
-        uses: docker/build-push-action@v5
+        uses: docker/build-push-action@v6
         with:
           context: ./frontend/web
           file: ./frontend/web/Dockerfile
           push: true
           tags: gisul/model-frontend:latest
+          provenance: false
 
   deploy:
     needs: build

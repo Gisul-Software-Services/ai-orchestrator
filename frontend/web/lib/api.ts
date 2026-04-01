@@ -2,7 +2,7 @@
  * HTTP client for the FastAPI backend.
  */
 
-const DEFAULT_BASE = "http://127.0.0.1:9000";
+const DEFAULT_BASE = "http://127.0.0.1:7000";
 
 function normalizeApiBase(raw: string | undefined): string {
   const s = (raw ?? "").trim();
@@ -84,10 +84,18 @@ export async function apiPost<T>(
   });
 }
 
-export async function getGpuMetricsPlaceholder(): Promise<Record<string, unknown>> {
-  throw new Error("Not implemented on backend yet");
+export async function getGpuMetrics(): Promise<Record<string, unknown>> {
+  return apiGet<Record<string, unknown>>("/api/v1/metrics/gpu");
 }
 
-export async function getRequestHistoryPlaceholder(): Promise<unknown[]> {
-  throw new Error("Not implemented on backend yet");
+export async function getInferenceMetrics(): Promise<Record<string, unknown>> {
+  return apiGet<Record<string, unknown>>("/api/v1/metrics/inference");
+}
+
+export async function getMetricsOverview(): Promise<Record<string, unknown>> {
+  return apiGet<Record<string, unknown>>("/api/v1/metrics/overview");
+}
+
+export async function getQueueMetrics(): Promise<Record<string, unknown>> {
+  return apiGet<Record<string, unknown>>("/api/v1/metrics/queues");
 }

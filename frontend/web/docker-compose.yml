@@ -3,8 +3,8 @@ version: '3.8'
 services:
   qwen-frontend:
     build:
-      context: ..
-      dockerfile: frontend/Dockerfile
+      context: .
+      dockerfile: Dockerfile
     image: aaptor/qwen-frontend:latest
     container_name: aaptor-qwen-frontend
     ports:

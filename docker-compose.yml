@@ -16,10 +16,12 @@ services:
     environment:
       - NVIDIA_VISIBLE_DEVICES=all
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:7001/docs"]
+      test: ["CMD", "curl", "-f", "http://localhost:7001/health"]
       interval: 30s
       timeout: 5s
       retries: 3
+    networks:
+      - gisul-network
     restart: unless-stopped
 
   backend-api:
@@ -27,22 +29,56 @@ services:
     container_name: aaptor-backend-api
     env_file:
       - ./backend/api_gateway/.env
+    environment:
+      # CORS allowed browser origins calling the gateway.
+      # Defaults cover local dev when frontend runs on :7002.
+      - ALLOWED_ORIGINS=http://127.0.0.1:7002,http://localhost:7002,http://192.168.1.13:7002,https://model.aaptor.com
     ports:
       - "7000:7000"
     depends_on:
       model-service:
         condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:7000/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+    networks:
+      - gisul-network
     restart: unless-stopped
 
   frontend:
-    image: gisul/model-frontend:latest
-    container_name: aaptor-frontend
-    env_file:
-      - ./frontend/web/.env.local
+    build:
+      context: ./frontend/web
+      dockerfile: Dockerfile
+    container_name: gisul-frontend
     ports:
       - "7002:7002"
     environment:
-      - API_BASE=http://backend-api:7000
+      - NODE_ENV=production
+      - GATEWAY_BASE_URL=http://backend-api:7000
+      - ADMIN_TOKEN=${ADMIN_TOKEN}
+      - ADMIN_API_KEY=${ADMIN_API_KEY}
     depends_on:
-      - backend-api
+      backend-api:
+        condition: service_healthy
+    networks:
+      - gisul-network
     restart: unless-stopped
+    healthcheck:
+      # node:alpine image doesn't include wget/curl by default.
+      test:
+        [
+          "CMD",
+          "node",
+          "-e",
+          "require('http').get('http://127.0.0.1:7002/login',r=>process.exit(r.statusCode===200?0:1)).on('error',()=>process.exit(1))",
+        ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+networks:
+  gisul-network:
+    driver: bridge

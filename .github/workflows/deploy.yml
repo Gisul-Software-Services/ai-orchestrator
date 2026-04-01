@@ -12,8 +12,19 @@ env:
 jobs:
   deploy:
     runs-on: self-hosted
+    env:
+      DOCKER_CONFIG: ${{ runner.temp }}/.docker
     steps:
       - uses: actions/checkout@v4
+
+      - name: Prepare Docker config (no credential helpers)
+        run: |
+          mkdir -p "$DOCKER_CONFIG"
+          cat > "$DOCKER_CONFIG/config.json" <<'EOF'
+          {
+            "auths": {}
+          }
+          EOF
 
       - uses: docker/login-action@v4
         with:

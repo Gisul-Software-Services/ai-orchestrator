@@ -174,7 +174,7 @@ batch_locks = {endpoint: asyncio.Lock() for endpoint in batch_queues.keys()}
 pending_results = {}
 
 # Model Console: recent /api access rows (middleware)
-REQUEST_LOG = deque(maxlen=2000)
+REQUEST_LOG = deque(maxlen=1000)
 
 # ----------------------------------------------------------------------------
 # FASTAPI APP

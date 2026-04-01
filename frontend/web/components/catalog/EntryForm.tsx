@@ -206,14 +206,14 @@ export function EntryForm({
           </div>
           <Err msg={fieldError(errors, "difficulty")} />
         </div>
-        <div className="flex items-center justify-between rounded-lg border border-white/10 bg-black/20 px-3 py-2">
+        <div className="flex items-center justify-between rounded-lg border border-zinc-200 bg-zinc-50 px-3 py-2 dark:border-white/10 dark:bg-white/5">
           <div>
-            <div className="text-sm text-zinc-200">Direct load</div>
+            <div className="text-sm text-zinc-900 dark:text-zinc-200">Direct load</div>
             <div className="text-xs text-zinc-500">
               If enabled, dataset can be loaded without manual download.
             </div>
           </div>
-          <label className="flex items-center gap-2 text-sm text-zinc-200">
+          <label className="flex items-center gap-2 text-sm text-zinc-900 dark:text-zinc-200">
             <input
               type="checkbox"
               checked={value.direct_load}

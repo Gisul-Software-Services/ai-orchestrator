@@ -95,7 +95,7 @@ export function CodeBlock({
   }, [code, language]);
 
   return (
-    <pre className="overflow-x-auto rounded-lg border border-zinc-800/90 bg-black/40 p-3.5 font-mono text-[0.8125rem] leading-relaxed shadow-inner">
+    <pre className="overflow-x-auto rounded-lg border border-zinc-200 bg-zinc-50 p-3.5 font-mono text-[0.8125rem] leading-relaxed text-zinc-800 shadow-inner dark:border-zinc-800/90 dark:bg-zinc-950/70 dark:text-zinc-200">
       <code className={`block whitespace-pre language-${language}`}>{nodes}</code>
     </pre>
   );

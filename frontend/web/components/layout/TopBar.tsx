@@ -19,18 +19,18 @@ export function TopBar() {
   const title = titleFromPath(pathname);
 
   return (
-    <header className="sticky top-0 z-20 flex items-center justify-between border-b border-zinc-800 bg-zinc-950/80 px-6 py-3 backdrop-blur sm:px-8">
+    <header className="sticky top-0 z-20 flex items-center justify-between border-b border-zinc-200 bg-white/80 px-6 py-3 backdrop-blur sm:px-8 dark:border-zinc-800 dark:bg-zinc-950/80">
       <div>
-        <h1 className="text-lg font-semibold tracking-tight text-zinc-50">
+        <h1 className="text-lg font-semibold tracking-tight text-zinc-900 dark:text-zinc-50">
           {title}
         </h1>
-        <p className="text-xs text-zinc-400">
+        <p className="text-xs text-zinc-500 dark:text-zinc-400">
           Internal admin console — authenticated staff only
         </p>
       </div>
       <div className="flex items-center gap-3">
-        <span className="hidden text-xs text-zinc-400 sm:inline">
-          Signed in as <span className="font-medium text-zinc-100">admin</span>
+        <span className="hidden text-xs text-zinc-500 sm:inline dark:text-zinc-400">
+          Signed in as <span className="font-medium text-zinc-800 dark:text-zinc-100">admin</span>
         </span>
         <ThemeToggle />
       </div>

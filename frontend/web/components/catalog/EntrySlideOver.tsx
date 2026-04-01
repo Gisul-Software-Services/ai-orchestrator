@@ -121,8 +121,8 @@ export function EntrySlideOver({
 
   return (
     <div className="fixed inset-0 z-50">
-      <div className="absolute inset-0 bg-black/60" onClick={onClose} />
-      <div className="absolute right-0 top-0 h-full w-full max-w-[720px] overflow-auto border-l border-white/10 bg-zinc-950 p-5">
+      <div className="absolute inset-0 bg-zinc-950/40 dark:bg-zinc-950/60" onClick={onClose} />
+      <div className="absolute right-0 top-0 h-full w-full max-w-[720px] overflow-auto border-l border-zinc-200 bg-white p-5 dark:border-white/10 dark:bg-zinc-950">
         <div className="flex items-center justify-between gap-2">
           <div>
             <div className="text-lg font-semibold">{title}</div>

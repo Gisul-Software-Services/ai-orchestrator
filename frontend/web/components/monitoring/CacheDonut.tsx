@@ -100,17 +100,17 @@ export function CacheDonut({ snapshot }: { snapshot: InferenceSnapshot | null })
       </div>
 
       <div className="mt-2 grid grid-cols-2 gap-3 text-sm">
-        <div className="rounded-lg border border-white/10 bg-black/20 p-3">
+        <div className="rounded-lg border border-zinc-200 bg-zinc-50 p-3 dark:border-white/10 dark:bg-white/5">
           <div className="text-xs text-zinc-500">Hits</div>
           <div className="mt-1 font-semibold tabular-nums">{localZeroed ? 0 : hits}</div>
         </div>
-        <div className="rounded-lg border border-white/10 bg-black/20 p-3">
+        <div className="rounded-lg border border-zinc-200 bg-zinc-50 p-3 dark:border-white/10 dark:bg-white/5">
           <div className="text-xs text-zinc-500">Misses</div>
           <div className="mt-1 font-semibold tabular-nums">
             {localZeroed ? 0 : misses}
           </div>
         </div>
-        <div className="col-span-2 rounded-lg border border-white/10 bg-black/20 p-3">
+        <div className="col-span-2 rounded-lg border border-zinc-200 bg-zinc-50 p-3 dark:border-white/10 dark:bg-white/5">
           <div className="text-xs text-zinc-500">Cache size (entries)</div>
           <div className="mt-1 font-semibold tabular-nums">—</div>
         </div>

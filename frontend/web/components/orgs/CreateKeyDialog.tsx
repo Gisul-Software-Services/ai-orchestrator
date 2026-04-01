@@ -39,8 +39,8 @@ export function CreateKeyDialog({ orgId }: { orgId: string }) {
         Create New Key
       </Button>
       {open ? (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4">
-          <div className="w-full max-w-lg rounded-xl border border-white/10 bg-zinc-950 p-5">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-zinc-950/40 p-4 dark:bg-zinc-950/70">
+          <div className="w-full max-w-lg rounded-xl border border-zinc-200 bg-white p-5 dark:border-white/10 dark:bg-zinc-950">
             <div className="text-lg font-semibold">Create API Key</div>
             {rawKey ? (
               <div className="mt-4 space-y-4">
@@ -51,7 +51,7 @@ export function CreateKeyDialog({ orgId }: { orgId: string }) {
                   <input
                     readOnly
                     value={rawKey}
-                    className="h-10 w-full rounded-md border border-white/10 bg-zinc-900 px-3 font-mono text-sm text-zinc-200"
+                    className="h-10 w-full rounded-md border border-zinc-200 bg-zinc-50 px-3 font-mono text-sm text-zinc-900 dark:border-white/10 dark:bg-zinc-900 dark:text-zinc-200"
                   />
                   <Button
                     variant="outline"
@@ -61,7 +61,7 @@ export function CreateKeyDialog({ orgId }: { orgId: string }) {
                     Copy
                   </Button>
                 </div>
-                <label className="flex items-start gap-2 text-sm text-zinc-300">
+                <label className="flex items-start gap-2 text-sm text-zinc-700 dark:text-zinc-300">
                   <input
                     type="checkbox"
                     checked={ack}
@@ -83,7 +83,7 @@ export function CreateKeyDialog({ orgId }: { orgId: string }) {
                   <input
                     value={label}
                     onChange={(e) => setLabel(e.target.value)}
-                    className="h-10 w-full rounded-md border border-white/10 bg-zinc-900 px-3 text-sm text-zinc-200"
+                    className="h-10 w-full rounded-md border border-zinc-200 bg-zinc-50 px-3 text-sm text-zinc-900 dark:border-white/10 dark:bg-zinc-900 dark:text-zinc-200"
                     placeholder="default"
                   />
                 </div>

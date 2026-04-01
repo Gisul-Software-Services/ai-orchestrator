@@ -76,7 +76,7 @@ function RawJsonSection({ data }: { data: unknown }) {
               {copied ? "Copied" : "Copy all"}
             </button>
           </div>
-          <pre className="max-h-64 overflow-auto rounded-md border border-zinc-800/80 bg-black/30 p-3 text-xs text-zinc-500">
+          <pre className="max-h-64 overflow-auto rounded-md border border-zinc-200 bg-zinc-50 p-3 text-xs text-zinc-600 dark:border-zinc-800/80 dark:bg-zinc-950/60 dark:text-zinc-500">
             {display || "(no matching lines)"}
           </pre>
         </div>

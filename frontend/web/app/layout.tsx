@@ -22,13 +22,13 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body
-        className={`${inter.className} min-h-screen antialiased bg-zinc-950 text-zinc-50`}
+        className={`${inter.className} min-h-screen antialiased bg-white text-zinc-900 dark:bg-zinc-950 dark:text-zinc-50`}
       >
         <ThemeProvider>
           <QueryProvider>
             <div className="flex min-h-screen">
               <Sidebar />
-              <main className="relative flex-1 overflow-auto bg-zinc-950 bg-[radial-gradient(ellipse_90%_60%_at_50%_-15%,rgba(34,211,238,0.09),transparent_55%),radial-gradient(ellipse_60%_40%_at_100%_50%,rgba(167,139,250,0.06),transparent_50%)]">
+              <main className="relative flex-1 overflow-auto bg-white dark:bg-zinc-950">
                 <TopBar />
                 <div className="mx-auto w-full max-w-[1400px] px-6 pb-8 pt-4 sm:px-8 sm:pt-6">
                   {children}

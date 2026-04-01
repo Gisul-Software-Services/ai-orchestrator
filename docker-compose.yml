@@ -3,9 +3,6 @@ version: '3.8'
 services:
 
   model-service:
-    build:
-      context: .
-      dockerfile: ./model-service/Dockerfile
     image: gisul/model-service:latest
     container_name: aaptor-model-service
     env_file:
@@ -34,6 +31,8 @@ services:
     env_file:
       - ./backend/api_gateway/.env
     environment:
+      # CORS allowed browser origins calling the gateway.
+      # Defaults cover local dev when frontend runs on :7002.
       - ALLOWED_ORIGINS=http://127.0.0.1:7002,http://localhost:7002,http://192.168.1.13:7002,https://model.aaptor.com
     ports:
       - "7000:7000"
@@ -67,6 +66,7 @@ services:
       - gisul-network
     restart: unless-stopped
     healthcheck:
+      # node:alpine image doesn't include wget/curl by default.
       test:
         [
           "CMD",

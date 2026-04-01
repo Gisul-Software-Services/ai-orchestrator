@@ -13,7 +13,7 @@ jobs:
   deploy:
     runs-on: self-hosted
     env:
-      DOCKER_CONFIG: ${{ runner.temp }}/.docker
+      DOCKER_CONFIG: /tmp/.docker-ci
     steps:
       - uses: actions/checkout@v4
 

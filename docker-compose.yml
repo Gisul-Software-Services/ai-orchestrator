@@ -18,8 +18,9 @@ services:
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:7001/health"]
       interval: 30s
-      timeout: 5s
-      retries: 3
+      timeout: 10s
+      retries: 5
+      start_period: 120s
     networks:
       - gisul-network
     restart: unless-stopped
@@ -49,9 +50,7 @@ services:
     restart: unless-stopped
 
   frontend:
-    build:
-      context: ./frontend/web
-      dockerfile: Dockerfile
+    image: gisul/model-frontend:latest
     container_name: gisul-frontend
     ports:
       - "7002:7002"

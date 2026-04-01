@@ -3,9 +3,6 @@ version: '3.8'
 services:
 
   model-service:
-    build:
-      context: .
-      dockerfile: ./model-service/Dockerfile
     image: gisul/model-service:latest
     container_name: aaptor-model-service
     env_file:

@@ -1,5 +1,7 @@
 # syntax=docker/dockerfile:1.6
-FROM nvidia/cuda:12.1.1-runtime-ubuntu22.04
+# Use a PyTorch CUDA runtime base so CI doesn't download massive torch+nvidia wheels.
+# This drastically reduces disk usage on GitHub-hosted runners.
+FROM pytorch/pytorch:2.10.0-cuda12.1-cudnn9-runtime
 
 WORKDIR /app
 
@@ -7,14 +9,11 @@ ENV HF_HOME=/root/.cache/huggingface
 ENV PYTORCH_CUDA_ALLOC_CONF=max_split_size_mb:128
 
 ENV DEBIAN_FRONTEND=noninteractive
-ENV CUDA_HOME=/usr/local/cuda
-ENV LD_LIBRARY_PATH=/usr/local/cuda/lib64:$LD_LIBRARY_PATH
-ENV BNB_CUDA_VERSION=121
 
 # System deps
 RUN apt-get update --fix-missing \
   && apt-get install -y --no-install-recommends \
-     python3 python3-pip curl \
+     curl \
   && apt-get clean \
   && rm -rf /var/lib/apt/lists/*
 
@@ -27,7 +26,7 @@ COPY model-service/requirements-gpu.txt /app/requirements-gpu.txt
 # Install dependencies in ONE pass (avoids duplicate torch/vLLM downloads).
 # Use BuildKit pip cache to reduce bandwidth + disk churn in CI.
 RUN --mount=type=cache,target=/root/.cache/pip \
-  pip3 install --extra-index-url https://download.pytorch.org/whl/cu121 -r /app/requirements-gpu.txt \
+  pip3 install -r /app/requirements-gpu.txt \
   && rm -rf /root/.cache/pip
 
 # Copy model-service entrypoint (required by spec)

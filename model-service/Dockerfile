@@ -23,16 +23,14 @@ ENV PATH="/opt/venv/bin:$PATH"
 
 # Ensure venv pip tooling is up to date
 RUN --mount=type=cache,target=/root/.cache/pip \
-  python -m pip install --upgrade pip setuptools wheel \
-  && rm -rf /root/.cache/pip
+  python -m pip install --upgrade pip setuptools wheel
 
 COPY model-service/requirements.txt /app/requirements.txt
 COPY model-service/requirements-gpu.txt /app/requirements-gpu.txt
 # Install dependencies in ONE pass (avoids duplicate torch/vLLM downloads).
 # Use BuildKit pip cache to reduce bandwidth + disk churn in CI.
 RUN --mount=type=cache,target=/root/.cache/pip \
-  python -m pip install -r /app/requirements-gpu.txt \
-  && rm -rf /root/.cache/pip
+  python -m pip install -r /app/requirements-gpu.txt
 
 # Copy model-service entrypoint (required by spec)
 COPY model-service/model_service_entrypoint.py /app/model_service_entrypoint.py

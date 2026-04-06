@@ -10,7 +10,7 @@ __pycache__/
 .env
 .env.*
 backend/.env
-backend/api_gateway/.env
+backend/gateway/.env
 model-service/.env
 venv/
 env/

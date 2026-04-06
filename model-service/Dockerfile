@@ -20,6 +20,8 @@ RUN apt-get update --fix-missing \
 # Install pip + ML deps
 RUN pip3 install --no-cache-dir --upgrade pip \
   && rm -rf /root/.cache/pip
+RUN pip3 install --no-cache-dir vllm --extra-index-url https://download.pytorch.org/whl/cu121 \
+  && rm -rf /root/.cache/pip
 
 COPY model-service/requirements.txt /app/requirements.txt
 COPY model-service/requirements-gpu.txt /app/requirements-gpu.txt
@@ -30,8 +32,8 @@ RUN pip3 install --no-cache-dir -r /app/requirements.txt \
 # Copy model-service entrypoint (required by spec)
 COPY model-service/model_service_entrypoint.py /app/model_service_entrypoint.py
 
-# Copy heavy monolith code (FastAPI app + RAG + FAISS) used by model-service.
-COPY backend/backend_app /app/backend_app
+# Copy model app code.
+COPY backend/model_app /app/model_app
 
 # Copy assets (FAISS indexes + enriched DSA json, etc.)
 COPY assets /app/assets
@@ -43,5 +45,5 @@ ENV ASSETS_DIR=/app/assets
 HEALTHCHECK --interval=30s --timeout=5s --start-period=30s --retries=3 \
   CMD curl --fail http://localhost:7001/docs || exit 1
 
-CMD ["uvicorn", "model_service_entrypoint:core_app", "--host", "0.0.0.0", "--port", "7001"]
+CMD ["uvicorn", "model_service_entrypoint:app", "--host", "0.0.0.0", "--port", "7001"]
 

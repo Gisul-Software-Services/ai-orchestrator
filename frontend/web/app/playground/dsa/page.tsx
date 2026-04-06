@@ -18,6 +18,10 @@ import {
 
 type Difficulty = "Easy" | "Medium" | "Hard";
 
+function hasJobId(v: unknown): v is { job_id: string } {
+  return !!v && typeof v === "object" && typeof (v as { job_id?: unknown }).job_id === "string";
+}
+
 export default function DsaPlaygroundPage() {
   const [topic, setTopic] = useState("");
   const [difficulty, setDifficulty] = useState<Difficulty>("Medium");
@@ -56,11 +60,22 @@ export default function DsaPlaygroundPage() {
       setSubmitting(true);
       setT0(Date.now());
       try {
-        const resp = await adminPostJson<{ job_id: string }>(
+        const resp = await adminPostJson<unknown>(
           "/api/admin/generate/dsa",
           payload
         );
-        setJobId(resp.job_id);
+        if (hasJobId(resp)) {
+          setJobId(resp.job_id);
+        } else {
+          const ts = Date.now();
+          const dur = t0 ? (ts - t0) / 1000 : 0;
+          setResult(resp);
+          setResultTs(ts);
+          setSubmitting(false);
+          setJobId(null);
+          setHistory((h) => [{ timestamp: ts, endpoint: "DSA", payload, result: resp, durationSeconds: dur }, ...h].slice(0, 10));
+          setSelectedIdx(0);
+        }
       } catch (err) {
         setError((err as Error).message || "Failed to submit");
         setJobId(null);

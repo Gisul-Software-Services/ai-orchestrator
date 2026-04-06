@@ -14,7 +14,6 @@ jobs:
     runs-on: ubuntu-latest
     env:
       IMAGE_TAG: ${{ github.sha }}
-
     steps:
       - uses: actions/checkout@v5
 
@@ -23,19 +22,17 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      # ---------------- BACKEND ----------------
       - name: Build and push backend
         uses: docker/build-push-action@v6
         with:
-          context: .
-          file: ./backend/api_gateway/Dockerfile
+          context: ./backend/gateway
+          file: ./backend/gateway/Dockerfile
           push: true
           tags: |
             gisul/backend-api:latest
             gisul/backend-api:${{ env.IMAGE_TAG }}
           provenance: false
 
-      # ---------------- MODEL SERVICE ----------------
       - name: Build and push model-service
         uses: docker/build-push-action@v6
         with:
@@ -47,17 +44,12 @@ jobs:
             gisul/model-service:${{ env.IMAGE_TAG }}
           provenance: false
 
-      # ---------------- FRONTEND ----------------
       - name: Build and push frontend
         uses: docker/build-push-action@v6
         with:
           context: ./frontend/web
           file: ./frontend/web/Dockerfile
           push: true
-          no-cache: true
-          build-args: |
-            ADMIN_TOKEN=${{ secrets.ADMIN_TOKEN }}
-            ADMIN_API_KEY=${{ secrets.ADMIN_API_KEY }}
           tags: |
             gisul/model-frontend:latest
             gisul/model-frontend:${{ env.IMAGE_TAG }}
@@ -69,11 +61,10 @@ jobs:
     env:
       DOCKER_CONFIG: /tmp/.docker-ci
       IMAGE_TAG: ${{ github.sha }}
-
     steps:
       - uses: actions/checkout@v5
 
-      - name: Prepare Docker config
+      - name: Prepare Docker config (no credential helpers)
         run: |
           mkdir -p "$DOCKER_CONFIG"
           cat > "$DOCKER_CONFIG/config.json" <<'EOF'
@@ -87,18 +78,15 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      # ---------------- ENV INJECTION ----------------
       - name: Inject env files
         run: |
-          echo "${{ secrets.BACKEND_ENV }}" > backend/api_gateway/.env
+          echo "${{ secrets.BACKEND_ENV }}" > backend/gateway/.env
           echo "${{ secrets.MODEL_ENV }}" > model-service/.env
           echo "${{ secrets.FRONTEND_ENV }}" > frontend/web/.env.local
-
           echo "ADMIN_TOKEN=${{ secrets.ADMIN_TOKEN }}" > .env
           echo "ADMIN_API_KEY=${{ secrets.ADMIN_API_KEY }}" >> .env
           echo "IMAGE_TAG=${IMAGE_TAG}" >> .env
 
-      # ---------------- DEPLOY ----------------
       - name: Deploy containers
         run: |
           cd $GITHUB_WORKSPACE

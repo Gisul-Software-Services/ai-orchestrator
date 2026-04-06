@@ -1,8 +1,23 @@
-version: '3.8'
-
 services:
 
+  redis:
+    image: redis:7-alpine
+    container_name: gisul-redis
+    ports:
+      - "6379:6379"
+    networks:
+      - gisul-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
   model-service:
+    build:
+      context: .
+      dockerfile: model-service/Dockerfile
     image: gisul/model-service:${IMAGE_TAG:-latest}
     container_name: aaptor-model-service
     env_file:
@@ -15,6 +30,10 @@ services:
     runtime: nvidia
     environment:
       - NVIDIA_VISIBLE_DEVICES=all
+      - REDIS_URL=${REDIS_URL:-redis://redis:6379}
+    depends_on:
+      redis:
+        condition: service_healthy
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:7001/health"]
       interval: 30s
@@ -26,18 +45,22 @@ services:
     restart: unless-stopped
 
   backend-api:
+    build:
+      context: ./backend/gateway
+      dockerfile: Dockerfile
     image: gisul/backend-api:${IMAGE_TAG:-latest}
     container_name: aaptor-backend-api
     env_file:
-      - ./backend/api_gateway/.env
-    environment:
-      - ALLOWED_ORIGINS=http://localhost:7002,http://127.0.0.1:7002,https://model.aaptor.com
+      - ./backend/gateway/.env
     ports:
       - "7000:7000"
     depends_on:
-      - model-service
+      model-service:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
     healthcheck:
-      test: ["CMD-SHELL", "curl -f http://localhost:7000/health || exit 1"]
+      test: ["CMD", "curl", "-f", "http://localhost:7000/health"]
       interval: 15s
       timeout: 5s
       retries: 3
@@ -54,16 +77,22 @@ services:
     environment:
       - NODE_ENV=production
       - GATEWAY_BASE_URL=http://backend-api:7000
-      # ⚠️ OPTIONAL: remove if using build-time injection
-      # - ADMIN_TOKEN=${ADMIN_TOKEN}
-      # - ADMIN_API_KEY=${ADMIN_API_KEY}
+      - ADMIN_TOKEN=${ADMIN_TOKEN}
+      - ADMIN_API_KEY=${ADMIN_API_KEY}
     depends_on:
-      - backend-api
+      backend-api:
+        condition: service_healthy
     networks:
       - gisul-network
     restart: unless-stopped
     healthcheck:
-      test: ["CMD-SHELL", "wget -qO- http://localhost:7002/login || exit 1"]
+      test:
+        [
+          "CMD",
+          "node",
+          "-e",
+          "require('http').get('http://127.0.0.1:7002/login',r=>process.exit(r.statusCode===200?0:1)).on('error',()=>process.exit(1))",
+        ]
       interval: 30s
       timeout: 10s
       retries: 3

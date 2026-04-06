@@ -13,12 +13,17 @@ ENV DEBIAN_FRONTEND=noninteractive
 # System deps
 RUN apt-get update --fix-missing \
   && apt-get install -y --no-install-recommends \
-     curl \
+     curl python3-venv \
   && apt-get clean \
   && rm -rf /var/lib/apt/lists/*
 
-# Install pip + ML deps
-RUN pip3 install --no-cache-dir --upgrade pip \
+# Create an isolated venv to avoid PEP 668 "externally managed" errors.
+RUN python3 -m venv /opt/venv
+ENV PATH="/opt/venv/bin:$PATH"
+
+# Ensure venv pip tooling is up to date
+RUN --mount=type=cache,target=/root/.cache/pip \
+  python -m pip install --upgrade pip setuptools wheel \
   && rm -rf /root/.cache/pip
 
 COPY model-service/requirements.txt /app/requirements.txt
@@ -26,7 +31,7 @@ COPY model-service/requirements-gpu.txt /app/requirements-gpu.txt
 # Install dependencies in ONE pass (avoids duplicate torch/vLLM downloads).
 # Use BuildKit pip cache to reduce bandwidth + disk churn in CI.
 RUN --mount=type=cache,target=/root/.cache/pip \
-  pip3 install -r /app/requirements-gpu.txt \
+  python -m pip install -r /app/requirements-gpu.txt \
   && rm -rf /root/.cache/pip
 
 # Copy model-service entrypoint (required by spec)

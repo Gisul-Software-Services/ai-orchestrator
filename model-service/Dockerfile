@@ -20,13 +20,13 @@ RUN apt-get update --fix-missing \
 # Install pip + ML deps
 RUN pip3 install --no-cache-dir --upgrade pip \
   && rm -rf /root/.cache/pip
-RUN pip3 install --no-cache-dir vllm --extra-index-url https://download.pytorch.org/whl/cu121 \
-  && rm -rf /root/.cache/pip
 
 COPY model-service/requirements.txt /app/requirements.txt
 COPY model-service/requirements-gpu.txt /app/requirements-gpu.txt
-RUN pip3 install --no-cache-dir -r /app/requirements.txt \
-  && pip3 install --no-cache-dir -r /app/requirements-gpu.txt \
+# Install dependencies in ONE pass (avoids duplicate torch/vLLM downloads).
+# Use BuildKit pip cache to reduce bandwidth + disk churn in CI.
+RUN --mount=type=cache,target=/root/.cache/pip \
+  pip3 install --extra-index-url https://download.pytorch.org/whl/cu121 -r /app/requirements-gpu.txt \
   && rm -rf /root/.cache/pip
 
 # Copy model-service entrypoint (required by spec)

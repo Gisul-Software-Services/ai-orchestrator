@@ -1,7 +1,9 @@
+--extra-index-url https://download.pytorch.org/whl/cu128
+
 pydantic-settings==2.13.1
 uvicorn[standard]==0.32.1
 
-torch==2.10.0
+torch==2.10.0+cu128
 vllm==0.17.1
 mistral-common==1.11.0
 

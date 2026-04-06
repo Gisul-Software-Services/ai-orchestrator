@@ -1,3 +1,4 @@
+# syntax=docker/dockerfile:1.6
 FROM nvidia/cuda:12.1.1-runtime-ubuntu22.04
 
 WORKDIR /app

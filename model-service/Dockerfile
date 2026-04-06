@@ -1,7 +1,7 @@
 # syntax=docker/dockerfile:1.6
 # Use a PyTorch CUDA runtime base so CI doesn't download massive torch+nvidia wheels.
 # This drastically reduces disk usage on GitHub-hosted runners.
-FROM pytorch/pytorch:2.10.0-cuda12.1-cudnn9-runtime
+FROM pytorch/pytorch:2.10.0-cuda12.8-cudnn9-runtime
 
 WORKDIR /app
 

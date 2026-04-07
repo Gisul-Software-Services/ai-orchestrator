@@ -18,6 +18,16 @@ jobs:
     steps:
       - uses: actions/checkout@v5
 
+      - name: Verify model-service Dockerfile matches repo (no stale rm pip cache)
+        run: |
+          echo "Commit: ${GITHUB_SHA}"
+          sed -n '1,40p' model-service/Dockerfile
+          if grep -q 'rm -rf /root/.cache/pip' model-service/Dockerfile; then
+            echo "ERROR: model-service/Dockerfile still contains rm on pip cache mount — remove it."
+            exit 1
+          fi
+          echo "OK: Dockerfile has no rm -rf /root/.cache/pip"
+
       - name: Free disk space before Docker build
         run: |
           # Free GitHub-hosted runner disk (torch/vLLM + CUDA wheels are huge)

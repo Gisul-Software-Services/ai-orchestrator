@@ -1,2 +1,1 @@
-"""Route compatibility package for the modular monolith migration."""
-
+"""FastAPI route modules for the model app."""

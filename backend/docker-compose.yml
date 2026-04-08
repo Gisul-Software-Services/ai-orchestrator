@@ -2,9 +2,13 @@ version: '3.8'
 
 services:
   qwen-model:
-    build: .
+    build:
+      context: ..
+      dockerfile: backend/Dockerfile
     image: qwen-api
     container_name: qwen-model
+    env_file:
+      - ./.env
     ports:
       - "9000:9000"
     volumes:

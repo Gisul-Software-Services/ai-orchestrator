@@ -1,16 +1,10 @@
-"""
-Generation routes are defined on ``backend.model_app.engine.core:app`` (monolith).
-
-Kept so imports like ``backend.model_app.api.routers.generation.generation_router`` do not break.
-"""
+"""Compatibility wrapper for generation routes."""
 
 from __future__ import annotations
 
-from fastapi import APIRouter
-
-generation_router = APIRouter(prefix="/api/v1", tags=["generation"])
+from backend.model_app.api.routes.generation import generation_router
 
 
-def attach_generation_handlers(router: APIRouter) -> None:
-    """No-op — handlers live on the monolith app."""
+def attach_generation_handlers(router):
     del router
+

@@ -1,4 +1,4 @@
-"""Append request access records to ``backend.model_app.engine.core.REQUEST_LOG``."""
+"""Append request access records to the in-memory request log."""
 
 from __future__ import annotations
 
@@ -11,7 +11,7 @@ from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.requests import Request
 from starlette.responses import Response
 
-from backend.model_app.engine import core as engine_core
+from backend.model_app.core.state import REQUEST_LOG
 
 
 class RequestLogMiddleware(BaseHTTPMiddleware):
@@ -55,7 +55,7 @@ class RequestLogMiddleware(BaseHTTPMiddleware):
             "cache_hit": bool(cache_hit),
             "job_id": job_id,
         }
-        engine_core.REQUEST_LOG.appendleft(record)
-        while len(engine_core.REQUEST_LOG) > 1000:
-            engine_core.REQUEST_LOG.pop()
+        REQUEST_LOG.appendleft(record)
+        while len(REQUEST_LOG) > 1000:
+            REQUEST_LOG.pop()
         return response

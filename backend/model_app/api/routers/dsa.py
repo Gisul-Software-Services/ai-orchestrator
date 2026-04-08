@@ -1,11 +1,10 @@
-"""DSA routes are defined on ``backend.model_app.engine.core:app`` (monolith)."""
+"""Compatibility wrapper for DSA routes."""
 
 from __future__ import annotations
 
-from fastapi import APIRouter
-
-dsa_router = APIRouter(prefix="/api/v1", tags=["dsa"])
+from backend.model_app.api.routes.dsa import dsa_router
 
 
-def attach_dsa_handlers(router: APIRouter) -> None:
+def attach_dsa_handlers(router):
     del router
+

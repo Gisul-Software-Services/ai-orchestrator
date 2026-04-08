@@ -77,12 +77,11 @@ def _load_catalog() -> List[Dict[str, Any]]:
 
 def _save_catalog(catalog: List[Dict[str, Any]]) -> None:
     _atomic_write_json(get_settings().aiml_catalog_path, catalog)
-    # Invalidate monolith cache if present (best effort).
+    # Invalidate in-memory catalog cache (best effort).
     try:
-        from backend.model_app.engine import core as eng
+        from backend.model_app.services import aiml as aiml_service
 
-        if hasattr(eng, "_aiml_catalog_cache"):
-            eng._aiml_catalog_cache = None  # type: ignore[attr-defined]
+        aiml_service._aiml_catalog_cache = None
     except Exception:
         pass
 

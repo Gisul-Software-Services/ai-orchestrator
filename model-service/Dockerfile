@@ -35,8 +35,9 @@ RUN --mount=type=cache,target=/root/.cache/pip \
 # Copy model-service entrypoint (required by spec)
 COPY model-service/model_service_entrypoint.py /app/model_service_entrypoint.py
 
-# Copy model app code.
-COPY backend/model_app /app/model_app
+# Copy the full backend package so absolute imports like
+# ``backend.model_app.*`` resolve the same way they do locally.
+COPY backend /app/backend
 
 # Copy assets (FAISS indexes + enriched DSA json, etc.)
 COPY assets /app/assets

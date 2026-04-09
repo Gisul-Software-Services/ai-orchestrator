@@ -209,6 +209,19 @@ async def _create_key(org_id: str, label: str) -> dict:
             "created_at": now,
         }
     )
+    # Option 1: store the raw key on the org document so Aaptor can attach it
+    # when calling the generation gateway without storing it elsewhere.
+    # NOTE: this is less secure than storing only hashes; protect DB access accordingly.
+    await aaptor_orgs().update_one(
+        {"orgId": org_id},
+        {
+            "$set": {
+                "gisul_api_key": raw_key,
+                "gisul_api_key_label": label,
+                "gisul_api_key_created_at": now,
+            }
+        },
+    )
     return {
         "org_id": org_id,
         "api_key": raw_key,

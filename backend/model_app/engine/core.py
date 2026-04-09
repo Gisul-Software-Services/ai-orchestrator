@@ -3990,6 +3990,23 @@ def _parse_input_output(input_output: list) -> tuple:
     """
     all_cases = []
 
+    def _is_invalid_expected_output(value) -> bool:
+        # Generated judge data must be deterministic expected values, never
+        # runtime failures from a buggy reference implementation.
+        if isinstance(value, str):
+            txt = value.strip().lower()
+            if not txt:
+                return True
+            bad_markers = (
+                "error:",
+                "exception",
+                "traceback",
+                "list assignment index out of range",
+                "index out of range",
+            )
+            return any(m in txt for m in bad_markers)
+        return False
+
     for item in input_output:
         raw_input  = (item.get("input") or "").strip()
         raw_output = (item.get("output") or "").strip()
@@ -4002,6 +4019,9 @@ def _parse_input_output(input_output: list) -> tuple:
             expected_output = json.loads(raw_output)
         except Exception:
             expected_output = raw_output
+
+        if _is_invalid_expected_output(expected_output):
+            continue
 
         case_type = _classify_testcase(raw_input)
 
@@ -4043,6 +4063,33 @@ def _parse_input_output(input_output: list) -> tuple:
         })
 
     return public_testcases, hidden_testcases
+
+
+def _sanitize_dsa_testcases(cases: list) -> list:
+    """Drop malformed/non-deterministic testcases before API response."""
+    out = []
+    for tc in cases or []:
+        if not isinstance(tc, dict):
+            continue
+        raw_in = str(tc.get("input_raw", "")).strip()
+        expected = tc.get("expected_output")
+        if not raw_in:
+            continue
+        if isinstance(expected, str):
+            txt = expected.strip().lower()
+            if (not txt) or any(
+                marker in txt
+                for marker in (
+                    "error:",
+                    "exception",
+                    "traceback",
+                    "list assignment index out of range",
+                    "index out of range",
+                )
+            ):
+                continue
+        out.append(tc)
+    return out
 
 
 def _build_starter_prompt(problem: dict) -> str:
@@ -4471,13 +4518,16 @@ async def generate_dsa_question(body: DSAQuestionRequest, http_request: Request)
         status="success",
     )
 
+    public_testcases = _sanitize_dsa_testcases(selected.get("public_testcases", []))
+    hidden_testcases = _sanitize_dsa_testcases(selected.get("hidden_testcases", []))
+
     return {
         "original_title":     selected.get("title", selected.get("task_id", "")),
         "title":              reworded.get("title", selected.get("title", "")),
         "description":        reworded.get("description", selected.get("problem_description", "")),
         "function_signature": selected.get("function_signature", {}),
-        "public_testcases":   selected.get("public_testcases", []),
-        "hidden_testcases":   selected.get("hidden_testcases", []),
+        "public_testcases":   public_testcases,
+        "hidden_testcases":   hidden_testcases,
         "starter_code":       filtered_starter_code,
         "difficulty":         selected.get("difficulty", request.difficulty),
         "tags":               selected.get("tags", selected.get("topics", [])),

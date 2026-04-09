@@ -98,9 +98,24 @@ export function DsaView({ p, index }: { p: Record<string, unknown>; index: numbe
         </div>
       )}
       {hidden.length > 0 && (
-        <p className="mb-3 rounded-md border border-blue-900/50 bg-blue-950/20 p-2 text-sm text-blue-200">
-          🔒 {hidden.length} hidden test case(s)
-        </p>
+        <div className="mb-2">
+          <Collapsible title={`🔒 Hidden test cases (${hidden.length})`}>
+            <ul className="space-y-2 text-sm text-zinc-300">
+              {hidden.map((tc, i) => {
+                if (!isRecord(tc)) return null;
+                return (
+                  <li key={i} className="border-b border-zinc-800/80 pb-2">
+                    <span className="text-zinc-500">In:</span>{" "}
+                    <code>{String(tc.input_raw ?? "")}</code>
+                    <br />
+                    <span className="text-zinc-500">Expected:</span>{" "}
+                    <code>{String(tc.expected_output ?? "")}</code>
+                  </li>
+                );
+              })}
+            </ul>
+          </Collapsible>
+        </div>
       )}
       {isRecord(starter) && Object.keys(starter).length > 0 && (
         <div className="mb-2">

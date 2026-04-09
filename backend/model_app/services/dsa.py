@@ -24,6 +24,19 @@ _UNSUPPORTED_RESTRICTED_PATH_PHRASES = (
     "distance does not exceed",
 )
 
+_INVALID_EXPECTED_OUTPUT_PATTERNS = (
+    re.compile(r"^\s*error\s*:", re.IGNORECASE),
+    re.compile(r"^\s*exception\b", re.IGNORECASE),
+    re.compile(r"^\s*traceback\b", re.IGNORECASE),
+)
+
+_INVALID_EXPECTED_OUTPUT_SUBSTRINGS = (
+    "list assignment index out of range",
+    "index out of range",
+    "out of bounds",
+    "execution timed out",
+)
+
 
 def _problem_title(problem: dict) -> str:
     return str(problem.get("title", problem.get("task_id", "")) or "")
@@ -222,6 +235,35 @@ def _normalize_graph_testcases(problem: dict, cases: list[dict], *, label: str) 
     return normalized
 
 
+def _is_invalid_expected_output(value: Any) -> bool:
+    if isinstance(value, str):
+        text = value.strip()
+        if not text:
+            return True
+        if any(pattern.search(text) for pattern in _INVALID_EXPECTED_OUTPUT_PATTERNS):
+            return True
+        lowered = text.lower()
+        if any(token in lowered for token in _INVALID_EXPECTED_OUTPUT_SUBSTRINGS):
+            return True
+    return False
+
+
+def _sanitize_expected_output_testcases(problem: dict, cases: list[dict], *, label: str) -> list[dict]:
+    sanitized: list[dict] = []
+    for case in cases:
+        expected_output = case.get("expected_output")
+        if _is_invalid_expected_output(expected_output):
+            logger.warning(
+                "Dropping testcase with invalid expected_output for '%s' (%s): %r",
+                _problem_title(problem),
+                label,
+                expected_output,
+            )
+            continue
+        sanitized.append(case)
+    return sanitized
+
+
 def _normalize_function_signature(
     problem: dict,
     signature: dict,
@@ -300,11 +342,13 @@ def _normalize_dsa_payload(problem: dict, payload: dict, *, validate_reworded_te
         list(normalized.get("public_testcases", []) or []),
         label="public",
     )
+    public_testcases = _sanitize_expected_output_testcases(problem, public_testcases, label="public")
     hidden_testcases = _normalize_graph_testcases(
         problem,
         list(normalized.get("hidden_testcases", []) or []),
         label="hidden",
     )
+    hidden_testcases = _sanitize_expected_output_testcases(problem, hidden_testcases, label="hidden")
     if not public_testcases and not hidden_testcases:
         raise HTTPException(status_code=500, detail="No valid DSA testcases remain after validation")
 
@@ -371,6 +415,10 @@ def _parse_input_output(input_output: list) -> tuple:
             expected_output = json.loads(raw_output)
         except Exception:
             expected_output = raw_output
+
+        if _is_invalid_expected_output(expected_output):
+            logger.warning("Skipping dataset testcase with invalid expected_output: %r", expected_output)
+            continue
 
         case_type = _classify_testcase(raw_input)
         all_cases.append(

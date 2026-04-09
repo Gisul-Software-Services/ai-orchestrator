@@ -1,11 +1,14 @@
 from __future__ import annotations
 
+import ast
 import json
 import logging
 import os as _os
 import random
+import re
 import time
 import uuid
+from typing import Any
 
 import numpy as _np
 from fastapi import HTTPException
@@ -16,9 +19,313 @@ from backend.model_app.services.generation import extract_json
 from backend.model_app.services.model import _llm_chat_single
 
 
-def _classify_testcase(raw_input: str) -> str:
-    import re
+_UNSUPPORTED_RESTRICTED_PATH_PHRASES = (
+    "threshold",
+    "distance does not exceed",
+)
 
+
+def _problem_title(problem: dict) -> str:
+    return str(problem.get("title", problem.get("task_id", "")) or "")
+
+
+def _problem_description(problem: dict) -> str:
+    return str(problem.get("problem_description", problem.get("description", "")) or "")
+
+
+def _is_restricted_path_problem(problem: dict) -> bool:
+    title_lower = _problem_title(problem).lower()
+    desc_lower = _problem_description(problem).lower()
+    return "restricted path" in title_lower or (
+        "restricted path" in desc_lower and "distancetolastnode" in desc_lower
+    )
+
+
+def _restricted_path_guardrails() -> str:
+    return """
+RESTRICTED-PATH DEFINITION LOCK:
+- A restricted path is one where distToN(zi) > distToN(zi+1) for all adjacent nodes.
+- Preserve the original shortest-distance-to-node-n semantics.
+- Do NOT replace this with threshold-based wording or any "distance does not exceed" rule.
+- Preserve the core semantics of the original title/problem.
+"""
+
+
+def _get_python_starter_code(problem: dict) -> str:
+    starter_code_langs = problem.get("starter_code_langs")
+    if isinstance(starter_code_langs, dict):
+        py = starter_code_langs.get("python")
+        if isinstance(py, str) and py.strip():
+            return py
+
+    starter_code = problem.get("starter_code")
+    if isinstance(starter_code, dict):
+        py = starter_code.get("python")
+        if isinstance(py, str) and py.strip():
+            return py
+    elif isinstance(starter_code, str) and starter_code.strip():
+        return starter_code
+
+    return ""
+
+
+def _extract_signature_from_python_starter(problem: dict) -> dict | None:
+    code = _get_python_starter_code(problem)
+    if not code:
+        return None
+
+    match = re.search(
+        r"def\s+(?P<name>\w+)\s*\((?P<params>[^)]*)\)\s*(?:->\s*(?P<ret>[^:\n]+))?:",
+        code,
+    )
+    if not match:
+        return None
+
+    raw_params = [p.strip() for p in match.group("params").split(",") if p.strip()]
+    parameters: list[dict[str, str]] = []
+    for raw_param in raw_params:
+        if raw_param == "self":
+            continue
+        if ":" in raw_param:
+            name, raw_type = raw_param.split(":", 1)
+            parameters.append(
+                {
+                    "name": name.strip(),
+                    "type": raw_type.strip(),
+                }
+            )
+        else:
+            parameters.append({"name": raw_param.strip(), "type": "Any"})
+
+    return {
+        "name": match.group("name").strip(),
+        "parameters": parameters,
+        "return_type": (match.group("ret") or "Any").strip(),
+    }
+
+
+def _split_top_level_commas(text: str) -> list[str]:
+    parts: list[str] = []
+    buf: list[str] = []
+    depth = 0
+    in_string = False
+    string_char = ""
+    i = 0
+
+    while i < len(text):
+        ch = text[i]
+        if in_string:
+            buf.append(ch)
+            if ch == "\\" and i + 1 < len(text):
+                i += 1
+                buf.append(text[i])
+            elif ch == string_char:
+                in_string = False
+        else:
+            if ch in ("'", '"'):
+                in_string = True
+                string_char = ch
+                buf.append(ch)
+            elif ch in "([{":
+                depth += 1
+                buf.append(ch)
+            elif ch in ")]}":
+                depth = max(0, depth - 1)
+                buf.append(ch)
+            elif ch == "," and depth == 0:
+                part = "".join(buf).strip()
+                if part:
+                    parts.append(part)
+                buf = []
+            else:
+                buf.append(ch)
+        i += 1
+
+    tail = "".join(buf).strip()
+    if tail:
+        parts.append(tail)
+    return parts
+
+
+def _parse_named_input_raw(raw_input: str) -> dict[str, Any] | None:
+    if "=" not in raw_input:
+        return None
+
+    parsed: dict[str, Any] = {}
+    for part in _split_top_level_commas(raw_input):
+        if "=" not in part:
+            return None
+        name, raw_value = part.split("=", 1)
+        key = name.strip()
+        value_text = raw_value.strip()
+        if not key:
+            return None
+        try:
+            parsed[key] = ast.literal_eval(value_text)
+        except Exception:
+            return None
+    return parsed or None
+
+
+def _looks_like_edge_list(value: Any) -> bool:
+    if not isinstance(value, list) or not value:
+        return False
+    for edge in value:
+        if not isinstance(edge, (list, tuple)) or len(edge) not in (2, 3):
+            return False
+        if any(not isinstance(x, int) for x in edge):
+            return False
+    return True
+
+
+def _allows_self_loops(problem: dict) -> bool:
+    desc_lower = _problem_description(problem).lower()
+    if "ui != vi" in desc_lower or "no self-loop" in desc_lower or "no self loop" in desc_lower:
+        return False
+    return "self-loop" in desc_lower or "self loop" in desc_lower
+
+
+def _normalize_graph_testcases(problem: dict, cases: list[dict], *, label: str) -> list[dict]:
+    allow_self_loops = _allows_self_loops(problem)
+    normalized: list[dict] = []
+
+    for case in cases:
+        raw_input = str(case.get("input_raw", "") or "").strip()
+        parsed = _parse_named_input_raw(raw_input)
+        if not parsed:
+            normalized.append(case)
+            continue
+
+        edges = parsed.get("edges")
+        if not _looks_like_edge_list(edges):
+            normalized.append(case)
+            continue
+
+        malformed = False
+        has_self_loop = False
+        for edge in edges:
+            if len(edge) not in (2, 3):
+                malformed = True
+                break
+            if edge[0] == edge[1]:
+                has_self_loop = True
+
+        if malformed:
+            logger.warning("Dropping malformed %s testcase for '%s': %s", label, _problem_title(problem), raw_input)
+            continue
+        if has_self_loop and not allow_self_loops:
+            logger.warning("Dropping self-loop %s testcase for '%s': %s", label, _problem_title(problem), raw_input)
+            continue
+
+        normalized.append(case)
+
+    return normalized
+
+
+def _normalize_function_signature(
+    problem: dict,
+    signature: dict,
+    public_testcases: list[dict],
+    hidden_testcases: list[dict],
+) -> dict:
+    normalized = dict(signature or {})
+    starter_signature = _extract_signature_from_python_starter(problem)
+    if starter_signature:
+        normalized = starter_signature
+
+    entry_point = str(problem.get("entry_point", "") or "")
+    fn_hint = entry_point.split(".")[-1].strip() if entry_point else ""
+    if fn_hint:
+        normalized["name"] = fn_hint
+
+    parameters = normalized.get("parameters")
+    if not isinstance(parameters, list):
+        normalized["parameters"] = []
+        parameters = normalized["parameters"]
+
+    parsed_case = None
+    for case in public_testcases + hidden_testcases:
+        parsed_case = _parse_named_input_raw(str(case.get("input_raw", "") or ""))
+        if parsed_case:
+            break
+
+    if parsed_case and parameters:
+        order = list(parsed_case.keys())
+        param_map = {
+            str(param.get("name")): param
+            for param in parameters
+            if isinstance(param, dict) and param.get("name")
+        }
+        if param_map and set(order) == set(param_map.keys()):
+            normalized["parameters"] = [param_map[name] for name in order]
+
+    return normalized
+
+
+def _normalize_reworded_problem(problem: dict, reworded: dict) -> dict:
+    original_title = _problem_title(problem)
+    original_description = _problem_description(problem)
+
+    title = str(reworded.get("title", "") or "").strip() or original_title
+    description = str(reworded.get("description", "") or "").strip() or original_description
+
+    if _is_restricted_path_problem(problem):
+        description_lower = description.lower()
+        unsupported_phrase = next(
+            (phrase for phrase in _UNSUPPORTED_RESTRICTED_PATH_PHRASES if phrase in description_lower),
+            None,
+        )
+        has_definition_lock = (
+            "restricted path" in description_lower
+            and (
+                "distancetolastnode(zi) > distancetolastnode(zi+1)" in description_lower
+                or "distton(zi) > distton(zi+1)" in description_lower
+            )
+        )
+        if unsupported_phrase or not has_definition_lock:
+            logger.warning(
+                "Restricted-path reword failed validation for '%s'; falling back to source wording",
+                original_title,
+            )
+            title = original_title
+            description = original_description
+
+    return {"title": title, "description": description}
+
+
+def _normalize_dsa_payload(problem: dict, payload: dict, *, validate_reworded_text: bool) -> dict:
+    normalized = dict(payload)
+    public_testcases = _normalize_graph_testcases(
+        problem,
+        list(normalized.get("public_testcases", []) or []),
+        label="public",
+    )
+    hidden_testcases = _normalize_graph_testcases(
+        problem,
+        list(normalized.get("hidden_testcases", []) or []),
+        label="hidden",
+    )
+    if not public_testcases and not hidden_testcases:
+        raise HTTPException(status_code=500, detail="No valid DSA testcases remain after validation")
+
+    normalized["public_testcases"] = public_testcases
+    normalized["hidden_testcases"] = hidden_testcases
+
+    if "function_signature" in normalized:
+        normalized["function_signature"] = _normalize_function_signature(
+            problem,
+            normalized.get("function_signature", {}) or {},
+            public_testcases,
+            hidden_testcases,
+        )
+
+    if validate_reworded_text:
+        normalized.update(_normalize_reworded_problem(problem, normalized))
+
+    return normalized
+
+
+def _classify_testcase(raw_input: str) -> str:
     numbers = re.findall(r"-?\d+", raw_input)
     if numbers:
         vals = [int(n) for n in numbers]
@@ -158,8 +465,11 @@ Generate ONLY this JSON (no extra text):
 
 RULES:
 1. function_signature: use EXACT function name from entry point above.
+   Extract parameter names + types from the Python starter code in the EXACT same order.
 2. starter_code: use EXACT function name for ALL 10 languages.
-3. Return ONLY valid JSON. No markdown, no explanation.
+3. If the canonical parameters are (n, edges), keep them in that exact order everywhere.
+   Do NOT swap to (edges, n).
+4. Return ONLY valid JSON. No markdown, no explanation.
 
 Generate now:"""
 
@@ -272,6 +582,7 @@ def _keyword_filter(problems: list, difficulty: str, topic: str, concepts: list)
 def _build_reword_prompt(problem: dict) -> str:
     title = problem.get("title", problem.get("task_id", ""))
     description = problem.get("problem_description", problem.get("description", ""))[:600]
+    extra_rules = _restricted_path_guardrails() if _is_restricted_path_problem(problem) else ""
 
     return f"""You are a technical problem designer.
 
@@ -281,6 +592,9 @@ STRICT RULES:
 - Keep the EXACT same algorithmic logic and solution approach.
 - Keep the EXACT same input/output format.
 - Change ONLY the real-world story/context.
+- Preserve the core semantics of the original title/problem.
+- Do NOT introduce any new constraints unless they are explicitly present in the source.
+{extra_rules}
 - Return ONLY valid JSON.
 
 ORIGINAL TITLE: {title}
@@ -345,11 +659,21 @@ async def enrich_dsa(http_request, problem: dict):
         if field not in result:
             raise HTTPException(status_code=500, detail=f"Missing field: {field}")
 
+    normalized_payload = _normalize_dsa_payload(
+        {**problem, "starter_code": result.get("starter_code", {})},
+        {
+            "function_signature": result["function_signature"],
+            "public_testcases": public_testcases,
+            "hidden_testcases": hidden_testcases,
+        },
+        validate_reworded_text=False,
+    )
+
     logger.info(
         "Enrichment done: %s | public=%s, hidden=%s, langs=%s",
         title,
-        len(public_testcases),
-        len(hidden_testcases),
+        len(normalized_payload["public_testcases"]),
+        len(normalized_payload["hidden_testcases"]),
         len(result.get("starter_code", {})),
     )
 
@@ -365,9 +689,9 @@ async def enrich_dsa(http_request, problem: dict):
     return {
         "pipeline": "dataset_driven",
         "test_case_source": "leetcode_dataset",
-        "function_signature": result["function_signature"],
-        "public_testcases": public_testcases,
-        "hidden_testcases": hidden_testcases,
+        "function_signature": normalized_payload["function_signature"],
+        "public_testcases": normalized_payload["public_testcases"],
+        "hidden_testcases": normalized_payload["hidden_testcases"],
         "starter_code": result["starter_code"],
     }
 
@@ -459,13 +783,25 @@ async def generate_dsa_question(body, http_request):
         status="success",
     )
 
+    response_payload = _normalize_dsa_payload(
+        selected,
+        {
+            "title": reworded.get("title", selected.get("title", "")),
+            "description": reworded.get("description", selected.get("problem_description", "")),
+            "function_signature": selected.get("function_signature", {}),
+            "public_testcases": selected.get("public_testcases", []),
+            "hidden_testcases": selected.get("hidden_testcases", []),
+        },
+        validate_reworded_text=True,
+    )
+
     return {
         "original_title": selected.get("title", selected.get("task_id", "")),
-        "title": reworded.get("title", selected.get("title", "")),
-        "description": reworded.get("description", selected.get("problem_description", "")),
-        "function_signature": selected.get("function_signature", {}),
-        "public_testcases": selected.get("public_testcases", []),
-        "hidden_testcases": selected.get("hidden_testcases", []),
+        "title": response_payload["title"],
+        "description": response_payload["description"],
+        "function_signature": response_payload["function_signature"],
+        "public_testcases": response_payload["public_testcases"],
+        "hidden_testcases": response_payload["hidden_testcases"],
         "starter_code": filtered_starter_code,
         "difficulty": selected.get("difficulty", request.difficulty),
         "tags": selected.get("tags", selected.get("topics", [])),

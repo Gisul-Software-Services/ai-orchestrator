@@ -1,9 +1,17 @@
 from __future__ import annotations
 
 
+def _is_restricted_path_problem(problem: dict) -> bool:
+    title = str(problem.get("title", problem.get("task_id", "")) or "").lower()
+    description = str(problem.get("problem_description", problem.get("description", "")) or "").lower()
+    return "restricted path" in title or (
+        "restricted path" in description and "distancetolastnode" in description
+    )
+
+
 def _build_starter_prompt(problem: dict) -> str:
     """
-    Minimal prompt — only asks Qwen for function_signature + starter_code.
+    Minimal prompt: only asks Qwen for function_signature + starter_code.
     Test cases already extracted from dataset.
     """
     title = problem.get("title", "")
@@ -57,11 +65,14 @@ Generate ONLY this JSON (no extra text):
 RULES:
 1. function_signature: use EXACT function name from entry point above.
    Extract parameter names + types from the Python starter code.
+   Preserve the EXACT same parameter order as the Python starter code.
    Use Python types: List[int], List[str], str, int, bool, float,
    Optional[TreeNode], Optional[ListNode], List[List[int]], etc.
 2. starter_code: use EXACT function name for ALL 10 languages.
    Match parameter types correctly for each language.
-3. Return ONLY valid JSON. No markdown, no explanation.
+3. If the canonical parameters are (n, edges), keep them in that exact order everywhere.
+   Do NOT swap to (edges, n).
+4. Return ONLY valid JSON. No markdown, no explanation.
 
 Generate now:"""
 
@@ -69,6 +80,14 @@ Generate now:"""
 def _build_reword_prompt(problem: dict) -> str:
     title = problem.get("title", problem.get("task_id", ""))
     description = problem.get("problem_description", problem.get("description", ""))[:600]
+
+    restricted_path_rules = ""
+    if _is_restricted_path_problem(problem):
+        restricted_path_rules = """
+- Definition lock for this problem:
+  "A restricted path is one where distToN(zi) > distToN(zi+1) for all adjacent nodes."
+- Do not introduce new constraints such as thresholds unless explicitly present in the source.
+"""
 
     return f"""You are a technical problem designer.
 
@@ -80,7 +99,9 @@ STRICT RULES:
 - Change ONLY the real-world story/context (names, domain, scenario wording).
 - The reworded version must be clearly different from the original wording.
 - Do NOT simplify or make the problem easier or harder.
-- Return ONLY valid JSON — no markdown, no extra text.
+- Preserve the core semantics of the original title/problem.
+{restricted_path_rules}
+- Return ONLY valid JSON - no markdown, no extra text.
 
 ORIGINAL TITLE: {title}
 
@@ -90,7 +111,7 @@ ORIGINAL DESCRIPTION:
 Return this exact JSON structure:
 {{
   "title": "Reworded title here",
-  "description": "Reworded full problem description here — same logic, different story/context"
+  "description": "Reworded full problem description here - same logic, different story/context"
 }}
 
 Generate now:"""
@@ -133,11 +154,11 @@ Return ONLY this JSON:
 {{
   "problemStatement": "Detailed real-world problem description grounded in the actual dataset domain",
   "tasks": [
-    "Task 1: Data Loading and Exploration — load the {dataset.get('name', '')} dataset using the provided load_code. Examine the actual columns specific to this dataset. Display shape, first 10 rows, check missing values per column, data types, and summary statistics relevant to {topic}.",
-    "Task 2: Data Preprocessing — handle any missing values in this specific dataset. Identify which features from {dataset.get('name', '')} need encoding or normalization. Apply appropriate transformations. Split 80/20 train/test.",
-    "Task 3: Exploratory Data Analysis — visualize the {dataset.get('target', 'target')} distribution. Plot correlations between features in this {dataset.get('domain', 'domain')} dataset. Create 2-3 meaningful domain-specific plots for {topic}.",
-    "Task 4: Model Training — train at least 2 ML models best suited for this {dataset.get('target_type', '')} problem using {dataset.get('name', '')} features. Evaluate with metrics appropriate for this target type.",
-    "Task 5: Model Comparison and {dataset.get('domain', 'Domain')} Insights — compare model performance on this specific dataset. Identify the most predictive features. Provide actionable {dataset.get('domain', 'domain')}-specific recommendations for {topic}."
+    "Task 1: Data Loading and Exploration - load the {dataset.get('name', '')} dataset using the provided load_code. Examine the actual columns specific to this dataset. Display shape, first 10 rows, check missing values per column, data types, and summary statistics relevant to {topic}.",
+    "Task 2: Data Preprocessing - handle any missing values in this specific dataset. Identify which features from {dataset.get('name', '')} need encoding or normalization. Apply appropriate transformations. Split 80/20 train/test.",
+    "Task 3: Exploratory Data Analysis - visualize the {dataset.get('target', 'target')} distribution. Plot correlations between features in this {dataset.get('domain', 'domain')} dataset. Create 2-3 meaningful domain-specific plots for {topic}.",
+    "Task 4: Model Training - train at least 2 ML models best suited for this {dataset.get('target_type', '')} problem using {dataset.get('name', '')} features. Evaluate with metrics appropriate for this target type.",
+    "Task 5: Model Comparison and {dataset.get('domain', 'Domain')} Insights - compare model performance on this specific dataset. Identify the most predictive features. Provide actionable {dataset.get('domain', 'domain')}-specific recommendations for {topic}."
   ],
   "preprocessing_requirements": [
     "Specific step 1 for THIS dataset",
@@ -151,4 +172,3 @@ Return ONLY this JSON:
 }}
 
 Generate now:"""
-

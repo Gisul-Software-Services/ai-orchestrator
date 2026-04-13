@@ -88,7 +88,6 @@ from fastapi import FastAPI, HTTPException, Body
 from pydantic import BaseModel, ConfigDict, Field
 from typing import List, Dict, Any, Optional, Tuple
 import torch
-from vllm import LLM, SamplingParams
 import os
 import json
 import re
@@ -104,6 +103,7 @@ import asyncio
 import redis.asyncio as redis_asyncio
 from collections import deque
 from starlette.requests import Request
+import httpx
 
 from backend.model_app.billing.metering import bind_usage_meta_from_request, schedule_usage_emit
 import uuid
@@ -135,7 +135,7 @@ def _batch_timeout() -> float:
 # ----------------------------------------------------------------------------
 # GLOBAL STATE
 # ----------------------------------------------------------------------------
-llm: LLM | None = None
+llm: Any | None = None
 
 RESPONSE_CACHE = TTLCache(maxsize=1000, ttl=3600)
 
@@ -434,14 +434,32 @@ class AIMLBatchResponse(BaseModel):
 # MODEL LOADING
 # ----------------------------------------------------------------------------
 
+def _llm_backend() -> str:
+    from backend.model_app.core.settings import get_settings
+
+    return str(get_settings().llm_backend or "vllm").strip().lower()
+
+
 def load_model():
     global llm
     from backend.model_app.core.settings import get_settings
 
     s = get_settings()
+    backend = _llm_backend()
+    if backend == "ollama":
+        llm = None
+        logger.info("LLM backend: ollama (model=%s, base_url=%s)", s.ollama_model, s.ollama_base_url)
+        return
+
     mn = s.model_name
     logger.info("Loading %s with vLLM AWQ...", mn)
-    llm = LLM(
+    try:
+        from vllm import LLM as _LLM  # type: ignore
+    except Exception as e:
+        raise RuntimeError(
+            f"vLLM import failed. Set LLM_BACKEND=ollama for Mac testing. Detail: {e}"
+        ) from e
+    llm = _LLM(
         model=mn,
         quantization="awq",
         dtype="float16",
@@ -459,13 +477,56 @@ def _make_sampling_params(
     max_tokens: int,
     top_p: float = 0.9,
     repetition_penalty: float = 1.1,
-) -> SamplingParams:
+) -> Any:
+    # vLLM only
+    from vllm import SamplingParams  # type: ignore
+
     return SamplingParams(
         temperature=temperature,
         top_p=top_p,
         max_tokens=max_tokens,
         repetition_penalty=repetition_penalty,
     )
+
+def _ollama_chat_single(
+    messages: list[dict[str, str]],
+    *,
+    temperature: float,
+    max_tokens: int,
+    top_p: float = 0.9,
+    repetition_penalty: float = 1.1,
+) -> tuple[str, int, int]:
+    """
+    Minimal Ollama adapter for macOS testing.
+    Uses Ollama's native /api/chat endpoint.
+    """
+    from backend.model_app.core.settings import get_settings
+
+    s = get_settings()
+    url = str(s.ollama_base_url).rstrip("/") + "/api/chat"
+    payload = {
+        "model": s.ollama_model,
+        "messages": messages,
+        "stream": False,
+        "options": {
+            "temperature": float(temperature),
+            "top_p": float(top_p),
+            "repeat_penalty": float(repetition_penalty),
+            "num_predict": int(max_tokens),
+        },
+    }
+    try:
+        with httpx.Client(timeout=120.0) as client:
+            r = client.post(url, json=payload)
+            r.raise_for_status()
+            data = r.json()
+    except Exception as e:
+        raise RuntimeError(f"Ollama chat failed: {e}") from e
+
+    msg = (data or {}).get("message") or {}
+    text = str(msg.get("content") or "").strip()
+    # Ollama doesn't return OpenAI-style token counts by default.
+    return text, 0, 0
 
 
 def _llm_chat_single(
@@ -476,6 +537,14 @@ def _llm_chat_single(
     top_p: float = 0.9,
     repetition_penalty: float = 1.1,
 ) -> tuple[str, int, int]:
+    if _llm_backend() == "ollama":
+        return _ollama_chat_single(
+            messages,
+            temperature=temperature,
+            max_tokens=max_tokens,
+            top_p=top_p,
+            repetition_penalty=repetition_penalty,
+        )
     if llm is None:
         raise RuntimeError("vLLM is not loaded")
     sampling_params = _make_sampling_params(
@@ -500,6 +569,21 @@ def _llm_chat_batch(
     top_p: float = 0.9,
     repetition_penalty: float = 1.1,
 ) -> tuple[list[str], list[tuple[int, int]]]:
+    if _llm_backend() == "ollama":
+        # Ollama has no true batch API; do sequential calls (OK for local testing).
+        responses: list[str] = []
+        token_stats: list[tuple[int, int]] = []
+        for msgs in messages_list:
+            text, in_tok, out_tok = _ollama_chat_single(
+                msgs,
+                temperature=temperature,
+                max_tokens=max_tokens,
+                top_p=top_p,
+                repetition_penalty=repetition_penalty,
+            )
+            responses.append(text)
+            token_stats.append((in_tok, out_tok))
+        return responses, token_stats
     if llm is None:
         raise RuntimeError("vLLM is not loaded")
     sampling_params = _make_sampling_params(

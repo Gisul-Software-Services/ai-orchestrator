@@ -11,6 +11,12 @@ class ModelSettings(BaseSettings):
     mongodb_uri: str
     redis_url: str = "redis://redis:6379"
     billing_db_name: str = "aaptor_model"
+    # LLM backend:
+    # - "vllm": local vLLM inside model-service (Linux + NVIDIA/CUDA)
+    # - "ollama": external Ollama server (works on macOS; can run Qwen locally)
+    llm_backend: str = "vllm"
+    ollama_base_url: str = "http://host.docker.internal:11434"
+    ollama_model: str = "qwen2.5:7b-instruct"
     batch_size_max: int = 2
     batch_timeout: float = 0.5
     aiml_library_data_preview: bool = True

@@ -1,3 +1,5 @@
+# Build from the repository root:
+#   docker build -f backend/Dockerfile .
 FROM nvidia/cuda:12.1.1-devel-ubuntu22.04
 
 WORKDIR /app
@@ -16,11 +18,8 @@ RUN apt-get update --fix-missing && apt-get install -y \
 
 RUN pip3 install --upgrade pip
 
-COPY backend/requirements.txt .
-RUN pip3 install --no-cache-dir -r requirements.txt
-
-# 🔥 ADD THIS LINE
-RUN pip3 install faiss-cpu
+COPY model-service/requirements.txt /app/requirements.txt
+RUN pip3 install --no-cache-dir -r /app/requirements.txt
 
 COPY backend/qwen_model_server_script_multiple.py /app/qwen_model_server_script_multiple.py
 

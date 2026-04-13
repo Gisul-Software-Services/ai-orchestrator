@@ -1,0 +1,25 @@
+# Model service (Mac / CPU / Ollama mode)
+#
+# This image is intended for Apple Silicon dev/testing where vLLM + NVML/CUDA
+# are not available. Use LLM_BACKEND=ollama to route generation to an Ollama
+# server running on the Mac host.
+
+pydantic-settings==2.13.1
+fastapi==0.135.3
+uvicorn[standard]==0.32.1
+httpx==0.28.1
+
+# CPU-only Torch is sufficient (used for non-LLM code paths and safeguards).
+torch==2.10.0
+
+sentence-transformers==5.3.0
+faiss-cpu==1.11.0.post1
+
+motor==3.7.1
+pymongo==4.16.0
+redis==5.0.4
+
+cachetools==5.3.3
+numpy==2.2.2
+pandas==2.2.2
+

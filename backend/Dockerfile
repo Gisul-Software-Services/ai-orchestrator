@@ -1,3 +1,5 @@
+# Build from the repository root:
+#   docker build -f backend/Dockerfile .
 FROM nvidia/cuda:12.1.1-devel-ubuntu22.04
 
 WORKDIR /app

@@ -46,8 +46,13 @@ services:
 
   backend-api:
     build:
+<<<<<<< HEAD
       context: .
       dockerfile: backend/gateway/Dockerfile
+=======
+      context: ./backend
+      dockerfile: gateway/Dockerfile
+>>>>>>> dev
     image: gisul/backend-api:${IMAGE_TAG:-latest}
     container_name: aaptor-backend-api
     env_file:

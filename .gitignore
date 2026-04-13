@@ -9,6 +9,9 @@ __pycache__/
 *.db
 .env
 .env.*
+# Allow committing templates (`.env.*` would otherwise match `.env.example`).
+!.env.example
+!**/.env.example
 backend/.env
 backend/gateway/.env
 model-service/.env

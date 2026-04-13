@@ -26,11 +26,10 @@ RUN --mount=type=cache,target=/root/.cache/pip \
   python -m pip install --upgrade pip setuptools wheel
 
 COPY model-service/requirements.txt /app/requirements.txt
-COPY model-service/requirements-gpu.txt /app/requirements-gpu.txt
-# Install dependencies in ONE pass (avoids duplicate torch/vLLM downloads).
-# Use BuildKit pip cache to reduce bandwidth + disk churn in CI.
+# Single dependency manifest for this service (`model-service/requirements.txt`).
+# Base image already ships PyTorch CUDA; pip may satisfy or align torch with the pinned line.
 RUN --mount=type=cache,target=/root/.cache/pip \
-  python -m pip install -r /app/requirements-gpu.txt
+  python -m pip install -r /app/requirements.txt
 
 # Copy model-service entrypoint (required by spec)
 COPY model-service/model_service_entrypoint.py /app/model_service_entrypoint.py

@@ -1,8 +1,0 @@
-fastapi
-uvicorn[standard]
-httpx
-motor
-pymongo
-pydantic-settings
-
-redis

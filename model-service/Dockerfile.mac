@@ -1,0 +1,35 @@
+# syntax=docker/dockerfile:1.6
+FROM python:3.11-slim
+
+WORKDIR /app
+
+ENV DEBIAN_FRONTEND=noninteractive
+
+RUN apt-get update --fix-missing \
+  && apt-get install -y --no-install-recommends curl \
+  && apt-get clean \
+  && rm -rf /var/lib/apt/lists/*
+
+RUN python -m venv /opt/venv
+ENV PATH="/opt/venv/bin:$PATH"
+
+RUN --mount=type=cache,target=/root/.cache/pip \
+  python -m pip install --upgrade pip setuptools wheel
+
+COPY model-service/requirements-mac.txt /app/requirements.txt
+RUN --mount=type=cache,target=/root/.cache/pip \
+  python -m pip install -r /app/requirements.txt
+
+COPY model-service/model_service_entrypoint.py /app/model_service_entrypoint.py
+COPY backend/model_app /app/model_app
+COPY assets /app/assets
+
+EXPOSE 7001
+ENV MODEL_SERVICE_SELF_URL=http://127.0.0.1:7001
+ENV ASSETS_DIR=/app/assets
+
+HEALTHCHECK --interval=30s --timeout=5s --start-period=30s --retries=3 \
+  CMD curl --fail http://localhost:7001/docs || exit 1
+
+CMD ["uvicorn", "model_service_entrypoint:app", "--host", "0.0.0.0", "--port", "7001"]
+

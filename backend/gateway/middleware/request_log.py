@@ -1,17 +1,23 @@
-"""Append request access records to ``backend.model_app.engine.core.REQUEST_LOG``."""
+"""Append request access records for traffic that hits this gateway process.
+
+The model service keeps a separate in-memory log in ``engine.core`` when requests
+reach it (including proxied calls). The gateway image must not import ``model_app``
+(it would pull torch/vLLM and break the slim container).
+"""
 
 from __future__ import annotations
 
+import json
 import time
 import uuid
-import json
+from collections import deque
 from datetime import datetime, timezone
 
 from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.requests import Request
 from starlette.responses import Response
 
-from backend.model_app.engine import core as engine_core
+GATEWAY_REQUEST_LOG: deque[dict] = deque(maxlen=1000)
 
 
 class RequestLogMiddleware(BaseHTTPMiddleware):
@@ -55,7 +61,5 @@ class RequestLogMiddleware(BaseHTTPMiddleware):
             "cache_hit": bool(cache_hit),
             "job_id": job_id,
         }
-        engine_core.REQUEST_LOG.appendleft(record)
-        while len(engine_core.REQUEST_LOG) > 1000:
-            engine_core.REQUEST_LOG.pop()
+        GATEWAY_REQUEST_LOG.appendleft(record)
         return response

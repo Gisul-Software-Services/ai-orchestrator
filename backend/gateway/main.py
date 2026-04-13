@@ -19,6 +19,7 @@ from backend.gateway.billing.org_context import OrgContextMiddleware
 from backend.gateway.billing.metering import get_usage_meta_header_value
 from backend.gateway.billing.router import router as billing_router
 from backend.gateway.billing.verified_org import VerifiedOrgRequiredMiddleware
+from backend.gateway.core.auth import is_admin_api_key
 from backend.gateway.core.settings import get_settings
 from backend.gateway.middleware.request_log import RequestLogMiddleware
 
@@ -40,6 +41,15 @@ _ORG_GATED_POST_PATHS = frozenset(
         "/api/v1/enrich-dsa",
     }
 )
+_ADMIN_ONLY_EXACT_PATHS = frozenset(
+    {
+        "/api/v1/clear-cache",
+        "/api/v1/request-log",
+        "/api/v1/enrich-dsa",
+        "/api/v1/catalog/faiss/rebuild-aiml",
+    }
+)
+_ADMIN_ONLY_PREFIXES = ("/api/v1/catalog",)
 _mongo_client: MongoClient | None = None
 _redis_client: redis_asyncio.Redis | None = None
 
@@ -143,6 +153,9 @@ async def _verify_org_header_or_block(request: Request, target_path: str) -> Res
     org_id = ""
 
     if api_key:
+        if is_admin_api_key(api_key):
+            request.state.is_admin_request = True
+            return None
         if not _mongodb_uri():
             return JSONResponse(
                 status_code=503,
@@ -183,6 +196,27 @@ async def _verify_org_header_or_block(request: Request, target_path: str) -> Res
     return JSONResponse(
         status_code=403,
         content={"error": "ORG_NOT_VERIFIED", "detail": f"Organisation '{org_id}' is not registered in the platform."},
+    )
+
+
+def _is_admin_only_target(target_path: str) -> bool:
+    return target_path in _ADMIN_ONLY_EXACT_PATHS or any(
+        target_path.startswith(prefix) for prefix in _ADMIN_ONLY_PREFIXES
+    )
+
+
+def _require_admin_for_target(request: Request, target_path: str) -> Response | None:
+    if not _is_admin_only_target(target_path):
+        return None
+    if is_admin_api_key(request.headers.get("X-Api-Key")):
+        request.state.is_admin_request = True
+        return None
+    return JSONResponse(
+        status_code=401,
+        content={
+            "error": "ADMIN_AUTH_REQUIRED",
+            "detail": f"{target_path} requires a valid admin API key.",
+        },
     )
 
 
@@ -242,11 +276,17 @@ async def _proxy(request: Request, target_path: str) -> Response:
 @app.api_route("/{full_path:path}", methods=["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"])
 async def catch_all(request: Request, full_path: str) -> Response:
     target_path = _normalize_target_path(f"/{full_path}")
+    admin_blocked = _require_admin_for_target(request, target_path)
+    if admin_blocked is not None:
+        return admin_blocked
+
     blocked = await _verify_org_header_or_block(request, target_path)
     if blocked is not None:
         return blocked
 
     if _require_verified_org_for_generation() and request.method == "POST" and target_path in _ORG_GATED_POST_PATHS:
+        if getattr(request.state, "is_admin_request", False):
+            return await _proxy(request, target_path)
         org_for_rl = (getattr(request.state, "verified_org_id", None) or "").strip()
         if org_for_rl and not await _check_rate_limit(org_for_rl):
             return JSONResponse(

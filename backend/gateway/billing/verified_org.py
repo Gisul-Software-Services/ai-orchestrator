@@ -17,6 +17,7 @@ from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.requests import Request
 from starlette.responses import JSONResponse, Response
 
+from backend.gateway.core.auth import is_admin_api_key
 from backend.gateway.core.settings import get_settings
 
 logger = logging.getLogger(__name__)
@@ -53,11 +54,10 @@ class VerifiedOrgRequiredMiddleware(BaseHTTPMiddleware):
         if not needs_check:
             return await call_next(request)
 
-        # Admin/server-to-server requests may authenticate with X-Api-Key only.
-        # In that case, defer verification to gateway.main where API key is
-        # resolved to org_id and validated against Mongo.
+        # The configured admin key may bypass org-header validation for
+        # frontend-originated control-plane actions.
         api_key = request.headers.get("X-Api-Key", "").strip()
-        if api_key:
+        if api_key and is_admin_api_key(api_key):
             return await call_next(request)
 
         org_id = request.headers.get("X-Org-Id", "").strip()

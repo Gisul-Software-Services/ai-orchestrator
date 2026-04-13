@@ -6,12 +6,13 @@ from pydantic_settings import BaseSettings
 
 class GatewaySettings(BaseSettings):
     mongodb_uri: str
+    admin_api_key: str = ""
     billing_db_name: str = "aaptor_model"
     organization_db_name: str = "organization_db"
     model_service_url: str = "http://model-service:7001"
     redis_url: str = "redis://redis:6379"
     allowed_origins: list[str] = ["*"]
-    require_verified_org_for_generation: bool = False
+    require_verified_org_for_generation: bool = True
     rate_limit_per_org: int = 20
     model_name: str = "Qwen/Qwen2.5-7B-Instruct"
     api_version: str = "2.0.0"

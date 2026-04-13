@@ -1,4 +1,4 @@
-"""System compatibility router + request log endpoint."""
+"""System routes for the modular monolith."""
 
 from __future__ import annotations
 
@@ -7,9 +7,35 @@ from typing import Any
 
 from fastapi import APIRouter, Query
 
-from backend.model_app.engine import core as engine_core
+from backend.model_app.core.state import REQUEST_LOG
+from backend.model_app.services import system as system_service
 
-router = APIRouter(tags=["system-compat"])
+router = APIRouter(tags=["system"])
+
+
+@router.get("/api/v1/job/{job_id}")
+async def poll_job(job_id: str):
+    return await system_service.poll_job(job_id)
+
+
+@router.get("/")
+async def root():
+    return system_service.root()
+
+
+@router.get("/health")
+async def health_check():
+    return await system_service.health_check()
+
+
+@router.get("/stats")
+async def get_stats():
+    return system_service.get_stats()
+
+
+@router.post("/api/v1/clear-cache")
+async def clear_cache():
+    return system_service.clear_cache()
 
 
 @router.get("/api/v1/request-log")
@@ -24,7 +50,7 @@ async def get_request_log(
     sort_by: str = Query(default="timestamp"),
     sort_order: str = Query(default="desc"),
 ):
-    items: list[dict[str, Any]] = list(engine_core.REQUEST_LOG)
+    items: list[dict[str, Any]] = list(REQUEST_LOG)
 
     if endpoint:
         q = endpoint.lower().strip()

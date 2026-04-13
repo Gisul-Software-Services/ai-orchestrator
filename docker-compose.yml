@@ -22,8 +22,8 @@ services:
     container_name: aaptor-model-service
     env_file:
       - ./model-service/.env
-    ports:
-      - "7001:7001"
+    expose:
+      - "7001"
     volumes:
       - ~/.cache/huggingface:/root/.cache/huggingface
       - ./assets:/app/assets
@@ -46,12 +46,19 @@ services:
 
   backend-api:
     build:
+<<<<<<< HEAD
+      context: .
+      dockerfile: backend/gateway/Dockerfile
+=======
       context: ./backend
       dockerfile: gateway/Dockerfile
+>>>>>>> dev
     image: gisul/backend-api:${IMAGE_TAG:-latest}
     container_name: aaptor-backend-api
     env_file:
       - ./backend/gateway/.env
+    environment:
+      - ADMIN_API_KEY=${ADMIN_API_KEY}
     ports:
       - "7000:7000"
     depends_on:
@@ -78,6 +85,7 @@ services:
       - NODE_ENV=production
       - GATEWAY_BASE_URL=http://backend-api:7000
       - ADMIN_TOKEN=${ADMIN_TOKEN}
+      - ADMIN_SESSION_SECRET=${ADMIN_SESSION_SECRET}
       - ADMIN_API_KEY=${ADMIN_API_KEY}
     depends_on:
       backend-api:

@@ -2,15 +2,19 @@ import { NextRequest, NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import { adminJobs } from "@/lib/adminJobStore";
 import { makeAdminProxyGetWithParams } from "@/lib/proxyUtils";
-
-const SESSION_COOKIE = "gisul_admin_session";
+import {
+  getAdminSessionCookieName,
+  verifyAdminSessionToken,
+} from "@/lib/adminSession";
 
 const upstreamGET = makeAdminProxyGetWithParams<{ jobId: string }>(
   ({ jobId }) => `/api/v1/job/${encodeURIComponent(jobId)}`
 );
 
 export async function GET(req: NextRequest, ctx: { params: { jobId: string } }) {
-  const hasSession = cookies().get(SESSION_COOKIE)?.value === "ok";
+  const hasSession = await verifyAdminSessionToken(
+    cookies().get(getAdminSessionCookieName())?.value
+  );
   if (!hasSession) {
     return NextResponse.json({ error: "UNAUTHENTICATED" }, { status: 401 });
   }

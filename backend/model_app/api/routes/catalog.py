@@ -77,12 +77,10 @@ def _load_catalog() -> List[Dict[str, Any]]:
 
 def _save_catalog(catalog: List[Dict[str, Any]]) -> None:
     _atomic_write_json(get_settings().aiml_catalog_path, catalog)
-    # Invalidate monolith cache if present (best effort).
     try:
-        from backend.model_app.engine import core as eng
+        from backend.model_app.services import aiml as aiml_service
 
-        if hasattr(eng, "_aiml_catalog_cache"):
-            eng._aiml_catalog_cache = None  # type: ignore[attr-defined]
+        aiml_service._aiml_catalog_cache = None
     except Exception:
         pass
 
@@ -154,7 +152,6 @@ async def catalog_update(catalog_id: str, entry: Dict[str, Any]):
         raise HTTPException(status_code=422, detail={"error": "validation_error", "fields": errors})
     for i, e in enumerate(catalog):
         if str(e.get("id")) == catalog_id:
-            # id is immutable in edit mode
             entry = {**entry, "id": catalog_id}
             catalog[i] = entry
             _save_catalog(catalog)
@@ -299,4 +296,3 @@ async def catalog_faiss_status():
             "vector_count": count_vectors(s.dsa_faiss_path, s.dsa_metadata_path),
         },
     }
-

@@ -8,7 +8,8 @@ from typing import Any, Dict
 
 from fastapi import APIRouter
 
-from backend.model_app.engine import core as eng
+from backend.model_app.core import state as app_state
+from backend.model_app.services.jobs import _job_store_count_active, _job_store_count_total
 
 router = APIRouter(prefix="/api/v1", tags=["dashboard"])
 
@@ -59,7 +60,7 @@ async def metrics_gpu():
 
 @router.get("/metrics/inference")
 async def metrics_inference():
-    st = eng.STATS
+    st = app_state.STATS
     hits = st.get("cache_hits", 0)
     misses = st.get("cache_misses", 0)
     total = max(1, hits + misses)
@@ -77,18 +78,14 @@ async def metrics_inference():
     }
 
 
-def _queues_payload() -> Dict[str, Any]:
-    depths: Dict[str, int] = {k: len(v) for k, v in eng.batch_queues.items()}
+async def _queues_payload() -> Dict[str, Any]:
+    depths: Dict[str, int] = {k: len(v) for k, v in app_state.batch_queues.items()}
     try:
-        active_jobs = sum(
-            1
-            for j in eng.JOB_STORE.values()
-            if isinstance(j, dict) and j.get("status") == "processing"
-        )
+        active_jobs = await _job_store_count_active()
     except Exception:
         active_jobs = 0
     try:
-        jobs_in_store = len(eng.JOB_STORE)
+        jobs_in_store = await _job_store_count_total()
     except Exception:
         jobs_in_store = 0
     return {
@@ -100,18 +97,17 @@ def _queues_payload() -> Dict[str, Any]:
 
 @router.get("/metrics/queues")
 async def metrics_queues():
-    return _queues_payload()
+    return await _queues_payload()
 
 
 @router.get("/metrics/overview")
 async def metrics_overview():
-    """Single payload for the Next.js Monitoring page."""
-    st = eng.STATS
+    st = app_state.STATS
     hits = st.get("cache_hits", 0)
     misses = st.get("cache_misses", 0)
     total = max(1, hits + misses)
     cuda_gb = None
-    if eng.llm is not None:
+    if app_state.llm is not None:
         try:
             import torch
 
@@ -119,10 +115,10 @@ async def metrics_overview():
         except Exception:
             pass
 
-    q = _queues_payload()
+    q = await _queues_payload()
     g = _gpu_snapshot()
     return {
-        "model_loaded": eng.llm is not None,
+        "model_loaded": app_state.llm is not None,
         "cuda_memory_gb": cuda_gb,
         "gpu": g,
         "inference": {

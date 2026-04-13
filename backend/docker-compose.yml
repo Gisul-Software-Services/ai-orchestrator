@@ -2,11 +2,15 @@ version: '3.8'
 
 services:
   qwen-model:
-    build: .
+    build:
+      context: ..
+      dockerfile: backend/Dockerfile
     image: qwen-api
     container_name: qwen-model
-    ports:
-      - "9000:9000"
+    env_file:
+      - ./.env
+    expose:
+      - "9000"
     volumes:
       - ~/.cache/huggingface:/root/.cache/huggingface
     deploy:

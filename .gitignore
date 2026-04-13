@@ -16,6 +16,8 @@ backend/.env
 backend/gateway/.env
 model-service/.env
 venv/
+.venv/
+.venv-wsl/
 env/
 ENV/
 

@@ -1,6 +1,8 @@
 import { NextResponse, type NextRequest } from "next/server";
-
-const SESSION_COOKIE = "gisul_admin_session";
+import {
+  getAdminSessionCookieName,
+  verifyAdminSessionToken,
+} from "@/lib/adminSession";
 
 const PROTECTED_PREFIXES = [
   "/dashboard",
@@ -13,7 +15,7 @@ const PROTECTED_PREFIXES = [
   "/settings",
 ];
 
-export function middleware(req: NextRequest) {
+export async function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl;
 
   // Allow auth routes and static assets through
@@ -35,7 +37,9 @@ export function middleware(req: NextRequest) {
     return NextResponse.next();
   }
 
-  const hasSession = req.cookies.get(SESSION_COOKIE)?.value === "ok";
+  const hasSession = await verifyAdminSessionToken(
+    req.cookies.get(getAdminSessionCookieName())?.value
+  );
   if (!hasSession) {
     const loginUrl = new URL("/login", req.url);
     loginUrl.searchParams.set("next", pathname);

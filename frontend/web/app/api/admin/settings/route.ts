@@ -1,7 +1,9 @@
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
-
-const SESSION_COOKIE = "gisul_admin_session";
+import {
+  getAdminSessionCookieName,
+  verifyAdminSessionToken,
+} from "@/lib/adminSession";
 
 function gatewayBase(): string {
   return (process.env.GATEWAY_BASE_URL || "http://backend-api:7000").replace(/\/$/, "");
@@ -24,7 +26,10 @@ async function upstreamGet(path: string, apiKey: string) {
 }
 
 export async function GET() {
-  if (cookies().get(SESSION_COOKIE)?.value !== "ok") {
+  const hasSession = await verifyAdminSessionToken(
+    cookies().get(getAdminSessionCookieName())?.value
+  );
+  if (!hasSession) {
     return NextResponse.json({ error: "UNAUTHENTICATED" }, { status: 401 });
   }
   const apiKey = (process.env.ADMIN_API_KEY || "").trim();

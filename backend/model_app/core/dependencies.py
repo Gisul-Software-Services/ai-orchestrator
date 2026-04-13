@@ -1,11 +1,11 @@
 from __future__ import annotations
 
 from backend.model_app.core.settings import ModelSettings, get_settings
-from backend.model_app.engine import core as eng
+from backend.model_app.core import state as app_state
 
 
 def get_model():
-    return eng.llm
+    return app_state.llm
 
 
 def get_model_settings() -> ModelSettings:

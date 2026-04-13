@@ -1,3 +1,4 @@
+"""Append request access records to the shared in-memory request log."""
 """Append request access records for traffic that hits this gateway process.
 
 The model service keeps a separate in-memory log in ``engine.core`` when requests

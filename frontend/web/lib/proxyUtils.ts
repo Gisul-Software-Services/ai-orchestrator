@@ -1,15 +1,19 @@
 import { cookies } from "next/headers";
 import { NextRequest, NextResponse } from "next/server";
-
-const SESSION_COOKIE = "gisul_admin_session";
+import {
+  getAdminSessionCookieName,
+  verifyAdminSessionToken,
+} from "@/lib/adminSession";
 
 function gatewayBase(): string {
   // In docker-compose, the gateway container is backend-api:7000
   return (process.env.GATEWAY_BASE_URL || "http://backend-api:7000").replace(/\/$/, "");
 }
 
-function requireAdminSession(): boolean {
-  return cookies().get(SESSION_COOKIE)?.value === "ok";
+async function requireAdminSession(): Promise<boolean> {
+  return verifyAdminSessionToken(
+    cookies().get(getAdminSessionCookieName())?.value
+  );
 }
 
 async function _proxyJson({
@@ -21,7 +25,7 @@ async function _proxyJson({
   method: "GET" | "POST" | "PUT" | "DELETE";
   upstreamPath: string;
 }) {
-  if (!requireAdminSession()) {
+  if (!(await requireAdminSession())) {
     return NextResponse.json({ error: "UNAUTHENTICATED" }, { status: 401 });
   }
 

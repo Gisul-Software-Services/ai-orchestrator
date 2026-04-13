@@ -1,11 +1,34 @@
 from __future__ import annotations
 
-from typing import Any
+import asyncio
+from collections import deque
 
+STATS = {
+    "total_requests": 0,
+    "cache_hits": 0,
+    "cache_misses": 0,
+    "total_generation_time": 0.0,
+    "requests_by_endpoint": {},
+    "errors": 0,
+    "batches_processed": 0,
+    "total_batched_requests": 0,
+    "avg_batch_size": 0.0,
+    "server_start_time": None,
+}
 
-def __getattr__(name: str) -> Any:
-    import backend.model_app.engine.core as eng
+batch_queues = {
+    "topics": deque(),
+    "mcq": deque(),
+    "subjective": deque(),
+    "coding": deque(),
+    "sql": deque(),
+    "aiml": deque(),
+}
 
-    if hasattr(eng, name):
-        return getattr(eng, name)
-    raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
+batch_locks = {endpoint: asyncio.Lock() for endpoint in batch_queues.keys()}
+pending_results = {}
+
+# Model Console: recent /api access rows (middleware)
+REQUEST_LOG = deque(maxlen=1000)
+
+llm = None

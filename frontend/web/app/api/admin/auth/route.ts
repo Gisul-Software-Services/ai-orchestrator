@@ -1,7 +1,10 @@
 import { cookies } from "next/headers";
 import { NextRequest, NextResponse } from "next/server";
-
-const COOKIE_NAME = "gisul_admin_session";
+import {
+  createAdminSessionToken,
+  getAdminSessionCookieName,
+  getAdminSessionExpiryDate,
+} from "@/lib/adminSession";
 
 export async function POST(req: NextRequest) {
   const body = await req.json().catch(() => ({}));
@@ -18,17 +21,16 @@ export async function POST(req: NextRequest) {
     return new NextResponse("Invalid admin token", { status: 401 });
   }
 
-  const expires = new Date();
-  expires.setDate(expires.getDate() + 7);
+  const sessionToken = await createAdminSessionToken();
 
   cookies().set({
-    name: COOKIE_NAME,
-    value: "ok",
+    name: getAdminSessionCookieName(),
+    value: sessionToken,
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
     sameSite: "lax",
     path: "/",
-    expires,
+    expires: getAdminSessionExpiryDate(),
   });
 
   return NextResponse.json({ ok: true });

@@ -4,11 +4,16 @@ import hashlib
 import secrets
 from datetime import datetime, timezone
 
-from fastapi import APIRouter, HTTPException, Query
+from fastapi import APIRouter, Depends, HTTPException, Query
 
 from backend.gateway.billing.db import api_keys, aaptor_orgs, usage_logs
+from backend.gateway.core.auth import require_admin_api_key
 
-router = APIRouter(prefix="/billing/v1", tags=["billing"])
+router = APIRouter(
+    prefix="/billing/v1",
+    tags=["billing"],
+    dependencies=[Depends(require_admin_api_key)],
+)
 
 
 @router.get("/orgs/{org_id}/profile")

@@ -7,15 +7,25 @@ Question-generation stack: **gateway** (FastAPI proxy, auth, billing) and **mode
 ### Linux + NVIDIA GPU (vLLM)
 
 ```bash
-# Pull pinned images (recommended)
+# Pull latest (recommended for quick testing)
+docker pull gisul/backend-api:latest
+docker pull gisul/model-service:gpu
+docker pull gisul/model-frontend:latest
+
+# Run
+export IMAGE_TAG=latest
+docker compose up -d
+docker compose ps
+```
+
+To pin to an exact build, you can also pull by commit tag (CI publishes these):
+
+```bash
 docker pull gisul/backend-api:<git-sha>
 docker pull gisul/model-service:<git-sha>-gpu
 docker pull gisul/model-frontend:<git-sha>
-
-# Run
 export IMAGE_TAG=<git-sha>
 docker compose up -d
-docker compose ps
 ```
 
 ### Mac (Apple Silicon) testing (Qwen via Ollama)
@@ -24,7 +34,7 @@ docker compose ps
 # On the Mac host (outside Docker)
 ollama pull qwen2.5:7b-instruct
 
-# Pull Mac model-service image
+# Pull latest Mac model-service image
 docker pull gisul/model-service:mac
 
 # Run the stack using the Mac override

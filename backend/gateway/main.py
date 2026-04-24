@@ -12,7 +12,7 @@ import httpx
 import redis.asyncio as redis_asyncio
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse, Response
+from fastapi.responses import JSONResponse, Response, StreamingResponse
 from pymongo import MongoClient
 
 from backend.gateway.billing.org_context import OrgContextMiddleware
@@ -41,6 +41,8 @@ _ORG_GATED_POST_PATHS = frozenset(
         "/api/v1/enrich-dsa",
         "/api/v1/evaluation/aiml",
         "/api/v1/evaluation/dsa",
+        "/api/v1/chat",
+        "/api/v1/dsa/qwen/generate-question",
     }
 )
 _ADMIN_ONLY_EXACT_PATHS = frozenset(
@@ -253,26 +255,52 @@ async def _proxy(request: Request, target_path: str) -> Response:
         headers["X-Org-Id"] = str(verified_org).strip()
     body = await request.body()
 
-    async with httpx.AsyncClient(timeout=_PROXY_TIMEOUT) as client:
-        try:
-            resp = await client.request(method=request.method, url=url, headers=headers, content=body if body else None)
-        except httpx.HTTPError:
-            return JSONResponse(
-                status_code=502,
-                content={
-                    "error": "UPSTREAM_UNREACHABLE",
-                    "detail": f"Model service is unreachable at '{_model_service_url()}'.",
-                },
-            )
+    # Use stream=True so NDJSON responses are forwarded chunk-by-chunk
+    client = httpx.AsyncClient(timeout=_PROXY_TIMEOUT)
+    try:
+        async with client.stream(
+            method=request.method,
+            url=url,
+            headers=headers,
+            content=body if body else None,
+        ) as resp:
+            content_type = resp.headers.get("content-type", "")
+            resp_headers: dict[str, str] = {}
+            for k, v in resp.headers.items():
+                if k.lower() in ("content-length", "transfer-encoding", "connection"):
+                    continue
+                resp_headers[k] = v
+            resp_headers["x-request-id"] = request_id
 
-    resp_headers: dict[str, str] = {}
-    for k, v in resp.headers.items():
-        if k.lower() in ("content-length", "transfer-encoding", "connection"):
-            continue
-        resp_headers[k] = v
-    resp_headers["x-request-id"] = request_id
+            if "x-ndjson" in content_type:
+                # Stream each NDJSON line to the client as it arrives
+                async def _stream_ndjson():
+                    async for chunk in resp.aiter_bytes():
+                        yield chunk
 
-    return Response(content=resp.content, status_code=resp.status_code, headers=resp_headers)
+                return StreamingResponse(
+                    _stream_ndjson(),
+                    status_code=resp.status_code,
+                    headers=resp_headers,
+                    media_type="application/x-ndjson",
+                )
+            else:
+                # Buffer non-streaming responses as before
+                content = await resp.aread()
+                return Response(
+                    content=content,
+                    status_code=resp.status_code,
+                    headers=resp_headers,
+                )
+    except httpx.HTTPError:
+        await client.aclose()
+        return JSONResponse(
+            status_code=502,
+            content={
+                "error": "UPSTREAM_UNREACHABLE",
+                "detail": f"Model service is unreachable at '{_model_service_url()}'.",
+            },
+        )
 
 
 @app.api_route("/{full_path:path}", methods=["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"])

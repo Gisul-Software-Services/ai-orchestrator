@@ -65,6 +65,16 @@ async function _proxyJson({
 
     const contentType = resp.headers.get("content-type") || "application/json";
     const text = await resp.text();
+
+    // NDJSON (streaming bulk responses) → parse into a JSON array for the client
+    if (contentType.includes("x-ndjson")) {
+      const items = text
+        .split("\n")
+        .filter((line) => line.trim())
+        .map((line) => JSON.parse(line));
+      return NextResponse.json(items, { status: resp.status });
+    }
+
     return new NextResponse(text, {
       status: resp.status,
       headers: { "content-type": contentType },

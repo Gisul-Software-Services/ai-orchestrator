@@ -7,6 +7,7 @@ from backend.model_app.api.routes import system
 from backend.model_app.api.routes.catalog import router as catalog_router
 from backend.model_app.api.routes.dashboard import router as dashboard_router
 from backend.model_app.api.routes.dsa import dsa_router
+from backend.model_app.api.routes.evaluation import router as evaluation_router
 from backend.model_app.api.routes.generation import generation_router
 from backend.model_app.core.app import app
 from backend.model_app.middleware.request_log import RequestLogMiddleware
@@ -20,5 +21,6 @@ app.include_router(dsa_router)
 app.include_router(aiml_library_router)
 app.include_router(dashboard_router)
 app.include_router(catalog_router)
+app.include_router(evaluation_router)
 
 __all__ = ["app", "FastAPI"]

@@ -191,6 +191,7 @@ export function buildPayload(
         difficulty: f.difficulty,
         concepts,
         languages: f.dsaLanguages,
+        count: nq,
       };
       break;
     }

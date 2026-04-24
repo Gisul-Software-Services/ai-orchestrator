@@ -39,6 +39,8 @@ _ORG_GATED_POST_PATHS = frozenset(
         "/api/v1/generate-aiml-library",
         "/api/v1/generate-dsa-question",
         "/api/v1/enrich-dsa",
+        "/api/v1/evaluation/aiml",
+        "/api/v1/evaluation/dsa",
     }
 )
 _ADMIN_ONLY_EXACT_PATHS = frozenset(
@@ -175,7 +177,7 @@ async def _verify_org_header_or_block(request: Request, target_path: str) -> Res
         if not org_id:
             return JSONResponse(
                 status_code=401,
-                content={"error": "ORG_HEADER_MISSING", "detail": "X-Org-Id header is required for generation endpoints."},
+                content={"error": "ORG_HEADER_MISSING", "detail": "X-Org-Id header is required for protected POST endpoints."},
             )
 
     if not _mongodb_uri():

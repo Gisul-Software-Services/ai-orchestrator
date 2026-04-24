@@ -18,6 +18,11 @@ import {
 
 type Difficulty = "Easy" | "Medium" | "Hard";
 
+const DSA_LANGUAGE_OPTIONS = [
+  "python", "java", "javascript", "typescript",
+  "kotlin", "go", "rust", "cpp", "csharp", "c",
+] as const;
+
 function hasJobId(v: unknown): v is { job_id: string } {
   return !!v && typeof v === "object" && typeof (v as { job_id?: unknown }).job_id === "string";
 }
@@ -26,7 +31,8 @@ export default function DsaPlaygroundPage() {
   const [topic, setTopic] = useState("");
   const [difficulty, setDifficulty] = useState<Difficulty>("Medium");
   const [concepts, setConcepts] = useState("");
-  const [useCache, setUseCache] = useState(true);
+  const [count, setCount] = useState(1);
+  const [languages, setLanguages] = useState<string[]>(["python", "javascript"]);
 
   const [jobId, setJobId] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
@@ -38,6 +44,12 @@ export default function DsaPlaygroundPage() {
   const [history, setHistory] = useState<HistoryItem[]>([]);
   const [selectedIdx, setSelectedIdx] = useState<number | null>(null);
 
+  const toggleLanguage = useCallback((lang: string) => {
+    setLanguages((prev) =>
+      prev.includes(lang) ? prev.filter((l) => l !== lang) : [...prev, lang]
+    );
+  }, []);
+
   const payload = useMemo(() => {
     const conceptsList = concepts
       .split(",")
@@ -47,9 +59,10 @@ export default function DsaPlaygroundPage() {
       topic: topic.trim(),
       difficulty,
       concepts: conceptsList,
-      use_cache: useCache,
+      languages,
+      count: Math.max(1, Math.min(20, count)),
     };
-  }, [topic, difficulty, concepts, useCache]);
+  }, [topic, difficulty, concepts, languages, count]);
 
   const onSubmit = useCallback(
     async (e: React.FormEvent) => {
@@ -82,7 +95,7 @@ export default function DsaPlaygroundPage() {
         setSubmitting(false);
       }
     },
-    [payload]
+    [payload, t0]
   );
 
   const handleComplete = useCallback(
@@ -109,7 +122,8 @@ export default function DsaPlaygroundPage() {
     setTopic("");
     setDifficulty("Medium");
     setConcepts("");
-    setUseCache(true);
+    setCount(1);
+    setLanguages(["python", "javascript"]);
     setJobId(null);
     setError(null);
     setResult(null);
@@ -121,7 +135,7 @@ export default function DsaPlaygroundPage() {
     <div className="space-y-4">
       <EndpointFormShell
         title="DSA question generation"
-        description="Generate a DSA question (FAISS RAG, falls back to keyword search)."
+        description="Generate 1–20 unique DSA questions via bulk RAG retrieval + Qwen reword."
         submitting={submitting}
         error={error}
         onSubmit={onSubmit}
@@ -153,8 +167,35 @@ export default function DsaPlaygroundPage() {
               placeholder="e.g. memoization, knapsack"
             />
           </Field>
+          <Field label="Count" hint="Number of questions (1–20)">
+            <TextInput
+              type="number"
+              value={String(count)}
+              onChange={(e) => setCount(Math.max(1, Math.min(20, Number(e.target.value))))}
+              min={1}
+              max={20}
+            />
+          </Field>
         </div>
-        <Toggle checked={useCache} onChange={setUseCache} label="Use cache" />
+
+        <Field label="Languages" hint="Select at least one">
+          <div className="flex flex-wrap gap-2 mt-1">
+            {DSA_LANGUAGE_OPTIONS.map((lang) => (
+              <button
+                key={lang}
+                type="button"
+                onClick={() => toggleLanguage(lang)}
+                className={`px-3 py-1 rounded text-sm border transition-colors ${
+                  languages.includes(lang)
+                    ? "bg-blue-600 text-white border-blue-600"
+                    : "bg-transparent text-gray-400 border-gray-600 hover:border-gray-400"
+                }`}
+              >
+                {lang}
+              </button>
+            ))}
+          </div>
+        </Field>
 
         <JobPoller jobId={jobId} onComplete={handleComplete} onError={handleError} />
       </EndpointFormShell>
@@ -167,4 +208,3 @@ export default function DsaPlaygroundPage() {
     </div>
   );
 }
-

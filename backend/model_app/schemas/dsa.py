@@ -10,4 +10,5 @@ class DSAQuestionRequest(BaseModel):
     topic: str
     concepts: List[str] = []
     languages: List[str] = []
+    count: int = 1
     org_id: Optional[str] = None

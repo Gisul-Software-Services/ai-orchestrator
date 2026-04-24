@@ -255,43 +255,15 @@ async def _proxy(request: Request, target_path: str) -> Response:
         headers["X-Org-Id"] = str(verified_org).strip()
     body = await request.body()
 
-    # Use stream=True so NDJSON responses are forwarded chunk-by-chunk
     client = httpx.AsyncClient(timeout=_PROXY_TIMEOUT)
     try:
-        async with client.stream(
+        req = client.build_request(
             method=request.method,
             url=url,
             headers=headers,
             content=body if body else None,
-        ) as resp:
-            content_type = resp.headers.get("content-type", "")
-            resp_headers: dict[str, str] = {}
-            for k, v in resp.headers.items():
-                if k.lower() in ("content-length", "transfer-encoding", "connection"):
-                    continue
-                resp_headers[k] = v
-            resp_headers["x-request-id"] = request_id
-
-            if "x-ndjson" in content_type:
-                # Stream each NDJSON line to the client as it arrives
-                async def _stream_ndjson():
-                    async for chunk in resp.aiter_bytes():
-                        yield chunk
-
-                return StreamingResponse(
-                    _stream_ndjson(),
-                    status_code=resp.status_code,
-                    headers=resp_headers,
-                    media_type="application/x-ndjson",
-                )
-            else:
-                # Buffer non-streaming responses as before
-                content = await resp.aread()
-                return Response(
-                    content=content,
-                    status_code=resp.status_code,
-                    headers=resp_headers,
-                )
+        )
+        resp = await client.send(req, stream=True)
     except httpx.HTTPError:
         await client.aclose()
         return JSONResponse(
@@ -300,6 +272,41 @@ async def _proxy(request: Request, target_path: str) -> Response:
                 "error": "UPSTREAM_UNREACHABLE",
                 "detail": f"Model service is unreachable at '{_model_service_url()}'.",
             },
+        )
+
+    content_type = resp.headers.get("content-type", "")
+    resp_headers: dict[str, str] = {}
+    for k, v in resp.headers.items():
+        if k.lower() in ("content-length", "transfer-encoding", "connection"):
+            continue
+        resp_headers[k] = v
+    resp_headers["x-request-id"] = request_id
+
+    if "x-ndjson" in content_type:
+        # Stream each chunk to the client as it arrives, close client when done
+        async def _stream_ndjson():
+            try:
+                async for chunk in resp.aiter_bytes():
+                    yield chunk
+            finally:
+                await resp.aclose()
+                await client.aclose()
+
+        return StreamingResponse(
+            _stream_ndjson(),
+            status_code=resp.status_code,
+            headers=resp_headers,
+            media_type="application/x-ndjson",
+        )
+    else:
+        # Buffer non-streaming responses
+        content = await resp.aread()
+        await resp.aclose()
+        await client.aclose()
+        return Response(
+            content=content,
+            status_code=resp.status_code,
+            headers=resp_headers,
         )
 
 

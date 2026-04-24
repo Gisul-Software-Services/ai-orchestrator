@@ -29,6 +29,23 @@ class RequestLogMiddleware(BaseHTTPMiddleware):
         response = await call_next(request)
         duration_ms = (time.perf_counter() - start) * 1000
 
+        # Don't buffer streaming responses — just log without job_id
+        content_type = response.headers.get("content-type", "")
+        if "x-ndjson" in content_type:
+            record = {
+                "request_id": str(uuid.uuid4()),
+                "timestamp": datetime.now(timezone.utc).isoformat(),
+                "method": request.method,
+                "path": request.url.path,
+                "org_id": getattr(request.state, "org_id", None) or "unattributed",
+                "status_code": response.status_code,
+                "latency_ms": int(round(duration_ms)),
+                "cache_hit": False,
+                "job_id": None,
+            }
+            GATEWAY_REQUEST_LOG.appendleft(record)
+            return response
+
         cache_hit_header = (
             response.headers.get("x-cache-hit")
             or response.headers.get("cache-hit")

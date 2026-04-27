@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from fastapi import FastAPI
 
-from backend.model_app.api.routes.aiml_library import router as aiml_library_router
+from backend.model_app.api.routes.aiml import aiml_router
 from backend.model_app.api.routes import system
 from backend.model_app.api.routes.catalog import router as catalog_router
 from backend.model_app.api.routes.cloud import cloud_router
@@ -22,7 +22,7 @@ app.include_router(generation_router)
 app.include_router(dsa_router)
 app.include_router(devops_router)
 app.include_router(cloud_router)
-app.include_router(aiml_library_router)
+app.include_router(aiml_router)
 app.include_router(dashboard_router)
 app.include_router(catalog_router)
 app.include_router(evaluation_router)

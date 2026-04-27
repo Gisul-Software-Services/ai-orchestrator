@@ -11,14 +11,14 @@ import uuid
 from backend.model_app.billing.metering import bind_usage_meta_from_request
 from backend.model_app.core.app import _emit_usage_metering, logger
 from backend.model_app.core.state import STATS
-from backend.model_app.prompts.aiml import build_aiml_prompt, calculate_aiml_token_limit
+from backend.model_app.competencies.aiml.prompts import build_aiml_prompt, calculate_aiml_token_limit
 from backend.model_app.prompts.generation import (
     build_coding_prompt,
     build_sql_prompt,
     build_subjective_prompt,
     build_topics_prompt,
 )
-from backend.model_app.services.aiml import (
+from backend.model_app.competencies.aiml.generator import (
     generate_aiml_dataset,
     validate_aiml_output,
     validate_and_fix_aiml_response,

@@ -1,11 +1,9 @@
-"""Generation routes for the modular monolith."""
-
+"""Generation routes for the modular monolith (MCQ, SQL, coding, topics, chat)."""
 from __future__ import annotations
 
 from fastapi import APIRouter, Body
 from starlette.requests import Request
 
-from backend.model_app.schemas.aiml import AIMLGenerationRequest
 from backend.model_app.schemas.generation import (
     CodingGenerationRequest,
     MCQGenerationRequest,
@@ -42,11 +40,6 @@ async def generate_coding(body: CodingGenerationRequest, http_request: Request):
 @router.post("/api/v1/generate-sql")
 async def generate_sql(body: SQLGenerationRequest, http_request: Request):
     return await generation_service.generate_sql(body, http_request)
-
-
-@router.post("/api/v1/generate-aiml")
-async def generate_aiml(body: AIMLGenerationRequest, http_request: Request):
-    return await generation_service.generate_aiml(body, http_request)
 
 
 @router.post("/api/v1/chat")

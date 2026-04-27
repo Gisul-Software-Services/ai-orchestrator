@@ -8,7 +8,7 @@ from fastapi import HTTPException
 import torch
 
 from backend.model_app.core import state as app_state
-from backend.model_app.services.cache import RESPONSE_CACHE
+from backend.model_app.services.cache import get_from_cache, save_to_cache, generate_cache_key
 from backend.model_app.services.jobs import (
     _job_store_count_active,
     _job_store_count_total,
@@ -80,8 +80,9 @@ def get_stats():
 
 
 def clear_cache():
-    cleared_count = len(RESPONSE_CACHE)
-    RESPONSE_CACHE.clear()
+    from backend.model_app.services.cache import _local_fallback
+    cleared_count = len(_local_fallback)
+    _local_fallback.clear()
     logger.info("Cache cleared: %s entries removed", cleared_count)
     return {
         "status": "cache cleared",

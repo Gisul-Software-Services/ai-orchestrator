@@ -7,10 +7,12 @@ from pydantic_settings import BaseSettings
 
 class ModelSettings(BaseSettings):
     model_name: str = "Qwen/Qwen2.5-7B-Instruct-AWQ"
+    coder_model_name: str = "Qwen/Qwen2.5-Coder-7B-Instruct-AWQ"
     assets_dir: Path = Path("/app/assets")
     mongodb_uri: str
     redis_url: str = "redis://redis:6379"
     billing_db_name: str = "aaptor_model"
+    rag_service_url: str = ""  # e.g. http://127.0.0.1:7003 — leave empty to use local fallback
     # LLM backend:
     # - "vllm": local vLLM inside model-service (Linux + NVIDIA/CUDA)
     # - "ollama": external Ollama server (works on macOS; can run Qwen locally)

@@ -24,7 +24,6 @@ from backend.model_app.services.aiml import (
     validate_and_fix_aiml_response,
 )
 from backend.model_app.services.cache import (
-    RESPONSE_CACHE,
     generate_cache_key,
     get_from_cache,
     save_to_cache,
@@ -304,12 +303,14 @@ async def generate_mcq(body, http_request):
                 if not item_data.get("request_id"):
                     item_data["request_id"] = str(uuid.uuid4())
                 cache_key = generate_cache_key("mcq", {**item_data, "question_index": i})
-                if body.use_cache and cache_key in RESPONSE_CACHE:
-                    cached = dict(RESPONSE_CACHE[cache_key])
-                    cached["cache_hit"] = True
-                    any_cache_hit = True
-                    all_questions.append(cached)
-                    continue
+                if body.use_cache:
+                    cached = get_from_cache(cache_key)
+                    if cached:
+                        cached = dict(cached)
+                        cached["cache_hit"] = True
+                        any_cache_hit = True
+                        all_questions.append(cached)
+                        continue
                 result = await enqueue_and_wait(item_data, cache_key)
                 total_time += result.get("generation_time_seconds", 0)
                 all_questions.append(result)

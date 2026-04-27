@@ -2,7 +2,7 @@
 
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
-import { Activity, BarChart3, History, LayoutDashboard, Layers, Play, Settings, Users } from "lucide-react";
+import { Activity, BarChart3, Database, History, LayoutDashboard, Play, Settings, Users } from "lucide-react";
 import { useHealthQuery } from "@/hooks/useMetrics";
 import Link from "next/link";
 
@@ -12,7 +12,7 @@ const SECTIONS = [
   { href: "/monitoring", label: "Monitoring", icon: Activity },
   { href: "/usage", label: "Usage & Billing", icon: BarChart3 },
   { href: "/orgs", label: "Orgs & Keys", icon: Users },
-  { href: "/catalog", label: "Dataset Catalog", icon: Layers },
+  { href: "/rag", label: "RAG Management", icon: Database },
   { href: "/history", label: "History", icon: History },
   { href: "/settings", label: "Settings", icon: Settings },
 ];

@@ -928,7 +928,7 @@ async def generate_aiml_library(body, http_request):
         calculate_aiml_token_limit,
     )
     from backend.model_app.services.batching import add_to_batch_and_wait
-    from backend.model_app.services.cache import generate_cache_key, get_from_cache, save_to_cache
+    from backend.model_app.services.cache import generate_cache_key, get_from_cache_async, save_to_cache_async
     from backend.model_app.services.generation import extract_json
     from backend.model_app.services.jobs import _job_store_set, _job_store_update
     from backend.model_app.services.model import _llm_chat_single
@@ -946,28 +946,22 @@ async def generate_aiml_library(body, http_request):
         await _job_store_update(job_id, status="processing")
         try:
             item_data = {k: v for k, v in data.items()}
-            cache_key = generate_cache_key("aiml_library", item_data)
-
-            if body.use_cache:
-                cached = get_from_cache(cache_key)
-                if cached:
-                    cached["cache_hit"] = True
-                    await _job_store_set(job_id, {
-                        "status": "complete",
-                        "result": {"aiml_problems": [cached], "generation_time_seconds": 0, "cache_hit": True, "batched": False, "batch_size": 1},
-                        "error": None,
-                    })
-                    _emit_usage_metering(
-                        job_id=job_id,
-                        usage_meta=um,
-                        route="generate-aiml-library",
-                        cache_hit=True,
-                        latency_ms=(time.time() - t_outer) * 1000,
-                        status="success",
-                    )
-                    return
 
             matched = _match_dataset(body.topic, body.concepts, body.difficulty)
+
+            # Try RAG service first, fall back to local _match_dataset
+            from backend.model_app.services.rag_client import retrieve as rag_retrieve
+            rag_result = await rag_retrieve(
+                competency="aiml",
+                topic=body.topic,
+                difficulty=body.difficulty,
+                concepts=body.concepts,
+            )
+            if rag_result and rag_result.get("matched"):
+                matched = rag_result["matched"]
+                logger.info("RAG service match: '%s'", matched.get("name", ""))
+            else:
+                matched = _match_dataset(body.topic, body.concepts, body.difficulty)
 
             if matched:
                 logger.info("Using library dataset: %s", matched["name"])
@@ -984,7 +978,7 @@ async def generate_aiml_library(body, http_request):
                         temperature=0.6,
                         top_p=0.9,
                         repetition_penalty=1.1,
-                        max_tokens=2000,
+                        max_tokens=900,
                     )
                     try:
                         from backend.model_app.billing.metering import current_token_counts
@@ -1063,7 +1057,6 @@ async def generate_aiml_library(body, http_request):
                         logger.warning("Library AIML output has quality issues - returning with warnings: %s", issues)
                         problem["validation_warnings"] = issues
 
-                    save_to_cache(cache_key, problem)
                     await _job_store_set(job_id, {
                         "status": "complete",
                         "result": {"aiml_problems": [problem], "generation_time_seconds": round(gen_time, 3), "cache_hit": False, "batched": False, "batch_size": 1},
@@ -1078,32 +1071,10 @@ async def generate_aiml_library(body, http_request):
                         status="success",
                     )
                 except Exception as e:
-                    logger.error("Library generation failed: %s - falling back to synthetic", e)
-                    token_limit = calculate_aiml_token_limit(item_data)
-                    result = await add_to_batch_and_wait("aiml", item_data, cache_key, build_aiml_prompt, token_limit)
-                    result["dataset_strategy"] = "synthetic_fallback"
-                    is_valid, issues = validate_aiml_output(
-                        result,
-                        item_data.get("topic", ""),
-                        item_data.get("concepts", []),
-                        item_data.get("difficulty", "Medium"),
-                        matched_dataset=None,
-                    )
-                    if not is_valid:
-                        result["validation_warnings"] = issues
-                    save_to_cache(cache_key, result)
-                    await _job_store_set(job_id, {
-                        "status": "complete",
-                        "result": {"aiml_problems": [result], "generation_time_seconds": round(result.get("generation_time_seconds", 0), 3), "cache_hit": False, "batched": False, "batch_size": 1},
-                        "error": None,
-                    })
-                    _emit_usage_metering(
-                        job_id=job_id,
-                        usage_meta=um,
-                        route="generate-aiml-library",
-                        cache_hit=False,
-                        latency_ms=(time.time() - t_outer) * 1000,
-                        status="success",
+                    logger.error("Library generation failed: %s", e)
+                    raise HTTPException(
+                        status_code=500,
+                        detail=f"Failed to generate question: {str(e)}"
                     )
             else:
                 logger.info("No catalog match - using synthetic generation")
@@ -1119,7 +1090,6 @@ async def generate_aiml_library(body, http_request):
                 )
                 if not is_valid:
                     result["validation_warnings"] = issues
-                save_to_cache(cache_key, result)
                 await _job_store_set(job_id, {
                     "status": "complete",
                     "result": {"aiml_problems": [result], "generation_time_seconds": round(result.get("generation_time_seconds", 0), 3), "cache_hit": False, "batched": False, "batch_size": 1},

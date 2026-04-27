@@ -57,9 +57,12 @@ async def _app_lifespan(_app: FastAPI):
     from backend.model_app.core.settings import get_settings
 
     s = get_settings()
-    for p in (s.dsa_enriched_path, s.aiml_catalog_path):
-        if not p.exists():
-            raise RuntimeError(f"Required asset not found: {p}")
+    # Only validate local assets if RAG service is not configured
+    # When RAG_SERVICE_URL is set, assets live on the RAG VM — no local check needed
+    if not s.rag_service_url:
+        for p in (s.dsa_enriched_path, s.aiml_catalog_path):
+            if not p.exists():
+                logger.warning("Local asset not found: %s (RAG service not configured)", p)
     await ensure_indexes()
     app_state.STATS["server_start_time"] = datetime.now(timezone.utc).isoformat()
     load_model()

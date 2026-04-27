@@ -749,23 +749,40 @@ async def generate_dsa_question(body, http_request):
     rid = str(uuid.uuid4())
     t0 = time.perf_counter()
     request = body
-    problems = _load_dsa_enriched()
-    query = f"{request.topic} {' '.join(request.concepts)} {request.difficulty}"
-    faiss_available = _load_faiss_index()
 
-    if faiss_available:
-        logger.info("Using FAISS search for: %s", query)
-        matched = _faiss_search(query, request.difficulty, top_k=20)
-        search_method = "faiss"
+    # Try RAG service first, fall back to local FAISS
+    from backend.model_app.services.rag_client import retrieve as rag_retrieve
+    rag_result = await rag_retrieve(
+        competency="dsa",
+        topic=request.topic,
+        difficulty=request.difficulty,
+        concepts=request.concepts,
+        top_k=20,
+    )
+
+    if rag_result and rag_result.get("matched"):
+        matched = [rag_result["matched"]]
+        search_method = f"rag_{rag_result.get('method', 'faiss')}"
+        logger.info("RAG service match: '%s' via %s", rag_result["matched"].get("title", ""), search_method)
     else:
-        logger.info("Using keyword search for: %s", query)
-        matched = _keyword_filter(problems, request.difficulty, request.topic, request.concepts)
-        search_method = "keyword"
+        # Local fallback
+        problems = _load_dsa_enriched()
+        query = f"{request.topic} {' '.join(request.concepts)} {request.difficulty}"
+        faiss_available = _load_faiss_index()
 
-    if not matched:
-        logger.warning("No match found - falling back to difficulty only filter")
-        matched = [p for p in problems if p.get("difficulty", "").lower() == request.difficulty.lower()]
-        search_method = "difficulty_only"
+        if faiss_available:
+            logger.info("Using local FAISS search for: %s", query)
+            matched = _faiss_search(query, request.difficulty, top_k=20)
+            search_method = "faiss"
+        else:
+            logger.info("Using keyword search for: %s", query)
+            matched = _keyword_filter(problems, request.difficulty, request.topic, request.concepts)
+            search_method = "keyword"
+
+        if not matched:
+            logger.warning("No match found - falling back to difficulty only filter")
+            matched = [p for p in problems if p.get("difficulty", "").lower() == request.difficulty.lower()]
+            search_method = "difficulty_only"
 
     if not matched:
         raise HTTPException(status_code=404, detail=f"No problems found for difficulty='{request.difficulty}'")

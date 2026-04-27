@@ -108,6 +108,7 @@ async def emit_usage_after_job(
     latency_ms: float,
     status: str = "success",
     error_detail: str | None = None,
+    model_name: str | None = None,
 ) -> None:
     try:
         counts = current_token_counts.get(None) or {}
@@ -129,7 +130,7 @@ async def emit_usage_after_job(
             client_ip=str(meta.get("client_ip") or ""),
             user_agent=str(meta.get("user_agent") or ""),
             correlation_id=str(meta.get("correlation_id") or ""),
-            model_name=s.model_name,
+            model_name=model_name or s.model_name,
             api_version=s.api_version,
             error_detail=error_detail,
         )

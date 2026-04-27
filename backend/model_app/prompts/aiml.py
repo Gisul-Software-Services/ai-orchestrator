@@ -143,10 +143,65 @@ Generate now:"""
 
 
 def calculate_aiml_token_limit(request_data: dict) -> int:
-    # Generous limits — AIML problems with 80-150 rows need significant tokens.
-    # Easy gets 10k, Medium 14k, Hard 16k. No artificial cap.
+    # Capped for 1024 context window — leave room for prompt tokens (~500-600).
+    # Increase these when moving to a larger context GPU.
     difficulty = request_data.get("difficulty", "medium").lower()
-    return {"easy": 10000, "medium": 14000, "hard": 16000}.get(difficulty, 14000)
+    return {"easy": 400, "medium": 450, "hard": 500}.get(difficulty, 450)
 
-from backend.model_app.prompts.dsa import _build_aiml_library_prompt
+
+def _build_aiml_library_prompt(request_data: dict, dataset: dict) -> str:
+    topic = request_data.get("topic", "")
+    difficulty = request_data.get("difficulty", "Medium")
+    concepts = request_data.get("concepts", [])
+    concepts_str = ", ".join(concepts) if concepts else "general ML"
+
+    return f"""You are an expert AI/ML assessment designer.
+
+Generate a {difficulty} difficulty AI/ML problem using this REAL dataset.
+
+DATASET INFORMATION:
+Name: {dataset.get('name', '')}
+Source: {dataset.get('source', '')}
+Domain: {dataset.get('domain', '')}
+Description: {dataset.get('description', '')}
+Features: {dataset.get('features_info', '')}
+Target: {dataset.get('target', '')}
+Target type: {dataset.get('target_type', '')}
+Size: {dataset.get('size', '')}
+
+ASSESSMENT TOPIC: {topic}
+CONCEPTS TO TEST: {concepts_str}
+DIFFICULTY: {difficulty}
+
+RULES:
+- Write a realistic real-world problem statement around THIS specific dataset.
+- Tasks must reference the ACTUAL feature names from this dataset.
+- Do NOT suggest loading a different dataset.
+- Do NOT generate synthetic data.
+- expectedApproach must suggest algorithms appropriate for this dataset target type.
+- evaluationCriteria must match the target type (classification vs regression metrics).
+- ALL fields are REQUIRED.
+
+Return ONLY this JSON:
+{{
+  "problemStatement": "Detailed real-world problem description grounded in the actual dataset domain",
+  "tasks": [
+    "Task 1: Data Loading and Exploration - load the {dataset.get('name', '')} dataset using the provided load_code. Examine the actual columns specific to this dataset. Display shape, first 10 rows, check missing values per column, data types, and summary statistics relevant to {topic}.",
+    "Task 2: Data Preprocessing - handle any missing values in this specific dataset. Identify which features from {dataset.get('name', '')} need encoding or normalization. Apply appropriate transformations. Split 80/20 train/test.",
+    "Task 3: Exploratory Data Analysis - visualize the {dataset.get('target', 'target')} distribution. Plot correlations between features in this {dataset.get('domain', 'domain')} dataset. Create 2-3 meaningful domain-specific plots for {topic}.",
+    "Task 4: Model Training - train at least 2 ML models best suited for this {dataset.get('target_type', '')} problem using {dataset.get('name', '')} features. Evaluate with metrics appropriate for this target type.",
+    "Task 5: Model Comparison and {dataset.get('domain', 'Domain')} Insights - compare model performance on this specific dataset. Identify the most predictive features. Provide actionable {dataset.get('domain', 'domain')}-specific recommendations for {topic}."
+  ],
+  "preprocessing_requirements": [
+    "Specific step 1 for THIS dataset",
+    "Specific step 2 for THIS dataset",
+    "Specific step 3 for THIS dataset"
+  ],
+  "expectedApproach": "2-3 specific ML algorithms suited for this exact dataset with reasoning.",
+  "evaluationCriteria": ["metric1", "metric2", "metric3"],
+  "difficulty": "{difficulty}",
+  "bloomLevel": "Apply"
+}}
+
+Generate now:"""
 

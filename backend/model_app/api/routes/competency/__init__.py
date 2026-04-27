@@ -1,1 +1,0 @@
-# competency routes package

@@ -1,13 +1,15 @@
 from __future__ import annotations
 
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Literal, Optional
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
+
+_DIFFICULTY = Literal["Easy", "Medium", "Hard"]
 
 
 class AIMLGenerationRequest(BaseModel):
-    topic: str
-    difficulty: str
+    topic: str = Field(..., min_length=1, max_length=500)
+    difficulty: _DIFFICULTY = "Medium"
     use_cache: bool = True
     org_id: Optional[str] = None
 
@@ -33,8 +35,8 @@ class AIMLBatchResponse(BaseModel):
 
 
 class AIMLLibraryRequest(BaseModel):
-    topic: str
-    difficulty: str
+    topic: str = Field(..., min_length=1, max_length=500)
+    difficulty: _DIFFICULTY = "Medium"
     concepts: List[str] = []
     use_cache: bool = True
     org_id: Optional[str] = None

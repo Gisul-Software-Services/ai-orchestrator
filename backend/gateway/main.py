@@ -23,8 +23,37 @@ from backend.gateway.core.auth import is_admin_api_key
 from backend.gateway.core.settings import get_settings
 from backend.gateway.middleware.request_log import RequestLogMiddleware
 
+from contextlib import asynccontextmanager
+
 app = FastAPI(title="Gisul Gateway")
 logger = logging.getLogger(__name__)
+
+
+@asynccontextmanager
+async def _gateway_lifespan(_app: FastAPI):
+    """Startup validation — fail loudly if critical config is missing."""
+    s = get_settings()
+    if not s.admin_api_key:
+        logger.critical(
+            "SECURITY WARNING: ADMIN_API_KEY is not set. "
+            "Admin endpoints (/api/v1/catalog/*, /api/v1/clear-cache, etc.) are UNPROTECTED. "
+            "Set ADMIN_API_KEY in environment before deploying to production."
+        )
+    if s.allowed_origins == ["*"]:
+        logger.warning(
+            "CORS is set to allow all origins ('*'). "
+            "Set ALLOWED_ORIGINS to your domain in production."
+        )
+    if not s.require_verified_org_for_generation:
+        logger.warning(
+            "REQUIRE_VERIFIED_ORG_FOR_GENERATION is False. "
+            "All generation endpoints are open without org verification."
+        )
+    logger.info("Gateway started — model_service=%s", s.model_service_url)
+    yield
+
+
+app = FastAPI(title="Gisul Gateway", lifespan=_gateway_lifespan)
 
 _PROXY_TIMEOUT = httpx.Timeout(connect=5.0, read=180.0, write=10.0, pool=5.0)
 

@@ -1,8 +1,10 @@
 from __future__ import annotations
 
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Literal, Optional
 
 from pydantic import BaseModel, ConfigDict, Field
+
+_DIFFICULTY = Literal["Easy", "Medium", "Hard"]
 
 
 class TopicGenerationRequest(BaseModel):
@@ -12,8 +14,8 @@ class TopicGenerationRequest(BaseModel):
     experience_min: int
     experience_max: int
     experience_mode: str = "corporate"
-    num_topics: int = 10
-    num_questions: int = 1
+    num_topics: int = Field(default=10, ge=1, le=20)
+    num_questions: int = Field(default=1, ge=1, le=20)
     use_cache: bool = True
     org_id: Optional[str] = None
 
@@ -37,10 +39,10 @@ class TopicBatchResponse(BaseModel):
 
 
 class MCQGenerationRequest(BaseModel):
-    topic: str
-    difficulty: str
-    target_audience: str
-    num_questions: int = 1
+    topic: str = Field(..., min_length=1, max_length=500)
+    difficulty: _DIFFICULTY = "Medium"
+    target_audience: str = Field(..., min_length=1, max_length=200)
+    num_questions: int = Field(default=1, ge=1, le=20)
     request_id: Optional[str] = None
     use_cache: bool = True
     org_id: Optional[str] = None
@@ -67,10 +69,10 @@ class MCQBatchResponse(BaseModel):
 
 
 class SubjectiveGenerationRequest(BaseModel):
-    topic: str
-    difficulty: str
-    target_audience: str
-    num_questions: int = 1
+    topic: str = Field(..., min_length=1, max_length=500)
+    difficulty: _DIFFICULTY = "Medium"
+    target_audience: str = Field(..., min_length=1, max_length=200)
+    num_questions: int = Field(default=1, ge=1, le=20)
     use_cache: bool = True
     org_id: Optional[str] = None
 
@@ -96,12 +98,12 @@ class SubjectiveBatchResponse(BaseModel):
 
 
 class CodingGenerationRequest(BaseModel):
-    topic: str
-    difficulty: str
+    topic: str = Field(..., min_length=1, max_length=500)
+    difficulty: _DIFFICULTY = "Medium"
     language: str = "Python"
     job_role: str = "Software Engineer"
     experience_years: str = "3-5"
-    num_questions: int = 1
+    num_questions: int = Field(default=1, ge=1, le=20)
     use_cache: bool = True
     org_id: Optional[str] = None
 
@@ -130,12 +132,12 @@ class CodingBatchResponse(BaseModel):
 
 
 class SQLGenerationRequest(BaseModel):
-    topic: str
-    difficulty: str
+    topic: str = Field(..., min_length=1, max_length=500)
+    difficulty: _DIFFICULTY = "Medium"
     database_type: str = "PostgreSQL"
     job_role: str = "Software Engineer"
     experience_years: str = "3-5"
-    num_questions: int = 1
+    num_questions: int = Field(default=1, ge=1, le=20)
     use_cache: bool = True
     org_id: Optional[str] = None
 

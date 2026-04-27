@@ -5,7 +5,9 @@ from fastapi import FastAPI
 from backend.model_app.api.routes.aiml_library import router as aiml_library_router
 from backend.model_app.api.routes import system
 from backend.model_app.api.routes.catalog import router as catalog_router
+from backend.model_app.api.routes.cloud import cloud_router
 from backend.model_app.api.routes.dashboard import router as dashboard_router
+from backend.model_app.api.routes.devops import devops_router
 from backend.model_app.api.routes.dsa import dsa_router
 from backend.model_app.api.routes.evaluation import router as evaluation_router
 from backend.model_app.api.routes.generation import generation_router
@@ -18,6 +20,8 @@ app.add_middleware(RequestLogMiddleware)
 app.include_router(system.router)
 app.include_router(generation_router)
 app.include_router(dsa_router)
+app.include_router(devops_router)
+app.include_router(cloud_router)
 app.include_router(aiml_library_router)
 app.include_router(dashboard_router)
 app.include_router(catalog_router)

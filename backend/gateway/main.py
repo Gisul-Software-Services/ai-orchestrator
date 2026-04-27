@@ -38,6 +38,8 @@ _ORG_GATED_POST_PATHS = frozenset(
         "/api/v1/generate-aiml",
         "/api/v1/generate-aiml-library",
         "/api/v1/generate-dsa-question",
+        "/api/v1/generate-devops-question",
+        "/api/v1/generate-cloud-question",
         "/api/v1/enrich-dsa",
         "/api/v1/evaluation/aiml",
         "/api/v1/evaluation/dsa",

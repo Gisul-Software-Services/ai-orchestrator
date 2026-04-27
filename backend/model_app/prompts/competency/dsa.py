@@ -6,19 +6,20 @@ MODE 2 — PURE GENERATION (fallback): no match → generate everything from scr
 """
 from __future__ import annotations
 
+from backend.model_app.prompts.global_rules import GLOBAL_RULES
+
 # =============================================================================
 # MODE 1 — RAG REWORD (PRIMARY)
 # =============================================================================
 
-DSA_REWORD_RULES = """You are a technical problem designer. Your ONLY job is to change
-the real-world story of a coding problem. Nothing else changes.
-
-ABSOLUTE RULES — violating any of these causes automatic rejection:
+DSA_REWORD_RULES = GLOBAL_RULES + """
+=== DSA REWORD RULES ===
+The ONLY task is to change the real-world story of a coding problem.
+Nothing else changes.
 
 [R1] ALGORITHM LOCK
 The underlying algorithm must be identical to the original.
-Never change WHAT the solution computes.
-Only change the story that motivates WHY it is being computed.
+Never change WHAT the solution computes — only the story that motivates WHY.
 
 [R2] INPUT FORMAT LOCK
 The number of parameters must be identical.
@@ -45,9 +46,7 @@ Before returning output, verify internally:
 2. Input format matches exactly? TRUE
 3. Output type matches exactly? TRUE
 4. No constraints added/removed? TRUE
-5. Identical code passes both versions? TRUE
-
-Return ONLY valid JSON. No markdown, no explanation, no preamble."""
+5. Identical code passes both versions? TRUE"""
 
 DSA_REWORD_SCHEMA = """ORIGINAL TITLE:
 {title}
@@ -64,30 +63,29 @@ Return ONLY this JSON:
 # MODE 2 — PURE GENERATION (FALLBACK)
 # =============================================================================
 
-DSA_GENERATION_RULES = """You are an expert technical interviewer and JSON-only coding question generator.
+DSA_GENERATION_RULES = GLOBAL_RULES + """
+=== DSA GENERATION RULES ===
 
 NARRATIVE REQUIREMENT:
 Every question MUST wrap the algorithm in an original real-world scenario.
-Drawn from unusual fields: astrobotany, deep-sea logistics, quantum routing,
+Draw from unusual fields: astrobotany, deep-sea logistics, quantum routing,
 medieval taxation, space station resource allocation, mycological networks.
-Parameter names, function name, test case values must all live in the same world.
+Parameter names, function name, and test case values must all live in the same world.
 
 DIFFICULTY MAPPING:
-EASY: Basic arrays, string manipulation, O(n) or O(n log n)
-MEDIUM: Two pointers, sliding window, BFS/DFS, greedy, O(n log n)
-HARD: Dynamic programming, backtracking, advanced graphs, O(n²) or better
+EASY   — Basic arrays, string manipulation, O(n) or O(n log n)
+MEDIUM — Two pointers, sliding window, BFS/DFS, greedy, O(n log n)
+HARD   — Dynamic programming, backtracking, advanced graphs, O(n²) or better
 
 TEST CASE REQUIREMENTS:
-Public: exactly 3 (basic, slightly larger, mild edge case)
-Hidden: exactly 3 (minimum input, maximum boundary, tricky logical case)
+Public : exactly 3 (basic, slightly larger, mild edge case)
+Hidden : exactly 3 (minimum input, maximum boundary, tricky logical case)
 CRITICAL: Every expected output MUST be logically verified. Never guess.
 
 INPUT/OUTPUT FORMAT:
-Input: JSON object with domain-specific parameter names
-Output: JSON value — NOT a string representation
-Forbidden generic names: nums, arr, k, n, s, t, a, b, list, array
-
-Return ONLY valid JSON. No markdown, no explanation."""
+Input  : JSON object with domain-specific parameter names
+Output : JSON value — NOT a string representation
+Forbidden generic names: nums, arr, k, n, s, t, a, b, list, array"""
 
 DSA_GENERATION_SCHEMA = """Generate a complete DSA coding question:
 Topic:      {topic}
@@ -98,7 +96,7 @@ Languages:  {languages}
 Return ONLY this JSON:
 {{"title": "Scenario-based title",
 "difficulty": "{difficulty}",
-"description": "3-paragraph description with real-world context",
+"description": "3-paragraph description with real-world context following G3",
 "examples": [{{"input": "readable input", "output": "readable output", "explanation": "step-by-step"}}],
 "constraints": ["1 <= size <= 10^5", "Expected time: O(...)"],
 "public_testcases": [

@@ -6,7 +6,7 @@ from pydantic import BaseModel
 
 
 class DSAQuestionRequest(BaseModel):
-    difficulty: str
+    difficulty: str = "Medium"
     topic: str
     concepts: List[str] = []
     languages: List[str] = []

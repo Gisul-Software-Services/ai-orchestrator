@@ -1,1 +1,0 @@
-# competency services package

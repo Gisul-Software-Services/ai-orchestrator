@@ -10,7 +10,7 @@ MODE: scenario — architecture reasoning and troubleshooting (5+ yrs)
 """
 from __future__ import annotations
 
-from backend.model_app.prompts.global_rules import GLOBAL_RULES
+from backend.model_app.shared.global_rules import GLOBAL_RULES
 
 # ─────────────────────────────────────────────
 # SHARED SYSTEM PROMPT (both passes)

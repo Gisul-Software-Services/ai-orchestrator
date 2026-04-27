@@ -7,8 +7,8 @@ from fastapi import APIRouter, HTTPException
 from fastapi.responses import StreamingResponse
 from starlette.requests import Request
 
-from backend.model_app.schemas.cloud import CloudQuestionRequest
-from backend.model_app.services.competency import cloud_generator
+from backend.model_app.competencies.cloud.schema import CloudQuestionRequest
+from backend.model_app.competencies.cloud import generator as cloud_generator
 
 router = APIRouter(tags=["cloud"])
 cloud_router = router

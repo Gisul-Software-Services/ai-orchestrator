@@ -8,9 +8,9 @@ from fastapi import APIRouter, Body, HTTPException
 from fastapi.responses import StreamingResponse
 from starlette.requests import Request
 
-from backend.model_app.schemas.dsa import DSAQuestionRequest
+from backend.model_app.competencies.dsa.schema import DSAQuestionRequest
 from backend.model_app.services import dsa as dsa_service
-from backend.model_app.services.competency import dsa_generator
+from backend.model_app.competencies.dsa import generator as dsa_generator
 
 router = APIRouter(tags=["dsa"])
 dsa_router = router

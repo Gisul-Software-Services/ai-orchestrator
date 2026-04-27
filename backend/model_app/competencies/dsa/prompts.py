@@ -6,7 +6,7 @@ MODE 2 — PURE GENERATION (fallback): no match → generate everything from scr
 """
 from __future__ import annotations
 
-from backend.model_app.prompts.global_rules import GLOBAL_RULES
+from backend.model_app.shared.global_rules import GLOBAL_RULES
 
 # =============================================================================
 # MODE 1 — RAG REWORD (PRIMARY)

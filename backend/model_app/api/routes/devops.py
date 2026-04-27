@@ -7,8 +7,8 @@ from fastapi import APIRouter, HTTPException
 from fastapi.responses import StreamingResponse
 from starlette.requests import Request
 
-from backend.model_app.schemas.devops import DevOpsQuestionRequest
-from backend.model_app.services.competency import devops_generator
+from backend.model_app.competencies.devops.schema import DevOpsQuestionRequest
+from backend.model_app.competencies.devops import generator as devops_generator
 
 router = APIRouter(tags=["devops"])
 devops_router = router

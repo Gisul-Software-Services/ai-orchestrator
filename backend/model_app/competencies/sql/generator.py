@@ -23,7 +23,7 @@ logger = logging.getLogger(__name__)
 
 
 def _build_response(selected: dict, reworded: dict) -> dict:
-    """Build Aaptor-compatible SQL response from RAG dataset + reworded title/description."""
+    """Build Aaptor-compatible SQL response from RAG dataset + reworded title/description/hints."""
     return {
         "title": reworded.get("title", selected.get("title", "")),
         "description": reworded.get("description", selected.get("description", "")),
@@ -35,7 +35,7 @@ def _build_response(selected: dict, reworded: dict) -> dict:
         "starter_query": selected.get("starter_query", "-- Write your SQL query here\n\nSELECT "),
         "reference_query": selected.get("reference_query", ""),
         "sql_expected_output": selected.get("sql_expected_output", ""),
-        "hints": selected.get("hints", []),
+        "hints": reworded.get("hints", selected.get("hints", [])),
         "evaluation": selected.get("evaluation", {
             "engine": "postgres",
             "comparison": "result_set",
@@ -48,14 +48,16 @@ def _build_response(selected: dict, reworded: dict) -> dict:
 
 
 async def _reword_problem(selected: dict) -> dict:
-    """Reword title + description using Qwen."""
-    # Extract table names from schemas so the prompt can enforce them
+    """Reword title, description, and hints using Qwen."""
     schemas = selected.get("schemas", {})
     tables = ", ".join(schemas.keys()) if schemas else "see description"
+    hints = selected.get("hints", [])
+    hints_text = "\n".join(f"- {h}" for h in hints) if hints else "- No hints provided"
 
     user_prompt = SQL_REWORD_SCHEMA.format(
         title=selected.get("title", ""),
-        description=selected.get("description", "")[:600],
+        description=selected.get("description", "")[:500],
+        hints=hints_text,
         tables=tables,
     )
     try:

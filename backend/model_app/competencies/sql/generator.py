@@ -13,7 +13,7 @@ from typing import Optional
 
 from fastapi import HTTPException
 
-from backend.model_app.competencies.sql.prompts import SQL_REWORD_RULES, SQL_REWORD_SCHEMA
+from backend.model_app.competencies.sql.prompts import SQL_REWORD_RULES, SQL_REWORD_SCHEMA, is_domain_specific
 from backend.model_app.services.generation import extract_json
 from backend.model_app.services.model import _llm_chat_single
 from backend.model_app.services.rag_client import retrieve as rag_retrieve
@@ -50,15 +50,31 @@ def _build_response(selected: dict, reworded: dict) -> dict:
 async def _reword_problem(selected: dict) -> dict:
     """Reword title, description, and hints using Qwen."""
     schemas = selected.get("schemas", {})
-    tables = ", ".join(schemas.keys()) if schemas else "see description"
+    tables = list(schemas.keys())
+    tables_str = ", ".join(tables) if tables else "see description"
     hints = selected.get("hints", [])
     hints_text = "\n".join(f"- {h}" for h in hints) if hints else "- No hints provided"
+
+    # Smart domain instruction based on table names
+    if is_domain_specific(tables):
+        domain_instruction = (
+            f"The table names ({tables_str}) are domain-specific. "
+            f"KEEP the same domain — do NOT shift to a different domain. "
+            f"Just rewrite the title and description more clearly."
+        )
+    else:
+        domain_instruction = (
+            f"The table names ({tables_str}) are neutral. "
+            f"SHIFT to a new domain (e-commerce, fintech, gaming, logistics, education, social media). "
+            f"The new domain must make sense with the existing column names."
+        )
 
     user_prompt = SQL_REWORD_SCHEMA.format(
         title=selected.get("title", ""),
         description=selected.get("description", "")[:500],
         hints=hints_text,
-        tables=tables,
+        tables=tables_str,
+        domain_instruction=domain_instruction,
     )
     try:
         messages = [

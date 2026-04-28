@@ -16,6 +16,7 @@ import { ArrowLeft, RefreshCw, Upload, Search, Trash2, Eye } from "lucide-react"
 const COMPETENCY_LABELS: Record<string, string> = {
   dsa: "DSA",
   aiml: "AIML",
+  sql: "SQL",
   data_engineering: "Data Engineering",
   devops: "DevOps",
   cloud: "Cloud",

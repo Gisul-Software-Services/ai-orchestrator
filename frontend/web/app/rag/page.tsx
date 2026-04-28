@@ -12,6 +12,7 @@ const COMPETENCIES = [
   { id: "aiml", label: "AIML", description: "AI/ML datasets for question generation", available: true },
   { id: "devops", label: "DevOps", description: "DevOps and infrastructure scenarios", available: true },
   { id: "cloud", label: "Cloud", description: "Cloud architecture and services", available: true },
+  { id: "sql", label: "SQL", description: "SQL query problems (RAG + reword)", available: true },
   { id: "data_engineering", label: "Data Engineering", description: "Data pipeline and engineering problems", available: false },
   { id: "design", label: "Design", description: "System design problems", available: false },
   { id: "prompt_engineering", label: "Prompt Engineering", description: "Prompt engineering tasks", available: false },

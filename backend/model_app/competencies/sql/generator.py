@@ -52,6 +52,18 @@ async def _reword_problem(selected: dict) -> dict:
     schemas = selected.get("schemas", {})
     tables = list(schemas.keys())
     tables_str = ", ".join(tables) if tables else "see description"
+
+    # Build table+columns string so LLM knows exact column names
+    schema_detail_parts = []
+    for tname, tdef in schemas.items():
+        cols = tdef.get("columns", [])
+        if isinstance(cols, list):
+            col_names = ", ".join(c.get("name", "") for c in cols if c.get("name"))
+        else:
+            col_names = str(cols)
+        schema_detail_parts.append(f"{tname}({col_names})")
+    schema_detail = " | ".join(schema_detail_parts) if schema_detail_parts else tables_str
+
     hints = selected.get("hints", [])
     hints_text = "\n".join(f"- {h}" for h in hints) if hints else "- No hints provided"
 
@@ -73,7 +85,7 @@ async def _reword_problem(selected: dict) -> dict:
         title=selected.get("title", ""),
         description=selected.get("description", "")[:500],
         hints=hints_text,
-        tables=tables_str,
+        tables=schema_detail,
         domain_instruction=domain_instruction,
     )
     try:

@@ -106,11 +106,15 @@ async def generate_sql_questions_bulk(
     http_request=None,
 ):
     """Generator that yields `count` SQL questions sequentially via bulk RAG + reword."""
+    # Use sql_category as the RAG topic for precise matching — it maps directly
+    # to the sql_category field in the catalog (join, aggregation, window, etc.)
+    # Fall back to the user topic if no category provided.
+    rag_topic = sql_category if sql_category else topic
     concepts = [sql_category] if sql_category else []
 
     candidates = await rag_retrieve_bulk(
         competency="sql",
-        topic=topic,
+        topic=rag_topic,
         difficulty=difficulty.capitalize(),
         concepts=concepts,
         count=count,
@@ -142,11 +146,14 @@ async def generate_sql_question(
     http_request=None,
 ) -> dict:
     """Single SQL question generation."""
+    # Use sql_category as the RAG topic for precise matching — it maps directly
+    # to the sql_category field in the catalog (join, aggregation, window, etc.)
+    rag_topic = sql_category if sql_category else topic
     concepts = [sql_category] if sql_category else []
 
     rag_result = await rag_retrieve(
         competency="sql",
-        topic=topic,
+        topic=rag_topic,
         difficulty=difficulty.capitalize(),
         concepts=concepts,
         top_k=20,

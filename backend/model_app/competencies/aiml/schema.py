@@ -10,6 +10,7 @@ _DIFFICULTY = Literal["Easy", "Medium", "Hard"]
 class AIMLGenerationRequest(BaseModel):
     topic: str = Field(..., min_length=1, max_length=500)
     difficulty: _DIFFICULTY = "Medium"
+    concepts: List[str] = []
     use_cache: bool = True
     org_id: Optional[str] = None
 

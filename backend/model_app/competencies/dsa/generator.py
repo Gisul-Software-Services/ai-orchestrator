@@ -9,14 +9,9 @@ Flow:
 from __future__ import annotations
 
 import logging
-import random
-import time
-import uuid
 
 from fastapi import HTTPException
 
-from backend.model_app.billing.metering import bind_usage_meta_from_request
-from backend.model_app.core.app import _emit_usage_metering
 from backend.model_app.competencies.dsa.prompts import (
     DSA_REWORD_RULES,
     DSA_REWORD_SCHEMA,

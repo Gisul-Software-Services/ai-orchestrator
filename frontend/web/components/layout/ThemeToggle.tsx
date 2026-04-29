@@ -1,29 +1,17 @@
 "use client";
 
-import { MoonStar, Sun } from "lucide-react";
-import { useTheme } from "next-themes";
-import { Button } from "@/components/ui/button";
-import { useEffect, useState } from "react";
+import { MoonStar } from "lucide-react";
 
+// Admin console is dark-mode only.
+// This component renders a static dark mode badge instead of a toggle.
 export function ThemeToggle() {
-  const { theme, setTheme } = useTheme();
-  const [mounted, setMounted] = useState(false);
-
-  useEffect(() => setMounted(true), []);
-  if (!mounted) return null;
-
-  const isDark = theme !== "light";
-
   return (
-    <Button
-      variant="outline"
-      size="icon"
-      className="h-8 w-8 border-zinc-200 bg-white text-zinc-800 hover:bg-zinc-100 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-200 dark:hover:bg-zinc-800"
-      onClick={() => setTheme(isDark ? "light" : "dark")}
-      aria-label="Toggle theme"
+    <div
+      className="flex h-8 items-center gap-1.5 rounded-lg border border-zinc-800/60 bg-zinc-900/60 px-2.5 text-xs text-zinc-500"
+      title="Dark mode (admin console)"
     >
-      {isDark ? <Sun className="h-4 w-4" /> : <MoonStar className="h-4 w-4" />}
-    </Button>
+      <MoonStar className="h-3.5 w-3.5" />
+      <span className="hidden sm:inline">Dark</span>
+    </div>
   );
 }
-

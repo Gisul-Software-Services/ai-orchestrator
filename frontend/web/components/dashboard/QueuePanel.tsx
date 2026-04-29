@@ -2,6 +2,21 @@
 
 import { Skeleton } from "@/components/ui/skeleton";
 import { LiveIndicator } from "./LiveIndicator";
+import { cn } from "@/lib/utils";
+
+function depthColor(v: number): string {
+  if (v === 0) return "bg-zinc-700";
+  if (v <= 5) return "bg-console-emerald";
+  if (v <= 20) return "bg-console-amber";
+  return "bg-console-red";
+}
+
+function depthTextColor(v: number): string {
+  if (v === 0) return "text-zinc-500";
+  if (v <= 5) return "text-emerald-400";
+  if (v <= 20) return "text-amber-400";
+  return "text-red-400";
+}
 
 export function QueuePanel({
   loading,
@@ -12,22 +27,24 @@ export function QueuePanel({
   loading: boolean;
   error: boolean;
   lastOkAt: number | null;
-  queues:
-    | {
-        active_jobs: number;
-        jobs_in_store: number;
-        queue_depths: Record<string, number>;
-      }
-    | null;
+  queues: {
+    active_jobs: number;
+    jobs_in_store: number;
+    queue_depths: Record<string, number>;
+  } | null;
 }) {
+  const sortedQueues = Object.entries(queues?.queue_depths ?? {}).sort(
+    (a, b) => b[1] - a[1]
+  );
+  const isEmpty = sortedQueues.length === 0;
+  const maxDepth = Math.max(1, ...sortedQueues.map(([, v]) => v));
+
   return (
-    <div className="rounded-xl border border-zinc-800 bg-zinc-950/60 p-4 shadow-panel">
-      <div className="mb-3 flex items-center justify-between">
+    <div className="rounded-xl border border-zinc-800/60 bg-zinc-900/50 p-4 backdrop-blur-sm">
+      <div className="mb-4 flex items-center justify-between">
         <div>
-          <div className="text-sm font-semibold text-zinc-50">Queue status</div>
-          <div className="text-xs text-zinc-400">
-            Batch queues + job store snapshot
-          </div>
+          <div className="text-sm font-semibold text-zinc-100">Queue status</div>
+          <div className="text-xs text-zinc-500">Batch queues + job store</div>
         </div>
         <LiveIndicator ok={!error} label={!error ? "Live" : "Degraded"} />
       </div>
@@ -39,51 +56,64 @@ export function QueuePanel({
           <Skeleton className="h-4 w-56" />
         </div>
       ) : error ? (
-        <div className="rounded-lg border border-amber-500/30 bg-amber-500/10 p-3 text-sm text-amber-200">
-          <div className="font-medium">Could not reach model-service</div>
-          <div className="mt-1 text-xs text-amber-200/80">
-            Last successful fetch:{" "}
-            {lastOkAt ? new Date(lastOkAt).toLocaleString() : "never"}
+        <div className="rounded-lg border border-amber-500/20 bg-amber-500/10 p-3 text-sm text-amber-300">
+          <div className="font-medium">Service unreachable</div>
+          <div className="mt-1 text-xs text-amber-300/70">
+            Last fetch: {lastOkAt ? new Date(lastOkAt).toLocaleString() : "never"}
           </div>
         </div>
       ) : (
         <div className="space-y-3">
-          <div className="flex items-center justify-between text-sm text-zinc-200">
-            <span>Active jobs</span>
-            <span className="font-medium text-zinc-50">
-              {queues?.active_jobs ?? 0}
-            </span>
+          {/* Summary row */}
+          <div className="grid grid-cols-2 gap-2">
+            <div className="rounded-lg border border-zinc-800/60 bg-zinc-950/40 px-3 py-2">
+              <div className="text-[10px] uppercase tracking-wide text-zinc-600">Active jobs</div>
+              <div className="mt-0.5 text-lg font-bold text-zinc-100">
+                {queues?.active_jobs ?? 0}
+              </div>
+            </div>
+            <div className="rounded-lg border border-zinc-800/60 bg-zinc-950/40 px-3 py-2">
+              <div className="text-[10px] uppercase tracking-wide text-zinc-600">In store</div>
+              <div className="mt-0.5 text-lg font-bold text-zinc-100">
+                {queues?.jobs_in_store ?? 0}
+              </div>
+            </div>
           </div>
-          <div className="flex items-center justify-between text-sm text-zinc-200">
-            <span>Jobs in store</span>
-            <span className="font-medium text-zinc-50">
-              {queues?.jobs_in_store ?? 0}
-            </span>
-          </div>
-          <div className="pt-2">
-            <div className="mb-2 text-xs font-medium text-zinc-400">
+
+          {/* Queue depths */}
+          <div>
+            <div className="mb-2 text-[10px] font-semibold uppercase tracking-widest text-zinc-600">
               Queue depths
             </div>
-            <div className="space-y-1">
-              {Object.entries(queues?.queue_depths ?? {})
-                .sort((a, b) => b[1] - a[1])
-                .map(([k, v]) => (
-                  <div
-                    key={k}
-                    className="flex items-center justify-between rounded-md bg-zinc-900/40 px-2 py-1 text-sm"
-                  >
-                    <span className="text-zinc-200">{k}</span>
-                    <span className="font-medium text-zinc-50">{v}</span>
+            {isEmpty ? (
+              <div className="flex items-center gap-2 rounded-lg border border-emerald-500/20 bg-emerald-500/5 px-3 py-2.5">
+                <span className="dot-emerald" />
+                <div>
+                  <div className="text-sm font-medium text-emerald-400">All queues empty</div>
+                  <div className="text-xs text-zinc-600">No pending jobs</div>
+                </div>
+              </div>
+            ) : (
+              <div className="space-y-1.5">
+                {sortedQueues.map(([k, v]) => (
+                  <div key={k} className="flex items-center gap-2">
+                    <div className="w-20 shrink-0 truncate text-xs text-zinc-400">{k}</div>
+                    <div className="relative flex-1 h-1.5 rounded-full bg-zinc-800">
+                      <div
+                        className={cn("h-full rounded-full transition-all duration-500", depthColor(v))}
+                        style={{ width: `${Math.max(4, (v / maxDepth) * 100)}%` }}
+                      />
+                    </div>
+                    <div className={cn("w-6 text-right text-xs font-bold tabular-nums", depthTextColor(v))}>
+                      {v}
+                    </div>
                   </div>
                 ))}
-              {Object.keys(queues?.queue_depths ?? {}).length === 0 ? (
-                <div className="text-xs text-zinc-500">No queue data.</div>
-              ) : null}
-            </div>
+              </div>
+            )}
           </div>
         </div>
       )}
     </div>
   );
 }
-

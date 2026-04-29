@@ -2,10 +2,10 @@
 
 import { format } from "date-fns";
 import {
+  Area,
+  AreaChart,
   CartesianGrid,
   Legend,
-  Line,
-  LineChart,
   ResponsiveContainer,
   Tooltip,
   XAxis,
@@ -17,22 +17,20 @@ export type QueueHistoryPoint = {
   [queueName: string]: number;
 };
 
-const COLORS = [
-  "#22c55e",
-  "#38bdf8",
-  "#a78bfa",
-  "#f59e0b",
-  "#ef4444",
-  "#14b8a6",
-  "#e879f9",
-  "#f97316",
-  "#60a5fa",
-  "#84cc16",
+const PALETTE = [
+  { line: "#22d3ee", fill: "rgba(34,211,238,0.15)" },
+  { line: "#a78bfa", fill: "rgba(167,139,250,0.15)" },
+  { line: "#34d399", fill: "rgba(52,211,153,0.15)" },
+  { line: "#fbbf24", fill: "rgba(251,191,36,0.15)" },
+  { line: "#f87171", fill: "rgba(248,113,113,0.15)" },
+  { line: "#38bdf8", fill: "rgba(56,189,248,0.15)" },
+  { line: "#e879f9", fill: "rgba(232,121,249,0.15)" },
+  { line: "#f97316", fill: "rgba(249,115,22,0.15)" },
 ];
 
 export function QueueChart({
   data,
-  height = 240,
+  height = 260,
 }: {
   data: QueueHistoryPoint[];
   height?: number;
@@ -41,64 +39,80 @@ export function QueueChart({
 
   if (keys.length === 0) {
     return (
-      <div className="rounded-xl border border-white/10 bg-zinc-950/40 p-4">
-        <div className="text-sm text-zinc-200">Queue Depths</div>
-        <div className="mt-2 text-sm text-zinc-500">No queue data yet.</div>
+      <div className="flex h-[180px] items-center justify-center rounded-xl border border-zinc-800/60 bg-zinc-900/50 text-sm text-zinc-600">
+        No queue history yet — collecting samples…
       </div>
     );
   }
 
   return (
-    <div className="rounded-xl border border-white/10 bg-zinc-950/40 p-4">
-      <div className="text-sm text-zinc-200">Queue Depths (by endpoint)</div>
-      <div className="mt-3" style={{ height }}>
+    <div className="rounded-xl border border-zinc-800/60 bg-zinc-900/50 p-4 backdrop-blur-sm">
+      <div className="mb-1 text-sm font-semibold text-zinc-100">Queue depths over time</div>
+      <div className="mb-3 text-xs text-zinc-600">Per-queue depth — rolling 5 min</div>
+      <div style={{ height }}>
         <ResponsiveContainer width="100%" height="100%">
-          <LineChart data={data} margin={{ left: 4, right: 10, top: 8, bottom: 0 }}>
-            <CartesianGrid stroke="rgba(255,255,255,0.06)" vertical={false} />
+          <AreaChart data={data} margin={{ left: 4, right: 10, top: 8, bottom: 0 }}>
+            <defs>
+              {keys.map((k, idx) => {
+                const p = PALETTE[idx % PALETTE.length];
+                return (
+                  <linearGradient key={k} id={`qgrad-${k}`} x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor={p.line} stopOpacity={0.3} />
+                    <stop offset="100%" stopColor={p.line} stopOpacity={0} />
+                  </linearGradient>
+                );
+              })}
+            </defs>
+            <CartesianGrid stroke="rgba(255,255,255,0.04)" vertical={false} />
             <XAxis
               dataKey="timestamp"
               type="number"
               domain={["dataMin", "dataMax"]}
-              tickFormatter={(ts) => format(new Date(ts), "HH:mm:ss")}
-              tick={{ fill: "rgba(255,255,255,0.55)", fontSize: 11 }}
-              axisLine={{ stroke: "rgba(255,255,255,0.10)" }}
-              tickLine={{ stroke: "rgba(255,255,255,0.10)" }}
+              tickFormatter={(ts) => format(new Date(ts), "HH:mm")}
+              tick={{ fill: "rgba(255,255,255,0.3)", fontSize: 10 }}
+              axisLine={false}
+              tickLine={false}
               interval={9}
             />
             <YAxis
-              tick={{ fill: "rgba(255,255,255,0.55)", fontSize: 11 }}
-              axisLine={{ stroke: "rgba(255,255,255,0.10)" }}
-              tickLine={{ stroke: "rgba(255,255,255,0.10)" }}
-              width={36}
+              tick={{ fill: "rgba(255,255,255,0.3)", fontSize: 10 }}
+              axisLine={false}
+              tickLine={false}
+              width={28}
               allowDecimals={false}
             />
             <Tooltip
               contentStyle={{
-                background: "rgba(9,9,11,0.92)",
-                border: "1px solid rgba(255,255,255,0.10)",
+                background: "rgba(9,9,11,0.95)",
+                border: "1px solid rgba(63,63,70,0.8)",
                 borderRadius: 10,
-                color: "rgba(255,255,255,0.86)",
+                fontSize: 12,
+                color: "#fafafa",
+                backdropFilter: "blur(12px)",
               }}
               labelFormatter={(ts) => format(new Date(Number(ts)), "HH:mm:ss")}
             />
             <Legend
-              wrapperStyle={{ color: "rgba(255,255,255,0.65)", fontSize: 11 }}
+              wrapperStyle={{ fontSize: 11, paddingTop: 8, color: "rgba(255,255,255,0.5)" }}
             />
-            {keys.map((k, idx) => (
-              <Line
-                key={k}
-                type="monotone"
-                dataKey={k}
-                dot={false}
-                stroke={COLORS[idx % COLORS.length]}
-                strokeWidth={2}
-                isAnimationActive={false}
-              />
-            ))}
-          </LineChart>
+            {keys.map((k, idx) => {
+              const p = PALETTE[idx % PALETTE.length];
+              return (
+                <Area
+                  key={k}
+                  type="monotone"
+                  dataKey={k}
+                  stroke={p.line}
+                  strokeWidth={2}
+                  fill={`url(#qgrad-${k})`}
+                  dot={false}
+                  isAnimationActive={false}
+                />
+              );
+            })}
+          </AreaChart>
         </ResponsiveContainer>
       </div>
     </div>
   );
 }
-

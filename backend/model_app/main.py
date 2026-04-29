@@ -11,6 +11,7 @@ from backend.model_app.api.routes.devops import devops_router
 from backend.model_app.api.routes.dsa import dsa_router
 from backend.model_app.api.routes.evaluation import router as evaluation_router
 from backend.model_app.api.routes.generation import generation_router
+from backend.model_app.api.routes.sql import sql_router
 from backend.model_app.core.app import app
 from backend.model_app.middleware.request_log import RequestLogMiddleware
 
@@ -26,5 +27,6 @@ app.include_router(aiml_router)
 app.include_router(dashboard_router)
 app.include_router(catalog_router)
 app.include_router(evaluation_router)
+app.include_router(sql_router)
 
 __all__ = ["app", "FastAPI"]

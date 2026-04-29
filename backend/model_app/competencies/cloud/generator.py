@@ -81,6 +81,8 @@ async def _pass1(
         repetition_penalty=1.1,
         max_tokens=600,
     )
+    logger.info(f"Cloud Pass 1 raw output length: {len(decoded)} chars")
+    logger.info(f"Cloud Pass 1 raw output:\n{decoded}")
     return extract_json(decoded)
 
 
@@ -106,7 +108,7 @@ async def _pass2_code(
         temperature=0.7,
         top_p=0.9,
         repetition_penalty=1.1,
-        max_tokens=600,
+        max_tokens=400,
     )
     return extract_json(decoded)
 
@@ -238,6 +240,7 @@ async def generate_cloud_question(
             rag_context=rag_context,
         )
     except Exception as e:
+        logger.error(f"Cloud generation failed: {type(e).__name__}: {str(e)}", exc_info=True)
         raise HTTPException(status_code=500, detail=f"Cloud generation failed: {str(e)}")
 
 

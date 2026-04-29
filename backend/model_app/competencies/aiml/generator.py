@@ -236,18 +236,29 @@ def validate_aiml_output(
 ) -> tuple:
     """
     Semantic validation layer — runs AFTER LLM generation.
-
-    Checks:
-      1. Problem statement is non-trivial and exists
-      2. Tasks reference actual feature names (not generic placeholders)
-      3. Difficulty field matches what was requested — auto-corrects if not
-      4. No generic feature names (feature_0, feature_1, ...) leaked through
-      5. evaluationCriteria match target_type — auto-corrects if not
-      6. Concepts are reflected in at least one task
-      7. If library dataset was matched, problem domain is consistent
-
     Returns (is_valid: bool, issues: list[str])
     """
+    issues: list[str] = []
+
+    # Check problem statement exists and is non-trivial
+    ps = result.get("problemStatement", "")
+    if not ps or len(ps.strip()) < 20:
+        issues.append("problemStatement is missing or too short")
+
+    # Check tasks exist
+    tasks = result.get("tasks", [])
+    if not tasks:
+        issues.append("tasks list is empty")
+
+    # Auto-correct difficulty if mismatched
+    result_diff = str(result.get("difficulty", "")).lower()
+    req_diff = difficulty.lower()
+    if result_diff and result_diff != req_diff:
+        logger.debug("Auto-correcting difficulty: %s → %s", result_diff, req_diff)
+        result["difficulty"] = difficulty
+
+    is_valid = len(issues) == 0
+    return is_valid, issues
 
 import json
 import logging
@@ -947,9 +958,7 @@ async def generate_aiml_library(body, http_request):
         try:
             item_data = {k: v for k, v in data.items()}
 
-            matched = _match_dataset(body.topic, body.concepts, body.difficulty)
-
-            # Try RAG service first, fall back to local _match_dataset
+            # Use RAG service for dataset matching — single source of truth
             from backend.model_app.services.rag_client import retrieve as rag_retrieve
             rag_result = await rag_retrieve(
                 competency="aiml",
@@ -957,11 +966,11 @@ async def generate_aiml_library(body, http_request):
                 difficulty=body.difficulty,
                 concepts=body.concepts,
             )
-            if rag_result and rag_result.get("matched"):
-                matched = rag_result["matched"]
+            matched = rag_result["matched"] if rag_result and rag_result.get("matched") else None
+            if matched:
                 logger.info("RAG service match: '%s'", matched.get("name", ""))
             else:
-                matched = _match_dataset(body.topic, body.concepts, body.difficulty)
+                logger.warning("RAG service returned no match for topic='%s'", body.topic)
 
             if matched:
                 logger.info("Using library dataset: %s", matched["name"])

@@ -2,13 +2,13 @@
 
 import { Skeleton } from "@/components/ui/skeleton";
 import { LiveIndicator } from "./LiveIndicator";
-import { EndpointBarChart } from "./EndpointBarChart";
+import { Bar, BarChart, Cell, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 
 export function InferencePanel({
   loading,
   error,
   lastOkAt,
-  avgLatencySeconds,
+  avgLatencyMs,
   totalRequests,
   errorRatePercent,
   requestsByEndpoint,
@@ -16,26 +16,22 @@ export function InferencePanel({
   loading: boolean;
   error: boolean;
   lastOkAt: number | null;
-  avgLatencySeconds: number | null;
+  avgLatencyMs: number | null;
   totalRequests: number | null;
   errorRatePercent: number | null;
   requestsByEndpoint: Record<string, number> | null;
 }) {
   const endpointData = Object.entries(requestsByEndpoint ?? {})
-    .map(([endpoint, value]) => ({ endpoint, value }))
+    .map(([endpoint, value]) => ({ endpoint: endpoint.replace("/api/v1/", ""), value }))
     .sort((a, b) => b.value - a.value)
     .slice(0, 6);
 
   return (
-    <div className="rounded-xl border border-zinc-800 bg-zinc-950/60 p-4 shadow-panel">
-      <div className="mb-3 flex items-center justify-between">
+    <div className="rounded-xl border border-zinc-800/60 bg-zinc-900/50 p-4 backdrop-blur-sm">
+      <div className="mb-4 flex items-center justify-between">
         <div>
-          <div className="text-sm font-semibold text-zinc-50">
-            Inference stats
-          </div>
-          <div className="text-xs text-zinc-400">
-            Latency + errors + endpoint mix
-          </div>
+          <div className="text-sm font-semibold text-zinc-100">Inference stats</div>
+          <div className="text-xs text-zinc-500">Latency · requests · errors</div>
         </div>
         <LiveIndicator ok={!error} label={!error ? "Live" : "Degraded"} />
       </div>
@@ -47,37 +43,95 @@ export function InferencePanel({
           <Skeleton className="h-24 w-full" />
         </div>
       ) : error ? (
-        <div className="rounded-lg border border-amber-500/30 bg-amber-500/10 p-3 text-sm text-amber-200">
-          <div className="font-medium">Could not reach model-service</div>
-          <div className="mt-1 text-xs text-amber-200/80">
-            Last successful fetch:{" "}
-            {lastOkAt ? new Date(lastOkAt).toLocaleString() : "never"}
+        <div className="rounded-lg border border-amber-500/20 bg-amber-500/10 p-3 text-sm text-amber-300">
+          <div className="font-medium">Service unreachable</div>
+          <div className="mt-1 text-xs text-amber-300/70">
+            Last fetch: {lastOkAt ? new Date(lastOkAt).toLocaleString() : "never"}
           </div>
         </div>
       ) : (
         <div className="space-y-4">
-          <div className="grid grid-cols-3 gap-3">
-            <Stat label="Avg latency" value={fmtSeconds(avgLatencySeconds)} />
-            <Stat label="Total requests" value={fmtInt(totalRequests)} />
-            <Stat label="Error rate" value={fmtPercent(errorRatePercent)} />
+          {/* KPI row */}
+          <div className="grid grid-cols-3 gap-2">
+            <Kpi label="Avg latency" value={fmtMs(avgLatencyMs)} accent="cyan" />
+            <Kpi label="Total reqs" value={fmtInt(totalRequests)} accent="violet" />
+            <Kpi label="Error rate" value={fmtPct(errorRatePercent)} accent={
+              errorRatePercent !== null && errorRatePercent > 5 ? "red" : "emerald"
+            } />
           </div>
-          <div>
-            <div className="mb-2 text-xs font-medium text-zinc-400">
-              Top endpoints
+
+          {/* Endpoint bar chart */}
+          {endpointData.length > 0 ? (
+            <div>
+              <div className="mb-2 text-[10px] font-semibold uppercase tracking-widest text-zinc-600">
+                Top endpoints
+              </div>
+              <div className="h-[160px]">
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart
+                    data={endpointData}
+                    layout="vertical"
+                    margin={{ top: 0, right: 8, bottom: 0, left: 0 }}
+                    barCategoryGap={6}
+                  >
+                    <XAxis
+                      type="number"
+                      tick={{ fill: "#52525b", fontSize: 10 }}
+                      axisLine={false}
+                      tickLine={false}
+                    />
+                    <YAxis
+                      type="category"
+                      dataKey="endpoint"
+                      width={90}
+                      tick={{ fill: "#71717a", fontSize: 10 }}
+                      axisLine={false}
+                      tickLine={false}
+                    />
+                    <Tooltip
+                      contentStyle={{
+                        background: "rgba(9,9,11,0.95)",
+                        border: "1px solid rgba(63,63,70,0.8)",
+                        borderRadius: 8,
+                        fontSize: 12,
+                        color: "#fafafa",
+                      }}
+                    />
+                    <Bar dataKey="value" radius={[0, 4, 4, 0]} maxBarSize={14}>
+                      {endpointData.map((_, i) => (
+                        <Cell
+                          key={i}
+                          fill={i === 0 ? "#22d3ee" : i === 1 ? "#a78bfa" : "#3f3f46"}
+                        />
+                      ))}
+                    </Bar>
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
             </div>
-            <EndpointBarChart data={endpointData} height={190} />
-          </div>
+          ) : (
+            <div className="flex h-[160px] items-center justify-center text-xs text-zinc-600">
+              No endpoint data yet
+            </div>
+          )}
         </div>
       )}
     </div>
   );
 }
 
-function Stat({ label, value }: { label: string; value: string }) {
+function Kpi({ label, value, accent }: { label: string; value: string; accent: string }) {
+  const textColor =
+    accent === "cyan" ? "text-console-accent"
+    : accent === "violet" ? "text-console-violet"
+    : accent === "red" ? "text-red-400"
+    : accent === "emerald" ? "text-emerald-400"
+    : "text-zinc-300";
+
   return (
-    <div className="rounded-lg bg-zinc-900/40 p-3">
-      <div className="text-xs text-zinc-400">{label}</div>
-      <div className="mt-1 text-lg font-semibold text-zinc-50">{value}</div>
+    <div className="rounded-lg border border-zinc-800/60 bg-zinc-950/40 px-2.5 py-2">
+      <div className="text-[10px] text-zinc-600">{label}</div>
+      <div className={`mt-0.5 text-base font-bold tabular-nums ${textColor}`}>{value}</div>
     </div>
   );
 }
@@ -86,11 +140,10 @@ function fmtInt(n: number | null) {
   return typeof n === "number" ? n.toLocaleString() : "—";
 }
 
-function fmtPercent(n: number | null) {
+function fmtPct(n: number | null) {
   return typeof n === "number" ? `${n.toFixed(2)}%` : "—";
 }
 
-function fmtSeconds(n: number | null) {
-  return typeof n === "number" ? `${n.toFixed(2)}s` : "—";
+function fmtMs(n: number | null) {
+  return typeof n === "number" ? `${n.toFixed(0)} ms` : "—";
 }
-

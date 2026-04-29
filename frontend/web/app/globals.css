@@ -4,17 +4,149 @@
 
 :root {
   --console-accent: 34 211 238;
+  --console-violet: 167 139 250;
+  --console-emerald: 52 211 153;
 }
 
-/* Ensure typed text and placeholders are readable in both themes */
+/* ── Base resets ─────────────────────────────────────────── */
 @layer base {
+  * {
+    @apply border-zinc-800;
+  }
+
+  html {
+    @apply scroll-smooth;
+  }
+
+  body {
+    @apply bg-zinc-950 text-zinc-100 antialiased;
+    font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+  }
+
   input:not([type="checkbox"]):not([type="radio"]):not([type="range"]),
   textarea,
   select {
-    @apply text-zinc-900 dark:text-zinc-100;
+    @apply text-zinc-100;
   }
+
   input::placeholder,
   textarea::placeholder {
-    @apply text-zinc-500 dark:text-zinc-400;
+    @apply text-zinc-500;
   }
+
+  /* Scrollbar */
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  ::-webkit-scrollbar-track {
+    @apply bg-zinc-950;
+  }
+  ::-webkit-scrollbar-thumb {
+    @apply rounded-full bg-zinc-700;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    @apply bg-zinc-600;
+  }
+}
+
+/* ── Component utilities ─────────────────────────────────── */
+@layer components {
+  /* Standard panel surface */
+  .panel {
+    @apply rounded-xl border border-zinc-800/80 bg-zinc-900/50 shadow-panel backdrop-blur-sm;
+  }
+
+  /* Glowing stat value */
+  .stat-value {
+    @apply text-3xl font-bold tracking-tight text-zinc-50;
+  }
+
+  /* Accent text */
+  .text-accent {
+    @apply text-console-accent;
+  }
+
+  /* Live indicator dot */
+  .live-dot {
+    @apply inline-block h-2 w-2 rounded-full bg-console-accent animate-glow-pulse;
+  }
+
+  /* Status dot variants */
+  .dot-emerald {
+    @apply inline-block h-2 w-2 rounded-full bg-console-emerald;
+    box-shadow: 0 0 8px rgba(52, 211, 153, 0.7);
+  }
+  .dot-red {
+    @apply inline-block h-2 w-2 rounded-full bg-console-red;
+    box-shadow: 0 0 8px rgba(248, 113, 113, 0.7);
+  }
+  .dot-amber {
+    @apply inline-block h-2 w-2 rounded-full bg-console-amber;
+    box-shadow: 0 0 8px rgba(251, 191, 36, 0.7);
+  }
+  .dot-zinc {
+    @apply inline-block h-2 w-2 rounded-full bg-zinc-500;
+  }
+
+  /* Gradient border card */
+  .card-gradient-border {
+    position: relative;
+    @apply rounded-xl;
+  }
+  .card-gradient-border::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    padding: 1px;
+    background: linear-gradient(135deg, rgba(34,211,238,0.3), rgba(167,139,250,0.2), transparent);
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    pointer-events: none;
+  }
+
+  /* Glassmorphism tooltip */
+  .tooltip-glass {
+    @apply rounded-xl border border-zinc-700/60 bg-zinc-900/95 text-zinc-100 shadow-panel backdrop-blur-md;
+  }
+}
+
+/* ── Recharts overrides ──────────────────────────────────── */
+.recharts-tooltip-wrapper {
+  outline: none !important;
+}
+
+.recharts-default-tooltip {
+  background: rgba(9, 9, 11, 0.95) !important;
+  border: 1px solid rgba(63, 63, 70, 0.8) !important;
+  border-radius: 10px !important;
+  backdrop-filter: blur(12px) !important;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4) !important;
+}
+
+/* ── Animations ──────────────────────────────────────────── */
+@keyframes shimmer {
+  0%   { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+
+.skeleton-shimmer {
+  position: relative;
+  overflow: hidden;
+  background: rgba(39, 39, 42, 0.6);
+}
+.skeleton-shimmer::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  transform: translateX(-100%);
+  background: linear-gradient(90deg, transparent, rgba(63,63,70,0.5), transparent);
+  animation: shimmer 1.8s infinite;
 }

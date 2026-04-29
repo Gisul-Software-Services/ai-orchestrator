@@ -32,3 +32,4 @@ pending_results = {}
 REQUEST_LOG = deque(maxlen=1000)
 
 llm = None
+coder_llm = None

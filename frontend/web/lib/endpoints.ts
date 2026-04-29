@@ -46,10 +46,10 @@ export const API_ENDPOINTS: ApiEndpointMeta[] = [
   },
   {
     id: "generate-sql",
-    path: `${API_V1}/generate-sql`,
+    path: `${API_V1}/generate-sql-question`,
     method: "POST",
     label: "SQL",
-    description: "SQL problems",
+    description: "SQL problems (RAG + reword)",
     implemented: true,
     section: "generation",
   },
@@ -72,6 +72,24 @@ export const API_ENDPOINTS: ApiEndpointMeta[] = [
     section: "generation",
   },
   {
+    id: "generate-devops",
+    path: `${API_V1}/generate-devops-question`,
+    method: "POST",
+    label: "DevOps",
+    description: "DevOps / infrastructure questions",
+    implemented: true,
+    section: "generation",
+  },
+  {
+    id: "generate-cloud",
+    path: `${API_V1}/generate-cloud-question`,
+    method: "POST",
+    label: "Cloud (AWS)",
+    description: "AWS cloud questions",
+    implemented: true,
+    section: "generation",
+  },
+  {
     id: "enrich-dsa",
     path: `${API_V1}/enrich-dsa`,
     method: "POST",
@@ -89,32 +107,23 @@ export const API_ENDPOINTS: ApiEndpointMeta[] = [
     implemented: true,
     section: "dsa",
   },
+  {
+    id: "evaluate-sql",
+    path: `${API_V1}/evaluation/sql/async`,
+    method: "POST",
+    label: "SQL Evaluation",
+    description: "AI scoring for candidate SQL submissions",
+    implemented: true,
+    section: "evaluation",
+  },
 
   // --- Reserved for later (UI shell only) ---
-  {
-    id: "evaluate",
-    path: `${API_V1}/evaluate`,
-    method: "POST",
-    label: "Evaluate",
-    description: "Evaluation engine (planned)",
-    implemented: false,
-    section: "future",
-  },
   {
     id: "generate-data-engineering",
     path: `${API_V1}/generate-data-engineering`,
     method: "POST",
     label: "Data Engineering",
     description: "Data engineering generation (planned)",
-    implemented: false,
-    section: "future",
-  },
-  {
-    id: "generate-devops",
-    path: `${API_V1}/generate-devops`,
-    method: "POST",
-    label: "DevOps",
-    description: "DevOps generation (planned)",
     implemented: false,
     section: "future",
   },
@@ -127,7 +136,7 @@ export const API_ENDPOINTS: ApiEndpointMeta[] = [
     implemented: false,
     section: "future",
   },
-  /** Dedicated “raw” DSA enrichment UI — backend path TBD (may reuse enrich-dsa). */
+  /** Dedicated "raw" DSA enrichment UI — backend path TBD (may reuse enrich-dsa). */
   {
     id: "enrich-dsa-raw",
     path: `${API_V1}/enrich-dsa-raw`,

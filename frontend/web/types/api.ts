@@ -1,5 +1,35 @@
 // Core system & metrics types
 
+export interface GpuMetrics {
+  available: boolean;
+  error?: string | null;
+  gpu_util_percent?: number;
+  memory_used_percent?: number;
+  memory_used_mb?: number;
+  memory_total_mb?: number;
+  temperature_c?: number;
+  power_watts?: number | null;
+}
+
+export interface QueuesMetrics {
+  active_jobs: number;
+  jobs_in_store: number;
+  queue_depths: Record<string, number>;
+}
+
+export interface InferenceMetrics {
+  total_requests: number;
+  cache_hits: number;
+  cache_misses: number;
+  cache_hit_rate_percent: number;
+  requests_by_endpoint: Record<string, number>;
+  errors: number;
+  batches_processed: number;
+  avg_batch_size: number;
+  total_generation_time_seconds: number;
+  server_start_time: string | null;
+}
+
 export interface HealthResponse {
   status: string;
   model_loaded: boolean;
@@ -18,6 +48,7 @@ export interface StatsResponse {
   errors: number;
 }
 
+
 export interface JobRecord {
   status: "pending" | "processing" | "complete" | "failed";
   result?: unknown;
@@ -29,16 +60,7 @@ export interface JobRecord {
 export interface MetricsOverview {
   model_loaded: boolean;
   cuda_memory_gb?: number | null;
-  gpu: {
-    available: boolean;
-    error?: string | null;
-    gpu_util_percent?: number;
-    memory_used_percent?: number;
-    memory_used_mb?: number;
-    memory_total_mb?: number;
-    temperature_c?: number;
-    power_watts?: number | null;
-  };
+  gpu: GpuMetrics;
   inference: {
     total_requests: number;
     cache_hit_rate_percent: number;

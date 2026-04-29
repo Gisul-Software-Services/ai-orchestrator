@@ -97,12 +97,12 @@ export default function HistoryPage() {
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
         <div className="rounded-xl border border-white/10 bg-zinc-950/40 p-4">
           <div className="text-xs text-zinc-500">Total requests shown</div>
-          <div className="mt-1 text-2xl font-semibold">{stats.total}</div>
+          <div className="mt-1 text-2xl font-semibold">{stats.total.toLocaleString()}</div>
         </div>
         <div className="rounded-xl border border-white/10 bg-zinc-950/40 p-4">
           <div className="text-xs text-zinc-500">Errors</div>
           <div className="mt-1 text-2xl font-semibold">
-            {stats.errors} ({stats.errorRate.toFixed(2)}%)
+            {stats.errors.toLocaleString()} ({stats.errorRate.toFixed(2)}%)
           </div>
         </div>
         <div className="rounded-xl border border-white/10 bg-zinc-950/40 p-4">

@@ -8,6 +8,7 @@ import {
   Select,
   TextInput,
   Toggle,
+  DifficultySelector,
 } from "@/components/playground/EndpointFormShell";
 import { JobPoller } from "@/components/playground/JobPoller";
 import { ResponseCard } from "@/components/playground/ResponseCard";
@@ -80,7 +81,7 @@ export default function AimlSyntheticPlaygroundPage() {
       setResultTs(ts);
       setSubmitting(false);
       setJobId(null);
-      setHistory((h) => [{ timestamp: ts, endpoint: "AIML (synthetic)", payload, result: res, durationSeconds: dur }, ...h].slice(0, 10));
+      setHistory((h) => [{ timestamp: ts, endpoint: "AIML", payload, result: res, durationSeconds: dur }, ...h].slice(0, 10));
       setSelectedIdx(0);
     },
     [payload, t0]
@@ -107,8 +108,8 @@ export default function AimlSyntheticPlaygroundPage() {
   return (
     <div className="space-y-4">
       <EndpointFormShell
-        title="AIML generation (synthetic)"
-        description="Generate synthetic AI/ML problems and datasets."
+        title="AIML generation"
+        description="Generate AI/ML problems grounded in real datasets from the catalog via /api/v1/generate-aiml"
         submitting={submitting}
         error={error}
         onSubmit={onSubmit}
@@ -124,14 +125,7 @@ export default function AimlSyntheticPlaygroundPage() {
             />
           </Field>
           <Field label="Difficulty">
-            <Select
-              value={difficulty}
-              onChange={(e) => setDifficulty(e.target.value as Difficulty)}
-            >
-              <option>Easy</option>
-              <option>Medium</option>
-              <option>Hard</option>
-            </Select>
+            <DifficultySelector value={difficulty} onChange={(v) => setDifficulty(v as Difficulty)} />
           </Field>
           <Field label="Concepts (comma separated)" hint="Optional">
             <TextInput
@@ -147,7 +141,7 @@ export default function AimlSyntheticPlaygroundPage() {
       </EndpointFormShell>
 
       {result && resultTs ? (
-        <ResponseCard endpoint="AIML (synthetic)" result={result} timestamp={resultTs} />
+        <ResponseCard endpoint="AIML" result={result} timestamp={resultTs} durationSeconds={t0 ? (resultTs - t0) / 1000 : undefined} />
       ) : null}
 
       <RequestHistory items={history} selectedIndex={selectedIdx} onSelect={setSelectedIdx} />

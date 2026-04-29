@@ -5,9 +5,10 @@ import { adminPostJson } from "@/lib/adminApi";
 import {
   EndpointFormShell,
   Field,
-  Select,
   TextInput,
   Toggle,
+  DifficultySelector,
+  LanguageChips,
 } from "@/components/playground/EndpointFormShell";
 import { JobPoller } from "@/components/playground/JobPoller";
 import { ResponseCard } from "@/components/playground/ResponseCard";
@@ -151,14 +152,7 @@ export default function DsaPlaygroundPage() {
             />
           </Field>
           <Field label="Difficulty">
-            <Select
-              value={difficulty}
-              onChange={(e) => setDifficulty(e.target.value as Difficulty)}
-            >
-              <option>Easy</option>
-              <option>Medium</option>
-              <option>Hard</option>
-            </Select>
+            <DifficultySelector value={difficulty} onChange={(v) => setDifficulty(v as Difficulty)} />
           </Field>
           <Field label="Concepts (comma separated)" hint="Optional">
             <TextInput
@@ -179,29 +173,18 @@ export default function DsaPlaygroundPage() {
         </div>
 
         <Field label="Languages" hint="Select at least one">
-          <div className="flex flex-wrap gap-2 mt-1">
-            {DSA_LANGUAGE_OPTIONS.map((lang) => (
-              <button
-                key={lang}
-                type="button"
-                onClick={() => toggleLanguage(lang)}
-                className={`px-3 py-1 rounded text-sm border transition-colors ${
-                  languages.includes(lang)
-                    ? "bg-blue-600 text-white border-blue-600"
-                    : "bg-transparent text-gray-400 border-gray-600 hover:border-gray-400"
-                }`}
-              >
-                {lang}
-              </button>
-            ))}
-          </div>
+          <LanguageChips
+            options={DSA_LANGUAGE_OPTIONS}
+            selected={languages}
+            onToggle={toggleLanguage}
+          />
         </Field>
 
         <JobPoller jobId={jobId} onComplete={handleComplete} onError={handleError} />
       </EndpointFormShell>
 
       {result && resultTs ? (
-        <ResponseCard endpoint="DSA" result={result} timestamp={resultTs} />
+        <ResponseCard endpoint="DSA" result={result} timestamp={resultTs} durationSeconds={t0 ? (resultTs - t0) / 1000 : undefined} />
       ) : null}
 
       <RequestHistory items={history} selectedIndex={selectedIdx} onSelect={setSelectedIdx} />

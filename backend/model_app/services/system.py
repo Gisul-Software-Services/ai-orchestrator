@@ -8,7 +8,7 @@ from fastapi import HTTPException
 import torch
 
 from backend.model_app.core import state as app_state
-from backend.model_app.services.cache import get_from_cache, save_to_cache, generate_cache_key
+from backend.model_app.services.cache import _get_redis_client, _CACHE_KEY_PREFIX
 from backend.model_app.services.jobs import (
     _job_store_count_active,
     _job_store_count_total,
@@ -79,13 +79,25 @@ def get_stats():
     }
 
 
-def clear_cache():
-    from backend.model_app.services.cache import _local_fallback
-    cleared_count = len(_local_fallback)
-    _local_fallback.clear()
-    logger.info("Cache cleared: %s entries removed", cleared_count)
+async def clear_cache():
+    # Flush all Redis keys with our cache prefix
+    redis_count = 0
+    try:
+        r = _get_redis_client()
+        cursor = 0
+        while True:
+            cursor, keys = await r.scan(cursor, match=f"{_CACHE_KEY_PREFIX}*", count=500)
+            if keys:
+                await r.delete(*keys)
+                redis_count += len(keys)
+            if cursor == 0:
+                break
+    except Exception as e:
+        logger.warning("Redis cache clear failed: %s", e)
+
+    logger.info("Cache cleared: %s Redis entries removed", redis_count)
     return {
         "status": "cache cleared",
-        "entries_removed": cleared_count,
-        "message": f"Successfully cleared {cleared_count} cached response(s)",
+        "entries_removed": redis_count,
+        "message": f"Successfully cleared {redis_count} Redis cached response(s)",
     }

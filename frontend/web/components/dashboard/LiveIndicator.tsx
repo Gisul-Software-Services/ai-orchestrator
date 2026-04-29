@@ -2,27 +2,26 @@
 
 import { cn } from "@/lib/utils";
 
-export function LiveIndicator({
-  ok,
-  label,
-}: {
-  ok: boolean;
-  label?: string;
-}) {
+export function LiveIndicator({ ok, label }: { ok: boolean; label?: string }) {
   return (
-    <div className="flex items-center gap-2 text-xs text-zinc-400">
-      <span
-        className={cn(
-          "relative inline-flex h-2.5 w-2.5 rounded-full",
-          ok ? "bg-emerald-400" : "bg-zinc-500"
-        )}
-      >
-        {ok ? (
-          <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400/60" />
-        ) : null}
+    <div className="flex items-center gap-1.5 text-[11px] font-medium">
+      <span className="relative inline-flex h-2 w-2">
+        <span
+          className={cn(
+            "absolute inline-flex h-full w-full rounded-full opacity-75",
+            ok ? "animate-ping bg-emerald-400" : "bg-zinc-600"
+          )}
+        />
+        <span
+          className={cn(
+            "relative inline-flex h-2 w-2 rounded-full",
+            ok ? "bg-emerald-400" : "bg-zinc-600"
+          )}
+        />
       </span>
-      <span>{label ?? (ok ? "Live" : "Stale")}</span>
+      <span className={ok ? "text-emerald-400" : "text-zinc-500"}>
+        {label ?? (ok ? "Live" : "Stale")}
+      </span>
     </div>
   );
 }
-

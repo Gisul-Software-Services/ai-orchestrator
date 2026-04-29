@@ -78,9 +78,9 @@ def _load_catalog() -> List[Dict[str, Any]]:
 def _save_catalog(catalog: List[Dict[str, Any]]) -> None:
     _atomic_write_json(get_settings().aiml_catalog_path, catalog)
     try:
-        from backend.model_app.services import aiml as aiml_service
+        from backend.model_app.competencies.aiml import generator as aiml_generator
 
-        aiml_service._aiml_catalog_cache = None
+        aiml_generator._aiml_catalog_cache = None
     except Exception:
         pass
 

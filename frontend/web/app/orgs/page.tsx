@@ -2,31 +2,46 @@
 
 import { OrgsTable } from "@/components/orgs/OrgsTable";
 import { useOrgsListQuery } from "@/hooks/useOrgs";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Users } from "lucide-react";
 
 export default function OrgsPage() {
   const query = useOrgsListQuery();
   const rows = query.data?.orgs ?? [];
 
   return (
-    <div className="space-y-8">
-      <div>
-        <div className="text-2xl font-semibold">Orgs & API Keys</div>
-        <div className="mt-1 text-sm text-zinc-400">
-          Manage organisations and their API access
+    <div className="animate-fade-in space-y-6">
+      {/* Header */}
+      <div className="flex items-center justify-between">
+        <div>
+          <div className="text-2xl font-bold text-zinc-50">Orgs & API Keys</div>
+          <div className="mt-1 text-sm text-zinc-500">
+            Manage organisations and their API access
+          </div>
         </div>
+        {query.data && (
+          <div className="flex items-center gap-2 rounded-full border border-zinc-800/60 bg-zinc-900/60 px-3 py-1.5">
+            <Users className="h-3.5 w-3.5 text-console-accent" />
+            <span className="text-xs font-medium text-zinc-300">
+              {rows.length} org{rows.length !== 1 ? "s" : ""}
+            </span>
+          </div>
+        )}
       </div>
 
-      <div className="rounded-xl border border-cyan-500/20 bg-cyan-500/5 px-4 py-3 text-xs text-cyan-100/90">
-        Orgs shown are those with API activity. Orgs with no usage history will not appear
-        here.
+      <div className="rounded-xl border border-cyan-500/20 bg-cyan-500/5 px-4 py-3 text-xs text-cyan-300/80">
+        Orgs shown are those with API activity in the current billing period. Orgs with no usage will not appear here.
       </div>
 
       {query.isLoading ? (
-        <div className="rounded-xl border border-white/10 bg-zinc-950/40 p-4 text-sm text-zinc-500">
-          Loading organisations…
+        <div className="rounded-xl border border-zinc-800/60 bg-zinc-900/50 p-4 space-y-2">
+          <Skeleton className="h-9 w-64" />
+          {Array.from({ length: 5 }).map((_, i) => (
+            <Skeleton key={i} className="h-12 w-full" />
+          ))}
         </div>
       ) : query.isError ? (
-        <div className="rounded-xl border border-amber-500/30 bg-amber-500/10 px-4 py-3 text-sm text-amber-200">
+        <div className="rounded-xl border border-amber-500/20 bg-amber-500/5 px-4 py-3 text-sm text-amber-300">
           {query.error instanceof Error ? query.error.message : "Failed to load orgs"}
         </div>
       ) : (
@@ -35,4 +50,3 @@ export default function OrgsPage() {
     </div>
   );
 }
-

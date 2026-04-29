@@ -1,18 +1,42 @@
 "use client";
 
-import { useQuery } from "@tanstack/react-query";
-import { adminFetchJson } from "@/lib/adminApi";
+import {
+  useHealthQuery,
+  useMetricsInferenceQuery,
+  useStatsQuery,
+} from "@/hooks/useMetrics";
+import type { HealthResponse, InferenceMetrics, StatsResponse } from "@/types/api";
 
-export type SettingsPayload = {
-  source: "settings-endpoint" | "derived";
-  data: any;
+export type SettingsData = {
+  health: HealthResponse | null;
+  stats: StatsResponse | null;
+  inference: InferenceMetrics | null;
 };
 
-export function useSettingsQuery() {
-  return useQuery({
-    queryKey: ["admin", "settings"],
-    queryFn: () => adminFetchJson<SettingsPayload>("/api/admin/settings"),
-    refetchInterval: 30_000,
-  });
-}
+export type SettingsPayload = {
+  source: "derived";
+  data: SettingsData;
+};
 
+export function useSettingsQuery(): {
+  isLoading: boolean;
+  isError: boolean;
+  data: SettingsPayload;
+} {
+  const healthQ = useHealthQuery();
+  const statsQ = useStatsQuery();
+  const inferenceQ = useMetricsInferenceQuery();
+
+  return {
+    isLoading: healthQ.isLoading || statsQ.isLoading || inferenceQ.isLoading,
+    isError: healthQ.isError && statsQ.isError && inferenceQ.isError,
+    data: {
+      source: "derived",
+      data: {
+        health: healthQ.data ?? null,
+        stats: statsQ.data ?? null,
+        inference: inferenceQ.data ?? null,
+      },
+    },
+  };
+}

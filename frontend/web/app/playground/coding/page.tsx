@@ -8,6 +8,7 @@ import {
   Select,
   TextInput,
   Toggle,
+  DifficultySelector,
 } from "@/components/playground/EndpointFormShell";
 import { JobPoller } from "@/components/playground/JobPoller";
 import { ResponseCard } from "@/components/playground/ResponseCard";
@@ -144,14 +145,7 @@ export default function CodingPlaygroundPage() {
             />
           </Field>
           <Field label="Difficulty">
-            <Select
-              value={difficulty}
-              onChange={(e) => setDifficulty(e.target.value as Difficulty)}
-            >
-              <option>Easy</option>
-              <option>Medium</option>
-              <option>Hard</option>
-            </Select>
+            <DifficultySelector value={difficulty} onChange={(v) => setDifficulty(v as Difficulty)} />
           </Field>
           <Field label="Number of questions">
             <TextInput
@@ -187,7 +181,7 @@ export default function CodingPlaygroundPage() {
       </EndpointFormShell>
 
       {result && resultTs ? (
-        <ResponseCard endpoint="Coding" result={result} timestamp={resultTs} />
+        <ResponseCard endpoint="Coding" result={result} timestamp={resultTs} durationSeconds={t0 ? (resultTs - t0) / 1000 : undefined} />
       ) : null}
 
       <RequestHistory items={history} selectedIndex={selectedIdx} onSelect={setSelectedIdx} />

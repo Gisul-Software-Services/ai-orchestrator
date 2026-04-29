@@ -15,6 +15,8 @@ import {
 import { Button } from "@/components/ui/button";
 import { buildCsv, downloadCsv } from "@/components/usage/csv";
 import { Skeleton } from "@/components/ui/skeleton";
+import { cn } from "@/lib/utils";
+import { ArrowUpDown, ChevronUp, ChevronDown } from "lucide-react";
 
 export type OrgUsageRow = {
   org_id: string;
@@ -31,13 +33,27 @@ export type OrgUsageRow = {
 };
 
 function fmtNum(n: number | null | undefined) {
-  if (n == null || !Number.isFinite(n)) return "—";
-  return n.toLocaleString();
+  if (n == null || !Number.isFinite(n)) return <span className="text-zinc-600">—</span>;
+  return <span className="tabular-nums">{n.toLocaleString()}</span>;
 }
 
 function fmtPct(n: number | null | undefined) {
-  if (n == null || !Number.isFinite(n)) return "—";
-  return `${n.toFixed(2)}%`;
+  if (n == null || !Number.isFinite(n)) return <span className="text-zinc-600">—</span>;
+  const color = n >= 70 ? "text-emerald-400" : n >= 40 ? "text-amber-400" : "text-red-400";
+  return <span className={cn("tabular-nums font-medium", color)}>{n.toFixed(1)}%</span>;
+}
+
+function fmtMs(n: number | null | undefined) {
+  if (n == null || !Number.isFinite(n)) return <span className="text-zinc-600">—</span>;
+  const ms = Math.round(Number(n));
+  const color = ms < 500 ? "text-emerald-400" : ms < 2000 ? "text-amber-400" : "text-red-400";
+  return <span className={cn("tabular-nums font-medium", color)}>{ms} ms</span>;
+}
+
+function fmtErrors(n: number | null | undefined) {
+  if (n == null || !Number.isFinite(n)) return <span className="text-zinc-600">—</span>;
+  if (n === 0) return <span className="text-zinc-500">0</span>;
+  return <span className="tabular-nums font-medium text-red-400">{n.toLocaleString()}</span>;
 }
 
 export function OrgsTable({
@@ -49,7 +65,9 @@ export function OrgsTable({
   period: string;
   loading: boolean;
 }) {
-  const [sorting, setSorting] = useState<SortingState>([]);
+  const [sorting, setSorting] = useState<SortingState>([
+    { id: "total_tokens", desc: true },
+  ]);
   const [globalFilter, setGlobalFilter] = useState("");
 
   const columns = useMemo<ColumnDef<OrgUsageRow>[]>(
@@ -58,40 +76,61 @@ export function OrgsTable({
         header: "Org ID",
         accessorKey: "org_id",
         cell: (ctx) => (
-          <span className="font-mono text-zinc-200">{String(ctx.getValue())}</span>
+          <span className="font-mono text-xs text-zinc-200">{String(ctx.getValue())}</span>
         ),
       },
       {
         header: "Org Name",
         accessorKey: "org_name",
-        cell: (ctx) => <span className="text-zinc-300">{ctx.getValue() ? String(ctx.getValue()) : "—"}</span>,
+        cell: (ctx) => (
+          <span className="text-zinc-300">
+            {ctx.getValue() ? String(ctx.getValue()) : <span className="text-zinc-600">—</span>}
+          </span>
+        ),
       },
-      { header: "Total Tokens", accessorKey: "total_tokens" },
-      { header: "Prompt Tokens", accessorKey: "prompt_tokens" },
-      { header: "Completion Tokens", accessorKey: "completion_tokens" },
-      { header: "API Calls", accessorKey: "call_count" },
       {
-        header: "Cache Hits %",
+        header: "Total Tokens",
+        accessorKey: "total_tokens",
+        cell: (ctx) => fmtNum(ctx.getValue() as number | null),
+      },
+      {
+        header: "Prompt",
+        accessorKey: "prompt_tokens",
+        cell: (ctx) => fmtNum(ctx.getValue() as number | null),
+      },
+      {
+        header: "Completion",
+        accessorKey: "completion_tokens",
+        cell: (ctx) => fmtNum(ctx.getValue() as number | null),
+      },
+      {
+        header: "API Calls",
+        accessorKey: "call_count",
+        cell: (ctx) => fmtNum(ctx.getValue() as number | null),
+      },
+      {
+        header: "Cache Hit %",
         accessorKey: "cache_hit_rate_percent",
-        cell: (ctx) => fmtPct(ctx.getValue() as any),
+        cell: (ctx) => fmtPct(ctx.getValue() as number | null),
       },
       {
-        header: "Avg Latency ms",
+        header: "Avg Latency",
         accessorKey: "avg_latency_ms",
-        cell: (ctx) => {
-          const v = ctx.getValue() as any;
-          return v == null ? "—" : `${Math.round(Number(v))}`;
-        },
+        cell: (ctx) => fmtMs(ctx.getValue() as number | null),
       },
       {
-        header: "Error Count",
+        header: "Errors",
         accessorKey: "errors",
-        cell: (ctx) => fmtNum(ctx.getValue() as any),
+        cell: (ctx) => fmtErrors(ctx.getValue() as number | null),
       },
       {
         header: "Last Active",
         accessorKey: "last_active",
-        cell: (ctx) => (ctx.getValue() ? String(ctx.getValue()) : "—"),
+        cell: (ctx) => (
+          <span className="font-mono text-xs text-zinc-400">
+            {ctx.getValue() ? String(ctx.getValue()) : <span className="text-zinc-600">—</span>}
+          </span>
+        ),
       },
       {
         header: "Actions",
@@ -101,11 +140,12 @@ export function OrgsTable({
           const orgId = ctx.row.original.org_id;
           const qs = new URLSearchParams({ period }).toString();
           return (
-            <Button asChild variant="outline" className="border-white/10">
-              <Link href={`/usage/${encodeURIComponent(orgId)}?${qs}`}>
-                View Details
-              </Link>
-            </Button>
+            <Link
+              href={`/usage/${encodeURIComponent(orgId)}?${qs}`}
+              className="inline-flex items-center gap-1 rounded-lg border border-zinc-700/60 bg-zinc-900 px-2.5 py-1 text-xs font-medium text-zinc-300 transition-colors hover:border-cyan-500/40 hover:text-console-accent"
+            >
+              Details →
+            </Link>
           );
         },
       },
@@ -135,16 +175,8 @@ export function OrgsTable({
 
   const exportAll = () => {
     const headers = [
-      "Org ID",
-      "Org Name",
-      "Total Tokens",
-      "Prompt Tokens",
-      "Completion Tokens",
-      "API Calls",
-      "Cache Hits %",
-      "Avg Latency ms",
-      "Error Count",
-      "Last Active",
+      "Org ID", "Org Name", "Total Tokens", "Prompt Tokens", "Completion Tokens",
+      "API Calls", "Cache Hit %", "Avg Latency ms", "Errors", "Last Active",
     ];
     const csvRows = rows.map((r) => ({
       "Org ID": r.org_id,
@@ -153,92 +185,95 @@ export function OrgsTable({
       "Prompt Tokens": r.prompt_tokens ?? "",
       "Completion Tokens": r.completion_tokens ?? "",
       "API Calls": r.call_count ?? "",
-      "Cache Hits %": r.cache_hit_rate_percent ?? "",
-      "Avg Latency ms": r.avg_latency_ms ?? "",
-      "Error Count": r.errors ?? "",
+      "Cache Hit %": r.cache_hit_rate_percent != null ? r.cache_hit_rate_percent.toFixed(2) : "",
+      "Avg Latency ms": r.avg_latency_ms != null ? Math.round(r.avg_latency_ms) : "",
+      "Errors": r.errors ?? "",
       "Last Active": r.last_active ?? "",
     }));
-    const csv = buildCsv(headers, csvRows);
-    downloadCsv(`gisul-usage-${period}.csv`, csv);
+    downloadCsv(`gisul-usage-${period}.csv`, buildCsv(headers, csvRows));
   };
 
   return (
-    <div className="rounded-xl border border-white/10 bg-zinc-950/40">
-      <div className="flex flex-col gap-3 border-b border-white/10 px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
-        <div className="flex items-center gap-2">
-          <input
-            className="h-9 w-full rounded-md border border-white/10 bg-zinc-950/40 px-3 text-sm text-zinc-200 outline-none focus:border-cyan-500/40 sm:w-[280px]"
-            placeholder="Search org ID or name…"
-            value={globalFilter}
-            onChange={(e) => setGlobalFilter(e.target.value)}
-          />
-        </div>
-        <div className="flex items-center gap-2">
-          <Button variant="outline" className="border-white/10" onClick={exportAll} disabled={rows.length === 0}>
-            Export CSV
-          </Button>
-        </div>
+    <div className="rounded-xl border border-zinc-800/60 bg-zinc-900/50 backdrop-blur-sm">
+      {/* Toolbar */}
+      <div className="flex flex-col gap-3 border-b border-zinc-800/60 px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
+        <input
+          className="h-9 w-full rounded-lg border border-zinc-700/60 bg-zinc-950/60 px-3 text-sm text-zinc-200 outline-none placeholder:text-zinc-600 focus:border-cyan-500/40 sm:w-[280px]"
+          placeholder="Search org ID or name…"
+          value={globalFilter}
+          onChange={(e) => setGlobalFilter(e.target.value)}
+        />
+        <Button
+          variant="outline"
+          className="border-zinc-700/60 hover:border-zinc-600"
+          onClick={exportAll}
+          disabled={rows.length === 0}
+        >
+          Export CSV
+        </Button>
       </div>
 
       {loading ? (
-        <div className="p-4">
-          <Skeleton className="h-10 w-full" />
-          <div className="mt-3 space-y-2">
-            {Array.from({ length: 6 }).map((_, i) => (
-              <Skeleton key={i} className="h-9 w-full" />
-            ))}
-          </div>
+        <div className="p-4 space-y-2">
+          <Skeleton className="h-10 w-full rounded-lg" />
+          {Array.from({ length: 6 }).map((_, i) => (
+            <Skeleton key={i} className="h-9 w-full rounded-lg" />
+          ))}
         </div>
       ) : (
         <>
           <div className="overflow-auto">
-            <table className="min-w-[1100px] w-full text-left text-sm">
-              <thead className="text-xs text-zinc-500">
+            <table className="min-w-[1200px] w-full text-left text-sm">
+              <thead>
                 {table.getHeaderGroups().map((hg) => (
-                  <tr key={hg.id} className="border-b border-white/10">
+                  <tr key={hg.id} className="border-b border-zinc-800/60">
                     {hg.headers.map((h) => (
                       <th
                         key={h.id}
-                        className={`px-4 py-2 ${h.column.getCanSort() ? "cursor-pointer select-none" : ""}`}
+                        className={cn(
+                          "px-4 py-2.5 text-xs font-semibold uppercase tracking-wide text-zinc-500",
+                          h.column.getCanSort() && "cursor-pointer select-none hover:text-zinc-300"
+                        )}
                         onClick={h.column.getToggleSortingHandler()}
                       >
                         <div className="flex items-center gap-1">
                           {flexRender(h.column.columnDef.header, h.getContext())}
-                          {h.column.getCanSort() ? (
-                            <span className="text-[10px] text-zinc-600">
-                              {h.column.getIsSorted() === "asc"
-                                ? "▲"
-                                : h.column.getIsSorted() === "desc"
-                                  ? "▼"
-                                  : ""}
+                          {h.column.getCanSort() && (
+                            <span className="text-zinc-700">
+                              {h.column.getIsSorted() === "asc" ? (
+                                <ChevronUp className="h-3 w-3 text-console-accent" />
+                              ) : h.column.getIsSorted() === "desc" ? (
+                                <ChevronDown className="h-3 w-3 text-console-accent" />
+                              ) : (
+                                <ArrowUpDown className="h-3 w-3" />
+                              )}
                             </span>
-                          ) : null}
+                          )}
                         </div>
                       </th>
                     ))}
                   </tr>
                 ))}
               </thead>
-              <tbody className="text-zinc-200">
+              <tbody>
                 {table.getRowModel().rows.length === 0 ? (
                   <tr>
-                    <td className="px-4 py-10 text-center text-zinc-500" colSpan={columns.length}>
+                    <td
+                      className="px-4 py-10 text-center text-sm text-zinc-600"
+                      colSpan={columns.length}
+                    >
                       No usage data for this period.
                     </td>
                   </tr>
                 ) : (
                   table.getRowModel().rows.map((r) => (
-                    <tr key={r.id} className="border-b border-white/5 hover:bg-white/5">
+                    <tr
+                      key={r.id}
+                      className="border-b border-zinc-800/40 transition-colors hover:bg-zinc-800/30"
+                    >
                       {r.getVisibleCells().map((c) => (
-                        <td key={c.id} className="px-4 py-2">
-                          {c.column.id === "total_tokens" ||
-                          c.column.id === "prompt_tokens" ||
-                          c.column.id === "completion_tokens" ||
-                          c.column.id === "call_count" ? (
-                            <span className="tabular-nums">{fmtNum(c.getValue() as any)}</span>
-                          ) : (
-                            flexRender(c.column.columnDef.cell, c.getContext())
-                          )}
+                        <td key={c.id} className="px-4 py-2.5">
+                          {flexRender(c.column.columnDef.cell, c.getContext())}
                         </td>
                       ))}
                     </tr>
@@ -248,27 +283,34 @@ export function OrgsTable({
             </table>
           </div>
 
-          <div className="flex items-center justify-between gap-3 px-4 py-3 text-xs text-zinc-500">
+          {/* Pagination */}
+          <div className="flex items-center justify-between gap-3 border-t border-zinc-800/60 px-4 py-3 text-xs text-zinc-500">
             <div>
-              Page{" "}
+              Showing{" "}
               <span className="font-medium text-zinc-300">
-                {table.getState().pagination.pageIndex + 1}
+                {table.getRowModel().rows.length}
               </span>{" "}
               of{" "}
-              <span className="font-medium text-zinc-300">{table.getPageCount()}</span>
+              <span className="font-medium text-zinc-300">
+                {table.getFilteredRowModel().rows.length}
+              </span>{" "}
+              orgs
             </div>
             <div className="flex items-center gap-2">
               <Button
                 variant="outline"
-                className="border-white/10"
+                className="border-zinc-700/60 h-7 px-3 text-xs"
                 onClick={() => table.previousPage()}
                 disabled={!table.getCanPreviousPage()}
               >
                 Prev
               </Button>
+              <span className="text-zinc-500">
+                {table.getState().pagination.pageIndex + 1} / {table.getPageCount()}
+              </span>
               <Button
                 variant="outline"
-                className="border-white/10"
+                className="border-zinc-700/60 h-7 px-3 text-xs"
                 onClick={() => table.nextPage()}
                 disabled={!table.getCanNextPage()}
               >
@@ -281,4 +323,3 @@ export function OrgsTable({
     </div>
   );
 }
-

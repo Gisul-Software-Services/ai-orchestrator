@@ -9,6 +9,7 @@ import {
   TextArea,
   TextInput,
   Toggle,
+  DifficultySelector,
 } from "@/components/playground/EndpointFormShell";
 import { JobPoller } from "@/components/playground/JobPoller";
 import { ResponseCard } from "@/components/playground/ResponseCard";
@@ -143,14 +144,7 @@ export default function DsaEnrichPlaygroundPage() {
           </Field>
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
             <Field label="Difficulty">
-              <Select
-                value={difficulty}
-                onChange={(e) => setDifficulty(e.target.value as Difficulty)}
-              >
-                <option>Easy</option>
-                <option>Medium</option>
-                <option>Hard</option>
-              </Select>
+              <DifficultySelector value={difficulty} onChange={(v) => setDifficulty(v as Difficulty)} />
             </Field>
             <Field label="Languages (comma separated)" hint="Default is all 10">
               <TextInput
@@ -204,7 +198,7 @@ export default function DsaEnrichPlaygroundPage() {
       </EndpointFormShell>
 
       {result && resultTs ? (
-        <ResponseCard endpoint="DSA enrich" result={result} timestamp={resultTs} />
+        <ResponseCard endpoint="DSA enrich" result={result} timestamp={resultTs} durationSeconds={t0 ? (resultTs - t0) / 1000 : undefined} />
       ) : null}
 
       <RequestHistory items={history} selectedIndex={selectedIdx} onSelect={setSelectedIdx} />

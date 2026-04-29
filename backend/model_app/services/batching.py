@@ -9,7 +9,7 @@ from fastapi import HTTPException
 
 from backend.model_app.core.app import _batch_size_max, _batch_timeout, logger
 from backend.model_app.core.state import STATS, batch_locks, batch_queues, pending_results
-from backend.model_app.services.cache import save_to_cache
+from backend.model_app.services.cache import save_to_cache_async
 from backend.model_app.services.generation import extract_json
 from backend.model_app.services.model import _llm_chat_batch
 
@@ -113,7 +113,7 @@ async def process_batch(endpoint: str, prompt_builder_func, max_tokens: int = 20
                         "cache_hit": False,
                     }
                 )
-                save_to_cache(cache_key, result)
+                save_to_cache_async(cache_key, result)
                 pending_results[request_id] = {"success": True, "data": result}
             except Exception as e:
                 logger.error(f"Error processing batch item {i}: {e}. Retrying...")
@@ -131,7 +131,7 @@ async def process_batch(endpoint: str, prompt_builder_func, max_tokens: int = 20
                             "cache_hit": False,
                         }
                     )
-                    save_to_cache(cache_key, retry_result)
+                    save_to_cache_async(cache_key, retry_result)
                     pending_results[request_id] = {"success": True, "data": retry_result}
                     logger.info(f"Retry successful for batch item {i}")
                 except Exception as retry_error:

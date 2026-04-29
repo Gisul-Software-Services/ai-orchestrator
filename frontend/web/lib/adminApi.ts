@@ -19,6 +19,11 @@ export async function adminFetchJson<T>(
     },
   });
   if (!res.ok) {
+    if (res.status === 429) {
+      const retryAfter = res.headers.get("Retry-After");
+      const wait = retryAfter ? ` Try again in ${retryAfter}s.` : " Please wait a moment before retrying.";
+      throw new Error(`Rate limit reached — too many requests.${wait}`);
+    }
     const text = await res.text();
     throw new Error(
       `${res.status} ${res.statusText}: ${text.slice(0, 400) || "request failed"}`

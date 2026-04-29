@@ -1,8 +1,9 @@
 "use client";
 
-import { differenceInSeconds, formatDistanceStrict } from "date-fns";
+import { formatDistanceStrict } from "date-fns";
 import { StatsCard } from "./StatsCard";
 import type { HealthResponse, MetricsOverview } from "@/types/api";
+import { Cpu, Thermometer, Zap, MemoryStick } from "lucide-react";
 
 function gbFromMb(mb: number | null | undefined) {
   if (typeof mb !== "number") return null;
@@ -26,87 +27,106 @@ export function GpuPanel({
 }) {
   const modelLoaded = health?.model_loaded ?? overview?.model_loaded ?? false;
 
-  const startIso = (overview as any)?.inference?.server_start_time as
-    | string
-    | undefined;
+  const startIso = (overview as { inference?: { server_start_time?: string } } | null)
+    ?.inference?.server_start_time;
   const uptime =
     startIso && !Number.isNaN(Date.parse(startIso))
-      ? formatDistanceStrict(new Date(startIso), new Date(), { addSuffix: true })
-          .replace("ago", "")
-          .trim()
+      ? formatDistanceStrict(new Date(startIso), new Date(), { addSuffix: false })
       : null;
 
   const gpu = overview?.gpu;
+  const gpuUnavailable = gpu?.available === false;
+  const gpuErrorMsg = gpu?.error ?? "NVML not available";
+
   const usedGb = gbFromMb(gpu?.memory_used_mb);
   const totalGb = gbFromMb(gpu?.memory_total_mb);
   const memPct = pct(gpu?.memory_used_percent);
   const utilPct = pct(gpu?.gpu_util_percent);
   const tempC = pct(gpu?.temperature_c);
 
-  const memIndicator =
-    memPct === null
-      ? "zinc"
-      : memPct > 90
-        ? "red"
-        : memPct > 70
-          ? "amber"
-          : "emerald";
-  const tempIndicator =
-    tempC === null
-      ? "zinc"
-      : tempC > 85
-        ? "red"
-        : tempC > 70
-          ? "amber"
-          : "emerald";
+  const memColor =
+    gpuUnavailable ? "zinc"
+    : memPct === null ? "zinc"
+    : memPct > 90 ? "red"
+    : memPct > 70 ? "amber"
+    : "emerald";
 
-  const utilIndicator =
-    utilPct === null ? "zinc" : utilPct > 90 ? "amber" : "cyan";
+  const tempColor =
+    gpuUnavailable ? "zinc"
+    : tempC === null ? "zinc"
+    : tempC > 85 ? "red"
+    : tempC > 70 ? "amber"
+    : "emerald";
+
+  const utilColor =
+    gpuUnavailable ? "zinc"
+    : utilPct === null ? "zinc"
+    : utilPct > 90 ? "amber"
+    : "cyan";
 
   return (
-    <div className="grid grid-cols-1 gap-3 md:grid-cols-4">
+    <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
       <StatsCard
         title="Model status"
         loading={loading}
         indicatorColor={unreachable ? "zinc" : modelLoaded ? "emerald" : "red"}
-        value={
-          unreachable ? "Unreachable" : modelLoaded ? "Loaded" : "Not loaded"
-        }
-        subtitle={uptime ? `Uptime ${uptime}` : undefined}
+        value={unreachable ? "Unreachable" : modelLoaded ? "Loaded" : "Not loaded"}
+        subtitle={uptime ? `Up ${uptime}` : health?.memory_gb ? `${health.memory_gb.toFixed(1)} GB RAM` : undefined}
+        icon={<Cpu className="h-3.5 w-3.5 text-zinc-600" strokeWidth={1.5} />}
       />
 
       <StatsCard
         title="GPU VRAM"
         loading={loading}
-        indicatorColor={memIndicator}
+        indicatorColor={memColor}
         value={
-          usedGb !== null && totalGb !== null
-            ? `${usedGb.toFixed(2)} / ${totalGb.toFixed(2)} GB`
-            : "—"
+          gpuUnavailable
+            ? "Unavailable"
+            : usedGb !== null && totalGb !== null
+              ? `${usedGb.toFixed(1)} / ${totalGb.toFixed(1)} GB`
+              : "—"
         }
-        subtitle={memPct !== null ? `${memPct.toFixed(2)}% used` : undefined}
+        subtitle={
+          gpuUnavailable
+            ? gpuErrorMsg
+            : memPct !== null
+              ? `${memPct.toFixed(1)}% used`
+              : undefined
+        }
+        icon={<MemoryStick className="h-3.5 w-3.5 text-zinc-600" strokeWidth={1.5} />}
       />
 
       <StatsCard
         title="GPU temperature"
         loading={loading}
-        indicatorColor={tempIndicator}
-        value={tempC !== null ? `${tempC.toFixed(0)}°C` : "—"}
+        indicatorColor={tempColor}
+        value={gpuUnavailable ? "Unavailable" : tempC !== null ? `${tempC.toFixed(0)}°C` : "—"}
         subtitle={
-          typeof gpu?.power_watts === "number"
-            ? `${gpu.power_watts.toFixed(0)} W`
-            : undefined
+          gpuUnavailable
+            ? gpuErrorMsg
+            : typeof gpu?.power_watts === "number"
+              ? `${gpu.power_watts.toFixed(0)} W draw`
+              : undefined
         }
+        icon={<Thermometer className="h-3.5 w-3.5 text-zinc-600" strokeWidth={1.5} />}
       />
 
       <StatsCard
         title="GPU utilisation"
         loading={loading}
-        indicatorColor={utilIndicator}
-        value={utilPct !== null ? `${utilPct.toFixed(0)}%` : "—"}
-        subtitle={gpu?.available ? "NVML OK" : gpu?.error ? "NVML error" : ""}
+        indicatorColor={utilColor}
+        value={gpuUnavailable ? "Unavailable" : utilPct !== null ? `${utilPct.toFixed(0)}%` : "—"}
+        subtitle={
+          gpuUnavailable
+            ? gpuErrorMsg
+            : gpu?.available
+              ? "NVML OK"
+              : gpu?.error
+                ? "NVML error"
+                : ""
+        }
+        icon={<Zap className="h-3.5 w-3.5 text-zinc-600" strokeWidth={1.5} />}
       />
     </div>
   );
 }
-

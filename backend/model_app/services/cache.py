@@ -65,24 +65,3 @@ async def save_to_cache_async(cache_key: str, response: Any) -> None:
     except Exception as e:
         logger.warning("Cache save failed for key %s: %s", cache_key, e)
 
-
-# ── Sync shims for callers that haven't been migrated to async yet ────────────
-# These fall back to a local in-process dict so existing sync call sites
-# continue to work. Migrate callers to the async versions over time.
-
-_local_fallback: dict[str, Any] = {}
-
-
-def get_from_cache(cache_key: str) -> Any:
-    """Sync fallback — checks local dict only. Use get_from_cache_async in async contexts."""
-    val = _local_fallback.get(cache_key)
-    if val is not None:
-        STATS["cache_hits"] += 1
-        return val
-    STATS["cache_misses"] += 1
-    return None
-
-
-def save_to_cache(cache_key: str, response: Any) -> None:
-    """Sync fallback — saves to local dict only. Use save_to_cache_async in async contexts."""
-    _local_fallback[cache_key] = response

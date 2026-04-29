@@ -2,8 +2,11 @@
 
 import { useQuery } from "@tanstack/react-query";
 import type {
+  GpuMetrics,
   HealthResponse,
+  InferenceMetrics,
   MetricsOverview,
+  QueuesMetrics,
   StatsResponse,
 } from "@/types/api";
 import { adminFetchJson } from "@/lib/adminApi";
@@ -35,7 +38,7 @@ export function useMetricsOverviewQuery() {
 export function useMetricsGpuQuery() {
   return useQuery({
     queryKey: ["admin", "metrics", "gpu"],
-    queryFn: () => adminFetchJson<Record<string, unknown>>("/api/admin/metrics/gpu"),
+    queryFn: () => adminFetchJson<GpuMetrics>("/api/admin/metrics/gpu"),
     refetchInterval: 5_000,
   });
 }
@@ -44,7 +47,7 @@ export function useMetricsQueuesQuery() {
   return useQuery({
     queryKey: ["admin", "metrics", "queues"],
     queryFn: () =>
-      adminFetchJson<Record<string, unknown>>("/api/admin/metrics/queues"),
+      adminFetchJson<QueuesMetrics>("/api/admin/metrics/queues"),
     refetchInterval: 5_000,
   });
 }
@@ -53,7 +56,7 @@ export function useMetricsInferenceQuery() {
   return useQuery({
     queryKey: ["admin", "metrics", "inference"],
     queryFn: () =>
-      adminFetchJson<Record<string, unknown>>("/api/admin/metrics/inference"),
+      adminFetchJson<InferenceMetrics>("/api/admin/metrics/inference"),
     refetchInterval: 5_000,
   });
 }

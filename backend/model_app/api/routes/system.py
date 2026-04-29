@@ -35,7 +35,7 @@ async def get_stats():
 
 @router.post("/api/v1/clear-cache")
 async def clear_cache():
-    return system_service.clear_cache()
+    return await system_service.clear_cache()
 
 
 @router.get("/api/v1/request-log")

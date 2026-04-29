@@ -30,7 +30,7 @@ from backend.model_app.core.app import _batch_size_max, _batch_timeout
 from backend.model_app.core.state import STATS, batch_locks, batch_queues, pending_results
 from backend.model_app.prompts.mcq import build_mcq_prompt
 from backend.model_app.prompts.mcq import build_mcq_verifier_prompt
-from backend.model_app.services.cache import get_from_cache, save_to_cache, generate_cache_key
+from backend.model_app.services.cache import save_to_cache_async, generate_cache_key
 from backend.model_app.services.generation import extract_json
 from backend.model_app.services.model import _llm_chat_batch, _llm_chat_single
 
@@ -1083,7 +1083,7 @@ async def process_mcq_batch():
                     "cache_hit": False,
                 }
             )
-            save_to_cache(keys[i], final_mcq)
+            save_to_cache_async(keys[i], final_mcq)
             pending_results[ids[i]] = final_mcq
             continue
 
@@ -1103,7 +1103,7 @@ async def process_mcq_batch():
                     "cache_hit": False,
                 }
             )
-            save_to_cache(keys[i], final_mcq)
+            save_to_cache_async(keys[i], final_mcq)
             pending_results[ids[i]] = final_mcq
             logger.info(f"Retry succeeded for item {i}")
         except Exception as retry_exc:

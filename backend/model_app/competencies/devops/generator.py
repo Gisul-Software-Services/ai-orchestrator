@@ -99,7 +99,7 @@ async def _pass2_code(title: str, description: str, difficulty: str, focus_area:
         temperature=0.7,
         top_p=0.9,
         repetition_penalty=1.1,
-        max_tokens=600,
+        max_tokens=400,
     )
     return extract_json(decoded)
 
@@ -224,6 +224,7 @@ async def generate_devops_question(
             rag_context=rag_context,
         )
     except Exception as e:
+        logger.error(f"DevOps generation failed: {type(e).__name__}: {str(e)}", exc_info=True)
         raise HTTPException(status_code=500, detail=f"DevOps generation failed: {str(e)}")
 
 

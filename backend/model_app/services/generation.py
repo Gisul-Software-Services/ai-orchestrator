@@ -25,8 +25,8 @@ from backend.model_app.competencies.aiml.generator import (
 )
 from backend.model_app.services.cache import (
     generate_cache_key,
-    get_from_cache,
-    save_to_cache,
+    get_from_cache_async,
+    save_to_cache_async,
 )
 from backend.model_app.services.jobs import (
     _job_store_set,
@@ -143,7 +143,7 @@ async def _run_generation_task(
             item_data = {k: v for k, v in request_data.items() if k not in ("num_questions",)}
             cache_key = generate_cache_key("topics", item_data)
             if use_cache:
-                cached = get_from_cache(cache_key)
+                cached = await get_from_cache_async(cache_key)
                 if cached:
                     cached["cache_hit"] = True
                     await _job_store_set(job_id, {"status": "complete", "result": cached, "error": None})
@@ -161,7 +161,7 @@ async def _run_generation_task(
             result["cache_hit"] = False
             result["batched"] = True
             result["batch_size"] = num_q
-            save_to_cache(cache_key, result)
+            await save_to_cache_async(cache_key, result)
             await _job_store_set(job_id, {"status": "complete", "result": result, "error": None})
             logger.info(f"Job {job_id[:8]} complete - topics generated")
             _emit_usage_metering(
@@ -183,14 +183,14 @@ async def _run_generation_task(
             cache_key = generate_cache_key(endpoint, {**item_data, "question_index": i})
 
             if use_cache:
-                cached = get_from_cache(cache_key)
+                cached = await get_from_cache_async(cache_key)
                 if cached:
                     any_cache_hit = True
                     all_items.append(cached)
                     continue
 
             result = await add_to_batch_and_wait(endpoint, item_data, cache_key, prompt_builder_func, max_tokens)
-            save_to_cache(cache_key, result)
+            await save_to_cache_async(cache_key, result)
             total_time += result.get("generation_time_seconds", 0)
             all_items.append(result)
 
@@ -251,7 +251,7 @@ async def generate_topics(body, http_request):
 
     cache_key = generate_cache_key("topics", item_data)
     if body.use_cache:
-        cached = get_from_cache(cache_key)
+        cached = await get_from_cache_async(cache_key)
         if cached:
             cached["cache_hit"] = True
             await _job_store_set(job_id, {"status": "complete", "result": cached, "error": None})
@@ -304,7 +304,7 @@ async def generate_mcq(body, http_request):
                     item_data["request_id"] = str(uuid.uuid4())
                 cache_key = generate_cache_key("mcq", {**item_data, "question_index": i})
                 if body.use_cache:
-                    cached = get_from_cache(cache_key)
+                    cached = await get_from_cache_async(cache_key)
                     if cached:
                         cached = dict(cached)
                         cached["cache_hit"] = True
@@ -423,7 +423,7 @@ async def generate_aiml(body, http_request):
             cache_key = generate_cache_key("aiml", item_data)
 
             if body.use_cache:
-                cached = get_from_cache(cache_key)
+                cached = await get_from_cache_async(cache_key)
                 if cached:
                     cached["cache_hit"] = True
                     await _job_store_set(
@@ -531,7 +531,7 @@ async def generate_aiml(body, http_request):
                 logger.warning("Synthetic AIML output has quality issues - returning with warnings: %s", issues)
                 result["validation_warnings"] = issues
 
-            save_to_cache(cache_key, result)
+            await save_to_cache_async(cache_key, result)
             await _job_store_set(
                 job_id,
                 {

@@ -5,6 +5,17 @@ Prepend GLOBAL_RULES to every competency system prompt.
 """
 from __future__ import annotations
 
+GLOBAL_RULES_COMPACT = """=== APTOR GLOBAL RULES ===
+[G1] Return ONLY valid JSON. No markdown, no code fences, no preamble.
+First character MUST be { and last MUST be }.
+Follow the schema exactly. No extra fields.
+If unable to generate: {"error": "CANNOT_GENERATE_CLEAN_QUESTION"}
+
+[G2] Formal third-person tone only.
+FORBIDDEN: "you", "your", "we", "I", "you should", "you must".
+Use: "The candidate must...", "The solution requires...", "The artifact must..."
+"""
+
 GLOBAL_RULES = """=== APTOR GLOBAL QUESTION GENERATION RULES ===
 These rules apply to every competency and cannot be overridden.
 

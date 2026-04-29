@@ -7,7 +7,6 @@ from starlette.requests import Request
 from backend.model_app.schemas.generation import (
     CodingGenerationRequest,
     MCQGenerationRequest,
-    SQLGenerationRequest,
     SubjectiveGenerationRequest,
     TopicGenerationRequest,
 )
@@ -35,11 +34,6 @@ async def generate_subjective(body: SubjectiveGenerationRequest, http_request: R
 @router.post("/api/v1/generate-coding")
 async def generate_coding(body: CodingGenerationRequest, http_request: Request):
     return await generation_service.generate_coding(body, http_request)
-
-
-@router.post("/api/v1/generate-sql")
-async def generate_sql(body: SQLGenerationRequest, http_request: Request):
-    return await generation_service.generate_sql(body, http_request)
 
 
 @router.post("/api/v1/chat")

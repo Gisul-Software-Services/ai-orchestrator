@@ -8,11 +8,11 @@ _DIFFICULTY = Literal["Easy", "Medium", "Hard"]
 
 
 class TopicGenerationRequest(BaseModel):
-    assessment_title: str
-    job_designation: str
+    assessment_title: str = Field(..., min_length=1, max_length=300)
+    job_designation: str = Field(..., min_length=1, max_length=200)
     skills: List[str]
-    experience_min: int
-    experience_max: int
+    experience_min: int = Field(..., ge=0, le=50)
+    experience_max: int = Field(..., ge=0, le=50)
     experience_mode: str = "corporate"
     num_topics: int = Field(default=10, ge=1, le=20)
     num_questions: int = Field(default=1, ge=1, le=20)

@@ -153,12 +153,10 @@ export function buildPayload(
       break;
     case "generate-sql":
       out = {
-        ...base,
         topic: f.topic,
         difficulty: f.difficulty,
-        database_type: f.databaseType,
-        job_role: f.jobRole,
-        experience_years: f.experienceYears,
+        sql_category: f.databaseType || undefined,
+        count: nq,
       };
       break;
     case "generate-aiml":

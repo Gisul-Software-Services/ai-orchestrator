@@ -16,8 +16,10 @@ from backend.model_app.evaluation.sql_evaluator import get_sql_feedback
 from backend.model_app.evaluation.devops_evaluator import get_devops_feedback
 from backend.model_app.evaluation.cloud_evaluator import get_cloud_feedback
 from backend.model_app.evaluation.linux_evaluator import get_linux_feedback
+from backend.model_app.evaluation.design_evaluator import get_design_feedback
 from backend.model_app.competencies.sql.eval_schema import SQLEvaluationRequest
 from backend.model_app.competencies.devops.eval_schema import DevOpsEvalRequest, CloudEvalRequest
+from backend.model_app.competencies.design.eval_schema import DesignEvalRequest
 
 # Linux uses the same request shape as DevOps
 LinuxEvalRequest = DevOpsEvalRequest

@@ -87,6 +87,7 @@ async def _reword_problem(selected: dict) -> dict:
         hints=hints_text,
         tables=schema_detail,
         domain_instruction=domain_instruction,
+        reference_query=selected.get("reference_query", ""),
     )
     try:
         messages = [

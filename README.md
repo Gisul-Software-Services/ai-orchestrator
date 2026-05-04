@@ -6,20 +6,20 @@ An AI-powered assessment platform for technical competency evaluation. The platf
 
 ## Architecture
 
-The platform runs as 3 services + Redis:
+The platform runs as 3 services + Redis, with an optional RAG service:
 
 ```
 ┌─────────────────┐     ┌─────────────────┐     ┌─────────────────┐
 │   Frontend      │────▶│    Gateway      │────▶│  Model Service  │
 │  Next.js :7002  │     │  FastAPI :7000  │     │  FastAPI :7001  │
 │  Admin UI       │     │  Auth + Billing │     │  Qwen / vLLM    │
-└─────────────────┘     └────────┬────────┘     └─────────────────┘
-                                 │
-                         ┌───────▼───────┐
-                         │     Redis     │
-                         │    :6379      │
-                         │  Jobs + Cache │
-                         └───────────────┘
+└─────────────────┘     └────────┬────────┘     └────────┬────────┘
+                                 │                        │
+                         ┌───────▼───────┐       ┌───────▼───────┐
+                         │     Redis     │       │  RAG Service  │
+                         │    :6379      │       │  FastAPI :7003│
+                         │  Jobs + Cache │       │  FAISS + Mongo│
+                         └───────────────┘       └───────────────┘
 ```
 
 | Service | Port | Purpose |
@@ -28,6 +28,7 @@ The platform runs as 3 services + Redis:
 | `backend-api` (gateway) | 7000 | Auth, billing, org verification, proxy |
 | `model-service` | 7001 | Qwen/vLLM — generation + evaluation |
 | `redis` | 6379 | Async job queue + response cache |
+| `rag-service` *(optional)* | 7003 | FAISS vector search + MongoDB catalog |
 
 ---
 
@@ -288,6 +289,61 @@ All API calls require one of:
 
 - **Admin key** — `X-Api-Key: <ADMIN_API_KEY>` — bypasses org verification, full access
 - **Org API key** — `X-Api-Key: <org-key>` — validated against MongoDB `api_keys` collection, subject to rate limiting (20 req/min per org)
+
+---
+
+## RAG Service
+
+The RAG service (`aaptor-rag-service`) runs separately on port **7003**. It provides FAISS vector search and MongoDB-backed catalog retrieval used by the model service for question generation across competencies.
+
+**Supported competency indexes:**
+- `aiml`, `dsa`, `devops`, `data_engineering`, `design`, `cloud`, `fullstack`, `prompt_engineering`
+
+### Run the RAG service
+
+```bash
+cd aaptor-rag-service
+cp .env.example .env   # set ADMIN_API_KEY
+docker compose up -d
+```
+
+This starts:
+- `rag-service` on port `7003`
+- `rag-mongo` (MongoDB) on port `27018`
+
+### Connect model service to RAG
+
+Set in `model-service/.env` or `backend/.env`:
+```
+RAG_SERVICE_URL=http://127.0.0.1:7003
+```
+
+In Docker Compose, if running on the same network:
+```
+RAG_SERVICE_URL=http://rag-service:7003
+```
+
+### RAG API
+
+```bash
+# Health check
+GET http://localhost:7003/health
+
+# Retrieve similar questions (used internally by model service)
+POST http://localhost:7003/retrieve
+Headers: X-Api-Key: <ADMIN_API_KEY>
+Body: { "competency": "data_engineering", "query": "...", "top_k": 5 }
+
+# Ingest new documents
+POST http://localhost:7003/ingest
+Headers: X-Api-Key: <ADMIN_API_KEY>
+
+# Rebuild FAISS index
+POST http://localhost:7003/rebuild
+Headers: X-Api-Key: <ADMIN_API_KEY>
+```
+
+Data (FAISS indexes + catalog JSON files) is mounted at `aaptor-rag-service/data/`.
 
 ---
 

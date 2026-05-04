@@ -1,207 +1,315 @@
-# Gisul model
+# Gisul AI Orchestrator
 
-Question-generation stack: **gateway** (FastAPI proxy, auth, billing) and **model service** (FastAPI + vLLM / GPU). This repo also includes a **Next.js** playground under `frontend/web`.
+An AI-powered assessment platform for technical competency evaluation. The platform generates questions, evaluates candidate submissions, and provides detailed AI feedback across multiple engineering domains.
 
-## Docker quickstart (pull + run)
+---
 
-### Linux + NVIDIA GPU (vLLM)
+## Architecture
+
+The platform runs as 3 services + Redis:
+
+```
+┌─────────────────┐     ┌─────────────────┐     ┌─────────────────┐
+│   Frontend      │────▶│    Gateway      │────▶│  Model Service  │
+│  Next.js :7002  │     │  FastAPI :7000  │     │  FastAPI :7001  │
+│  Admin UI       │     │  Auth + Billing │     │  Qwen / vLLM    │
+└─────────────────┘     └────────┬────────┘     └─────────────────┘
+                                 │
+                         ┌───────▼───────┐
+                         │     Redis     │
+                         │    :6379      │
+                         │  Jobs + Cache │
+                         └───────────────┘
+```
+
+| Service | Port | Purpose |
+|---|---|---|
+| `frontend` | 7002 | Next.js admin console |
+| `backend-api` (gateway) | 7000 | Auth, billing, org verification, proxy |
+| `model-service` | 7001 | Qwen/vLLM — generation + evaluation |
+| `redis` | 6379 | Async job queue + response cache |
+
+---
+
+## Competencies
+
+### Generation
+| Competency | Endpoint |
+|---|---|
+| Topics | `POST /api/v1/generate-topics` |
+| MCQ | `POST /api/v1/generate-mcq` |
+| Subjective | `POST /api/v1/generate-subjective` |
+| Coding | `POST /api/v1/generate-coding` |
+| SQL | `POST /api/v1/generate-sql-question` |
+| DSA | `POST /api/v1/generate-dsa-question` |
+| DevOps | `POST /api/v1/generate-devops-question` |
+| Cloud (AWS) | `POST /api/v1/generate-cloud-question` |
+| AIML | `POST /api/v1/generate-aiml` |
+
+### Evaluation
+All evaluation endpoints have both sync and async variants. Use async (`/async`) to avoid timeouts.
+
+| Competency | Async Endpoint |
+|---|---|
+| DSA | `POST /api/v1/evaluation/dsa/async` |
+| AIML | `POST /api/v1/evaluation/aiml/async` |
+| SQL | `POST /api/v1/evaluation/sql/async` |
+| DevOps | `POST /api/v1/evaluation/devops/async` |
+| Cloud | `POST /api/v1/evaluation/cloud/async` |
+| Linux | `POST /api/v1/evaluation/linux/async` |
+| Design | `POST /api/v1/evaluation/design/async` |
+| Data Engineering | `POST /api/v1/evaluation/data-engineering/async` |
+
+Poll async job results:
+```
+GET /api/v1/job/{job_id}
+```
+
+---
+
+## Data Engineering Evaluation
+
+The Data Engineering evaluator uses a 3-layer scoring pipeline:
+
+```
+Candidate submits PySpark code / written answer
+        ↓
+Layer 1: Deterministic Validation   (execution results from engine → DataFrame comparison)
+Layer 2: Static Partial Credit      (PySpark pattern matching — only when execution fails)
+Layer 3: AI Review                  (Qwen Coder — code quality, performance, best practices)
+        ↓
+Final score = deterministic overrides AI (with fallback exceptions)
+```
+
+**Request body:**
+```json
+{
+  "question": {
+    "id": "q-001",
+    "title": "GroupBy Aggregation",
+    "description": "Compute total sales per region",
+    "question_type": "coding",
+    "difficulty": "medium",
+    "rubric_items": ["use groupBy", "aggregate sum"],
+    "test_cases": [
+      {
+        "input_data": { "rows": [{"region": "North", "amount": 100}] },
+        "expected_output": [{"region": "North", "total": 100}]
+      }
+    ]
+  },
+  "submission": {
+    "code": "...",
+    "answer": "",
+    "execution_results": [
+      {
+        "test_case_index": 0,
+        "status": "success",
+        "output_df": [{"region": "North", "total": 100}],
+        "error_message": null
+      }
+    ]
+  },
+  "use_cache": true
+}
+```
+
+**Response:**
+```json
+{
+  "final_score": 100.0,
+  "deterministic_score": 100.0,
+  "static_partial_score": 0.0,
+  "ai_score": 85.0,
+  "score_reason": "exact_match",
+  "is_correct": true,
+  "per_test_case_results": [...],
+  "ai_feedback": {
+    "overall_score": 85.0,
+    "correctness_feedback": "...",
+    "performance_feedback": "...",
+    "best_practices_feedback": "...",
+    "improvement_suggestions": [...],
+    "strengths": [...],
+    "areas_for_improvement": [...]
+  }
+}
+```
+
+---
+
+## Project Structure
+
+```
+gisul_model/
+├── backend/
+│   ├── gateway/              # FastAPI gateway (auth, billing, proxy)
+│   │   ├── Dockerfile
+│   │   └── main.py
+│   └── model_app/
+│       ├── api/routes/       # All API route handlers
+│       ├── competencies/     # Per-competency schemas + generators
+│       │   ├── aiml/
+│       │   ├── cloud/
+│       │   ├── data_engineering/
+│       │   ├── design/
+│       │   ├── devops/
+│       │   ├── dsa/
+│       │   └── sql/
+│       ├── evaluation/       # Evaluator modules (one per competency)
+│       └── services/         # Shared: cache, jobs, model, RAG
+├── model-service/
+│   ├── Dockerfile            # GPU (vLLM + CUDA)
+│   ├── Dockerfile.mac        # Mac (Ollama)
+│   └── requirements.txt
+├── frontend/
+│   └── web/                  # Next.js admin console
+│       └── Dockerfile
+├── assets/                   # FAISS indexes, DSA enriched data
+├── docker-compose.yml        # Production (Linux + GPU)
+├── docker-compose.mac.yml    # Mac override (Ollama)
+└── README.md
+```
+
+---
+
+## Quick Start
+
+### Prerequisites
+- Docker + Docker Compose
+- NVIDIA GPU + CUDA (for model-service)
+- NVIDIA Container Toolkit
+
+### 1. Clone and configure
 
 ```bash
-# Pull latest (recommended for quick testing)
-docker pull gisul/backend-api:latest
-docker pull gisul/model-service:gpu
-docker pull gisul/model-frontend:latest
+git clone https://github.com/Gisul-Software-Services/ai-orchestrator.git
+cd ai-orchestrator
+```
 
-# Run
-export IMAGE_TAG=latest
-docker compose up -d
+Copy and fill in the env files:
+
+```bash
+cp backend/.env.example backend/.env
+cp model-service/.env.example model-service/.env
+cp frontend/web/.env.example frontend/web/.env.local
+```
+
+Key values to set:
+
+**`backend/.env`**
+```
+MONGODB_URI=mongodb+srv://...
+ADMIN_API_KEY=your-admin-key
+REDIS_URL=redis://redis:6379
+MODEL_SERVICE_URL=http://model-service:7001
+```
+
+**`model-service/.env`**
+```
+MONGODB_URI=mongodb+srv://...
+REDIS_URL=redis://redis:6379
+MODEL_NAME=Qwen/Qwen2.5-7B-Instruct-AWQ
+```
+
+**`frontend/web/.env.local`**
+```
+ADMIN_TOKEN=your-admin-token
+ADMIN_SESSION_SECRET=your-session-secret
+ADMIN_API_KEY=your-admin-key
+GATEWAY_BASE_URL=http://backend-api:7000
+```
+
+### 2. Build and run
+
+```bash
+docker compose up -d --build
 docker compose ps
 ```
 
-To pin to an exact build, you can also pull by commit tag (CI publishes these):
+### 3. Verify
 
 ```bash
-docker pull gisul/backend-api:<git-sha>
-docker pull gisul/model-service:<git-sha>-gpu
-docker pull gisul/model-frontend:<git-sha>
-export IMAGE_TAG=<git-sha>
-docker compose up -d
+# Gateway health
+curl http://localhost:7000/api/v1/health
+
+# Frontend
+open http://localhost:7002
 ```
 
-### Mac (Apple Silicon) testing (Qwen via Ollama)
+---
+
+## Mac (Apple Silicon) — Local Dev
+
+Requires [Ollama](https://ollama.com) running on the host:
 
 ```bash
-# On the Mac host (outside Docker)
 ollama pull qwen2.5:7b-instruct
 
-# Pull latest Mac model-service image
-docker pull gisul/model-service:mac
-
-# Run the stack using the Mac override
 docker compose -f docker-compose.yml -f docker-compose.mac.yml up -d
-docker compose ps
 ```
 
-## Prerequisites
+Set in `model-service/.env`:
+```
+LLM_BACKEND=ollama
+OLLAMA_BASE_URL=http://host.docker.internal:11434
+OLLAMA_MODEL=qwen2.5:7b-instruct
+```
 
-- **Python 3.11** (matches the gateway Docker image `python:3.11-slim` and is the version to standardize on locally). Python 3.12 may work for the GPU stack but is not what the gateway image pins.
-- **Node.js 20+** (LTS) and **npm** for the frontend.
-- **NVIDIA GPU + CUDA** if you run the full model locally (same dependency set as `model-service`). Gateway-only development does not require a GPU.
+---
 
-## Clone and Python environment
+## Local Development (without Docker)
 
-From the repository root:
+Requires Python 3.11 and Node 20+.
 
 ```bash
-cd gisul_model
-
-# Use Python 3.11 explicitly so the venv matches production-ish images.
-python3.11 --version   # expect 3.11.x
-
+# Create venv
 python3.11 -m venv venv
-source venv/bin/activate   # Windows: venv\Scripts\activate
-
-# Install / upgrade pip inside the venv (must be the venv’s python, not system pip).
-python -m pip install --upgrade pip setuptools wheel
-
-# Confirm interpreter and pip point at the same environment.
-python --version
-python -m pip --version
-```
-
-You should see `pip` coming from `.../venv/...` and a **pip version line** that references the same `python3.11` (or `python`) in that `venv`. If `pip install` affects a different Python, use `python -m pip install ...` instead of bare `pip install`.
-
-## Dependency layout (one manifest per area)
-
-| Area | Manifest | Purpose |
-|------|-----------|--------|
-| **Backend** (gateway API) | `backend/requirements.txt` | FastAPI proxy, Mongo, Redis, httpx, billing. Used by `backend/gateway/Dockerfile` (build context `backend/`). |
-| **Model service** | `model-service/requirements.txt` | vLLM, torch+cu128, sentence-transformers, FAISS, etc. Same file is copied into the model Docker image. |
-| **Frontend** (Next.js) | `frontend/web/package.json` (+ `package-lock.json`) | Node dependencies for the web app. Install with `npm ci` from `frontend/web`. |
-
-Application code for the model lives under `backend/model_app/`; it does **not** have its own `requirements.txt` — use **`model-service/requirements.txt`** for that runtime.
-
-## Install Python dependencies
-
-Pick one path depending on what you run locally.
-
-### Model service / full local model (GPU)
-
-Use the pinned set (CUDA wheels via the PyTorch extra index in the file). Requires a CUDA-capable machine.
-
-```bash
-python -m pip install -r model-service/requirements.txt
-```
-
-### Gateway only (lightweight; proxies to a model service running elsewhere)
-
-```bash
-python -m pip install -r backend/requirements.txt
-```
-
-## Environment files
-
-- **Gateway + local scripts:** copy `backend/.env.example` to `backend/.env` and fill in values (MongoDB, Redis, `MODEL_SERVICE_URL`, etc.).
-- **Model service (Docker / GPU container):** copy `model-service/.env.example` to `model-service/.env` when using compose or a local GPU server that reads that file.
-
-Never commit real `.env` files; they are listed in `.gitignore`.
-
-## Run services locally (development)
-
-Use the same activated `venv` and repo root as the working directory.
-
-### Terminal 1 — Model service (GPU) on port 7001
-
-```bash
-cd /path/to/gisul_model
 source venv/bin/activate
-set -a && source backend/.env && set +a
-PYTHONPATH=backend uvicorn model_app.main:app --host 0.0.0.0 --port 7001
-```
+pip install -r model-service/requirements.txt
 
-### Terminal 2 — Gateway on port 7000
+# Terminal 1 — Model service (port 7001)
+uvicorn model_service_entrypoint:app --host 0.0.0.0 --port 7001
 
-Point `MODEL_SERVICE_URL` in `backend/.env` at the model service (e.g. `http://127.0.0.1:7001`).
+# Terminal 2 — Gateway (port 7000)
+uvicorn backend.gateway.main:app --host 0.0.0.0 --port 7000
 
-```bash
-cd /path/to/gisul_model
-source venv/bin/activate
-set -a && source backend/.env && set +a
-PYTHONPATH=. uvicorn backend.gateway.main:app --host 0.0.0.0 --port 7000
-```
-
-### Terminal 3 — Frontend on port 7002
-
-```bash
+# Terminal 3 — Frontend (port 7002)
 cd frontend/web
 npm ci
-PORT=7002 npm run dev -- -p 7002
+npm run dev -- -p 7002
 ```
 
-Open: [http://127.0.0.1:7002](http://127.0.0.1:7002)
+---
 
-## Docker
+## Authentication
 
-For containerized Redis, model-service, and gateway, see `docker-compose.yml` at the repo root.
+All API calls require one of:
 
-### Images and tags (what to pull)
+- **Admin key** — `X-Api-Key: <ADMIN_API_KEY>` — bypasses org verification, full access
+- **Org API key** — `X-Api-Key: <org-key>` — validated against MongoDB `api_keys` collection, subject to rate limiting (20 req/min per org)
 
-We publish multiple `gisul/model-service` variants because **vLLM/CUDA (GPU)** and **macOS dev (Ollama)** are different runtimes:
+---
 
-- **Linux + NVIDIA GPU (vLLM/CUDA)**:
-  - `gisul/model-service:gpu`
-  - `gisul/model-service:<git-sha>-gpu`
-  - `gisul/model-service:latest` and `gisul/model-service:<git-sha>` also point at the **GPU** build
-- **Mac dev (Apple Silicon) / Ollama backend**:
-  - `gisul/model-service:mac`
-  - `gisul/model-service:<git-sha>-mac`
-
-Gateway and frontend are published as multi-arch images and should run on both Intel/AMD and Apple Silicon:
-
-- `gisul/backend-api:latest` / `gisul/backend-api:<git-sha>`
-- `gisul/model-frontend:latest` / `gisul/model-frontend:<git-sha>`
-
-### Run on Linux with NVIDIA GPU (production-style)
-
-This uses the **GPU** model-service image (vLLM) and requires NVIDIA Container Toolkit.
+## Testing
 
 ```bash
-# Pull pinned images (recommended)
-docker pull gisul/backend-api:<git-sha>
-docker pull gisul/model-service:<git-sha>-gpu
-docker pull gisul/model-frontend:<git-sha>
+# Test all evaluation endpoints
+python3 test_all_evaluations.py
 
-# Or use latest
-# docker pull gisul/model-service:gpu
+# Test data engineering endpoint specifically
+python3 test_de_endpoint.py
 
-# Run the stack
-export IMAGE_TAG=<git-sha>
-docker compose up -d
-docker compose ps
+# Test deterministic scoring logic (no server needed)
+python3 test_de_eval_logic.py
 ```
 
-### Run on Mac (Apple Silicon) for testing (Qwen via Ollama)
+---
 
-On macOS, vLLM/NVML/CUDA won’t run. For local testing we run **Qwen via Ollama** on the Mac host and the repo’s model-service container calls it using env vars.
+## Dependencies
 
-1) Start Ollama on the Mac and pull Qwen (example):
-
-```bash
-ollama pull qwen2.5:7b-instruct
-```
-
-2) Pull the **Mac** model-service image and start the stack with the Mac override:
-
-```bash
-docker pull gisul/model-service:mac
-
-# Start using the Mac override (build/run config switches model-service to Dockerfile.mac)
-docker compose -f docker-compose.yml -f docker-compose.mac.yml up -d
-docker compose ps
-```
-
-3) Ensure `model-service/.env` contains (or export as environment variables):
-
-- `LLM_BACKEND=ollama`
-- `OLLAMA_BASE_URL=http://host.docker.internal:11434`
-- `OLLAMA_MODEL=qwen2.5:7b-instruct`
+| Area | Manifest |
+|---|---|
+| Gateway | `backend/requirements.txt` |
+| Model service | `model-service/requirements.txt` |
+| Frontend | `frontend/web/package.json` |

@@ -54,7 +54,7 @@ def submit_job(question: dict) -> dict:
     return {"question_id": question["id"], "job_id": data["job_id"]}
 
 
-def poll_single_job(job_info: dict, timeout: int = 1600) -> dict:
+def poll_single_job(job_info: dict, timeout: int = 2000) -> dict:
     """Poll a single job until complete. Returns result dict."""
     question_id = job_info["question_id"]
     job_id = job_info["job_id"]

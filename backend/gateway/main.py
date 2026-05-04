@@ -84,6 +84,10 @@ _ORG_GATED_POST_PATHS = frozenset(
         "/api/v1/evaluation/aiml/async",
         "/api/v1/evaluation/linux",
         "/api/v1/evaluation/linux/async",
+        "/api/v1/evaluation/design",
+        "/api/v1/evaluation/design/async",
+        "/api/v1/evaluation/data-engineering",
+        "/api/v1/evaluation/data-engineering/async",
         "/api/v1/chat",
         "/api/v1/dsa/qwen/generate-question",
     }

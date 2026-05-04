@@ -17,9 +17,11 @@ from backend.model_app.evaluation.devops_evaluator import get_devops_feedback
 from backend.model_app.evaluation.cloud_evaluator import get_cloud_feedback
 from backend.model_app.evaluation.linux_evaluator import get_linux_feedback
 from backend.model_app.evaluation.design_evaluator import get_design_feedback
+from backend.model_app.evaluation.data_engineering_evaluator import get_data_engineering_feedback
 from backend.model_app.competencies.sql.eval_schema import SQLEvaluationRequest
 from backend.model_app.competencies.devops.eval_schema import DevOpsEvalRequest, CloudEvalRequest
 from backend.model_app.competencies.design.eval_schema import DesignEvalRequest
+from backend.model_app.competencies.data_engineering.eval_schema import DataEngineeringEvalRequest
 
 # Linux uses the same request shape as DevOps
 LinuxEvalRequest = DevOpsEvalRequest
@@ -269,6 +271,88 @@ async def evaluate_linux_async(
             async with llm_semaphore:
                 result = await asyncio.to_thread(
                     get_linux_feedback, payload=payload_dict, usage_meta=usage_meta
+                )
+            await _job_store_set(job_id, {"status": "complete", "result": result, "error": None})
+        except Exception as exc:
+            await _job_store_set(job_id, {"status": "failed", "result": None, "error": str(exc)})
+
+    asyncio.create_task(_run())
+    return {"job_id": job_id, "status": "pending"}
+
+
+@router.post("/design")
+async def evaluate_design(
+    http_request: Request,
+    payload: DesignEvalRequest,
+):
+    """Design evaluation — rule-based scoring + Qwen text analysis."""
+    usage_meta = bind_usage_meta_from_request(http_request)
+    return get_design_feedback(payload=payload.model_dump(), usage_meta=usage_meta)
+
+
+@router.post("/design/async")
+async def evaluate_design_async(
+    http_request: Request,
+    payload: DesignEvalRequest,
+):
+    """Async Design evaluation — enqueues LLM call, returns job_id immediately.
+    Poll GET /api/v1/job/{job_id} for the result."""
+    from backend.model_app.core.state import llm_semaphore
+
+    usage_meta = bind_usage_meta_from_request(http_request)
+    job_id = str(uuid.uuid4())
+    payload_dict = payload.model_dump()
+
+    await _job_store_set(job_id, {"status": "pending", "result": None, "error": None})
+
+    async def _run():
+        await _job_store_update(job_id, status="processing")
+        try:
+            async with llm_semaphore:
+                result = await asyncio.to_thread(
+                    get_design_feedback, payload=payload_dict, usage_meta=usage_meta
+                )
+            await _job_store_set(job_id, {"status": "complete", "result": result, "error": None})
+        except Exception as exc:
+            await _job_store_set(job_id, {"status": "failed", "result": None, "error": str(exc)})
+
+    asyncio.create_task(_run())
+    return {"job_id": job_id, "status": "pending"}
+
+
+@router.post("/data-engineering")
+async def evaluate_data_engineering(
+    http_request: Request,
+    payload: DataEngineeringEvalRequest,
+):
+    """Data Engineering evaluation — 3-layer scoring (execution results + static + Qwen AI review)."""
+    usage_meta = bind_usage_meta_from_request(http_request)
+    return get_data_engineering_feedback(payload=payload.model_dump(), usage_meta=usage_meta)
+
+
+@router.post("/data-engineering/async")
+async def evaluate_data_engineering_async(
+    http_request: Request,
+    payload: DataEngineeringEvalRequest,
+):
+    """Async Data Engineering evaluation — enqueues LLM call, returns job_id immediately.
+    Poll GET /api/v1/job/{job_id} for the result."""
+    from backend.model_app.core.state import llm_semaphore
+
+    usage_meta = bind_usage_meta_from_request(http_request)
+    job_id = str(uuid.uuid4())
+    payload_dict = payload.model_dump()
+
+    await _job_store_set(job_id, {"status": "pending", "result": None, "error": None})
+
+    async def _run():
+        await _job_store_update(job_id, status="processing")
+        try:
+            async with llm_semaphore:
+                result = await asyncio.to_thread(
+                    get_data_engineering_feedback,
+                    payload=payload_dict,
+                    usage_meta=usage_meta,
                 )
             await _job_store_set(job_id, {"status": "complete", "result": result, "error": None})
         except Exception as exc:

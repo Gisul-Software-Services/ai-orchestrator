@@ -116,6 +116,15 @@ export const API_ENDPOINTS: ApiEndpointMeta[] = [
     implemented: true,
     section: "evaluation",
   },
+  {
+    id: "evaluate-data-engineering",
+    path: `${API_V1}/evaluation/data-engineering/async`,
+    method: "POST",
+    label: "Data Engineering Evaluation",
+    description: "3-layer scoring for PySpark and subjective data engineering submissions",
+    implemented: true,
+    section: "evaluation",
+  },
 
   // --- Reserved for later (UI shell only) ---
   {

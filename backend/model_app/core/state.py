@@ -33,3 +33,8 @@ REQUEST_LOG = deque(maxlen=1000)
 
 llm = None
 coder_llm = None
+
+# Global semaphore — ensures only one LLM call runs at a time.
+# vLLM with max_num_seqs=1 cannot handle concurrent inference requests.
+# All evaluation async tasks must acquire this before calling _llm_chat_coder.
+llm_semaphore: asyncio.Semaphore = asyncio.Semaphore(1)

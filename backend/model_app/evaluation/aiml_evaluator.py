@@ -1,3 +1,14 @@
+"""AIML / ML Code Evaluator — Production-ready redesign.
+
+Evaluates ML/AI code submissions (Python-first) against task requirements,
+test results, and execution outputs.
+
+Scoring formula:
+  overall_score = round((task_score × 0.50) + (code_quality × 0.25) + (output_quality × 0.25))
+  where task_score = round((completed_tasks / total_tasks) × 100)
+
+Response contract matches Aaptor's EvaluateSubmissionResponse shape.
+"""
 from __future__ import annotations
 
 import hashlib
@@ -13,123 +24,176 @@ logger = logging.getLogger(__name__)
 
 _cache = TTLCache(maxsize=500, ttl=3600)
 
-# NOTE: AIML evaluation is Python-first in this deployment. We intentionally
-# treat submissions as Python to keep the prompt + validation simple.
-_DEFAULT_LANGUAGE = "python"
+# ─────────────────────────────────────────────────────────────
+# System prompt — compact, clear schema, 0-100 scores
+# ─────────────────────────────────────────────────────────────
 
-_PRODUCT_SYSTEM_PROMPT = """You are evaluating an AIML submission.
+_SYSTEM_PROMPT = """You are a strict ML/AI code evaluator. Score on a 0-100 scale.
 
-Return ONLY ONE JSON object with EXACTLY these top-level keys (no extra keys):
-overall_score, feedback_summary, one_liner, task_scores, task_completion,
-code_quality, library_usage, output_quality, strengths, areas_for_improvement,
-suggestions, deduction_reasons, ai_generated
+Scoring formula:
+  overall_score = round((task_score × 0.50) + (code_quality.score × 0.25) + (output_quality.score × 0.25))
+  where task_score = round((completed_tasks / total_tasks) × 100)
+
+Return ONLY minified JSON — no markdown, no code fences, no explanation:
+{"overall_score":0,"feedback_summary":"<4-5 sentences covering: 1) overall performance, 2) what was done correctly, 3) what was missing or wrong, 4) code quality observations, 5) one specific actionable improvement>","one_liner":"<single sentence verdict>","task_scores":[{"task_number":1,"task_description":"<task>","score":0,"max_score":10,"status":"completed|partially_completed|not_attempted","feedback":""}],"task_completion":{"completed":0,"total":0,"details":["<completed task name>"]},"code_quality":{"score":0,"comments":"<specific comment on ML code quality, library usage, best practices>"},"library_usage":{"score":0,"comments":"<comment on correct use of sklearn/pandas/numpy/etc>"},"output_quality":{"score":0,"comments":"<comment on model performance, metrics, output correctness>"},"strengths":["<strength>"],"areas_for_improvement":["<area>"],"suggestions":["<suggestion>"],"deduction_reasons":["<reason>"]}
 
 Rules:
-- Output MUST be MINIFIED JSON (no markdown, no code fences, no newlines/indentation).
-- Include ALL keys always. Use empty strings/lists where needed.
-- task_scores: list of objects with keys: task_number, task_description, score, max_score, status, feedback.
-- task_completion: object with keys: completed, total, details.
-- code_quality/library_usage/output_quality: objects with keys: score, comments.
-- Be concise and specific. No praise fluff.
-- Do NOT reveal hidden testcase details or hidden expected outputs (only counts).
-- Judge ONLY from provided source_code + outputs + task/test metadata; do not pretend to execute code.
-- Output must end with '}' and contain nothing after it.
-"""
+- overall_score MUST be 0-100. Apply the formula above.
+- task_score = round((completed_tasks / total_tasks) × 100) where completed = tasks with status "completed".
+- code_quality.score, library_usage.score, output_quality.score are all 0-100.
+- feedback_summary MUST be 4-5 sentences. Cover: overall result, correct parts, gaps, code quality, one improvement.
+- Max 4 items per list field.
+- Keep each string under 200 characters.
+- If code is empty or < 20 chars, set all scores to 0.
+- Do NOT reveal hidden test case details. Refer to failures by count only."""
 
 
-def get_aiml_feedback_product_contract(*, payload: dict, usage_meta: dict | None) -> dict:
-    """
-    Accepts Aaptor EvaluateSubmissionRequest payload and returns the expected AIML evaluation response.
-    Uses Qwen coder model under the hood; evaluates only from provided code + outputs.
-    """
-    code = str(payload.get("source_code") or "")
-    language = _DEFAULT_LANGUAGE
+# ─────────────────────────────────────────────────────────────
+# Prompt builder
+# ─────────────────────────────────────────────────────────────
 
+def _build_user_prompt(payload: dict) -> str:
+    code = str(payload.get("source_code") or "")[:800]
     title = str(payload.get("question_title") or "")
-    desc = str(payload.get("question_description") or "")
+    desc = str(payload.get("question_description") or "")[:300]
+    difficulty = str(payload.get("difficulty") or "")
     tasks = payload.get("tasks") or []
     constraints = payload.get("constraints") or []
-    difficulty = str(payload.get("difficulty") or "")
-    skill = payload.get("skill")
-    dataset_info = payload.get("dataset_info") or {}
     outputs = payload.get("outputs") or []
     test_cases = payload.get("test_cases") or []
 
-    # Cache key based on stable evaluation inputs.
-    cache_key = hashlib.md5(
-        f"{title}:{language}:{code}:{json.dumps(outputs, sort_keys=True, default=str)[:2000]}".encode()
-    ).hexdigest()
-    if cache_key in _cache:
-        emit_eval_usage(usage_meta, "aiml_evaluation", latency_ms=0, cache_hit=True)
-        return _cache[cache_key]
+    task_lines = "\n".join(
+        f"  {i+1}. {str(t)[:120]}" for i, t in enumerate(tasks[:6])
+    ) or "  None"
 
-    if not code or len(code.strip()) < 20:
-        fb = _product_empty()
-        _cache[cache_key] = fb
-        return fb
+    constraint_lines = "\n".join(
+        f"  - {str(c)[:100]}" for c in constraints[:3]
+    ) or "  None"
 
-    def _truncate(s: str, n: int) -> str:
-        s = s or ""
-        return s if len(s) <= n else s[:n] + "…"
-
-    # Build compact prompt content to fit small context budgets.
-    task_lines = "\n".join(f"- {i+1}. {str(t)[:160]}" for i, t in enumerate(tasks[:6])) or "None"
-    constraint_lines = "\n".join(f"- {str(c)[:160]}" for c in constraints[:4]) or "None"
-
-    tc_lines = []
-    if isinstance(test_cases, list):
-        for tc in test_cases[:8]:
-            if not isinstance(tc, dict):
-                continue
-            tc_lines.append(
-                f"- task_number={tc.get('task_number')} "
-                f"validation_type={tc.get('validation_type')} "
-                f"points={tc.get('points')} "
-                f"description={_truncate(str(tc.get('description') or ''), 140)}"
-            )
-    tc_block = "\n".join(tc_lines) if tc_lines else "None"
-
-    out_block = ""
-    if isinstance(outputs, list) and outputs:
-        joined = "\n---\n".join(_truncate(str(x), 220) for x in outputs[:4])
-        out_block = joined
-    else:
-        out_block = "None"
-
-    user_prompt = (
-        f"question_title: {title}\n"
-        f"question_description: {_truncate(desc, 500)}\n"
-        f"difficulty: {difficulty}\n"
-        f"skill: {skill}\n"
-        f"language: {language}\n\n"
-        f"tasks:\n{task_lines}\n\n"
-        f"constraints:\n{constraint_lines}\n\n"
-        f"dataset_info (summary): {_truncate(json.dumps(dataset_info, default=str) if isinstance(dataset_info, dict) else str(dataset_info), 250)}\n\n"
-        f"test_cases (metadata only):\n{tc_block}\n\n"
-        f"outputs (execution logs/metrics):\n{out_block}\n\n"
-        f"candidate_submission:\n```python\n{_truncate(code, 2000)}\n```\n\n"
-        f"Return ONLY the minified JSON described in the system prompt."
+    # Test case summary — counts only, no hidden details
+    total_tc = len(test_cases) if isinstance(test_cases, list) else 0
+    passed_tc = sum(
+        1 for tc in (test_cases or [])
+        if isinstance(tc, dict) and str(tc.get("status", "")).lower() in ("passed", "completed", "success")
     )
 
-    messages = [
-        {"role": "system", "content": _PRODUCT_SYSTEM_PROMPT},
-        {"role": "user", "content": user_prompt},
-    ]
+    # Output summary — cap each output
+    out_lines = []
+    if isinstance(outputs, list):
+        for o in outputs[:3]:
+            out_lines.append(f"  {str(o)[:200]}")
+    out_block = "\n".join(out_lines) or "  None"
 
-    try:
-        start = time.time()
-        # Keep output budget bounded; prompt is compact and output is minified JSON.
-        raw, _, _ = _llm_chat_coder(messages=messages, temperature=0.0, max_tokens=450)
-        latency_ms = (time.time() - start) * 1000
-        emit_eval_usage(usage_meta, "aiml_evaluation", latency_ms=latency_ms, cache_hit=False)
-        out = safe_parse(raw)
-        fb = _normalize_product(out)
-    except Exception as e:
-        emit_eval_usage(usage_meta, "aiml_evaluation", latency_ms=0, status="error", error_detail=str(e))
-        fb = _product_empty()
+    return (
+        f"question: {title}\n"
+        f"description: {desc}\n"
+        f"difficulty: {difficulty}\n\n"
+        f"tasks:\n{task_lines}\n\n"
+        f"constraints:\n{constraint_lines}\n\n"
+        f"test_results: {passed_tc}/{total_tc} passed\n\n"
+        f"execution_outputs:\n{out_block}\n\n"
+        f"source_code:\n```python\n{code}\n```\n\n"
+        f"Apply the scoring formula from the system prompt. Return ONLY JSON."
+    )
 
-    _cache[cache_key] = fb
-    return fb
+
+# ─────────────────────────────────────────────────────────────
+# Normalization
+# ─────────────────────────────────────────────────────────────
+
+def _normalize_product(raw: dict) -> dict:
+    base = _product_empty()
+    if not isinstance(raw, dict) or raw.get("parse_error"):
+        if raw.get("parse_error"):
+            summary = str(raw.get("overall_summary") or "")[:400]
+            if summary:
+                base["feedback_summary"] = summary
+                base["one_liner"] = "Evaluation output was not valid JSON — please retry."
+        return base
+
+    def _int_clamp(v, lo=0, hi=100):
+        try:
+            return max(lo, min(hi, int(float(v))))
+        except Exception:
+            return lo
+
+    def _str(v, max_len=300):
+        return str(v)[:max_len] if v is not None else ""
+
+    def _list_of_str(v, max_items=3):
+        if not isinstance(v, list):
+            return []
+        return [str(x) for x in v[:max_items] if str(x).strip()]
+
+    def _norm_status(v) -> str:
+        s = str(v or "").strip().lower().replace("-", "_").replace(" ", "_")
+        if s in {"completed", "complete", "done", "success", "passed"}:
+            return "completed"
+        if s in {"partially_completed", "partial", "partially_complete", "incomplete"}:
+            return "partially_completed"
+        if s in {"attempted_incorrect", "incorrect", "wrong", "failed"}:
+            return "attempted_incorrect"
+        return "not_attempted"
+
+    # Task scores
+    raw_tasks = raw.get("task_scores") or []
+    norm_tasks = []
+    if isinstance(raw_tasks, list):
+        for i, item in enumerate(raw_tasks):
+            if not isinstance(item, dict):
+                continue
+            max_score = max(1, _int_clamp(item.get("max_score", 10), 0, 100))
+            score = _int_clamp(item.get("score", 0), 0, max_score)
+            status = _norm_status(item.get("status"))
+            norm_tasks.append({
+                "task_number":    _int_clamp(item.get("task_number", i + 1), 1, 100),
+                "task_description": _str(item.get("task_description"), 200),
+                "score":          score,
+                "max_score":      max_score,
+                "status":         status,
+                "feedback":       _str(item.get("feedback"), 200),
+            })
+    base["task_scores"] = norm_tasks
+
+    # Task completion — derive from task_scores for consistency
+    completed = sum(1 for t in norm_tasks if t["status"] == "completed")
+    partial = sum(1 for t in norm_tasks if t["status"] == "partially_completed")
+    # Count partial as 0.5 for scoring purposes
+    effective_completed = completed + (partial * 0.5)
+    total_tasks_count = len(norm_tasks)
+
+    base["task_completion"] = {
+        "completed": completed,
+        "total":     total_tasks_count,
+        "details":   [t["task_description"] for t in norm_tasks if t["status"] in ("completed", "partially_completed")],
+    }
+
+    # Sub-scores
+    cq_score = _int_clamp((raw.get("code_quality") or {}).get("score", 0))
+    lu_score = _int_clamp((raw.get("library_usage") or {}).get("score", 0))
+    oq_score = _int_clamp((raw.get("output_quality") or {}).get("score", 0))
+
+    base["code_quality"]  = {"score": cq_score,  "comments": _str((raw.get("code_quality") or {}).get("comments", ""))}
+    base["library_usage"] = {"score": lu_score,  "comments": _str((raw.get("library_usage") or {}).get("comments", ""))}
+    base["output_quality"]= {"score": oq_score,  "comments": _str((raw.get("output_quality") or {}).get("comments", ""))}
+
+    # Recompute overall_score using formula — derived from task_scores, not Qwen's value
+    task_score = round((effective_completed / total_tasks_count) * 100) if total_tasks_count > 0 else 0
+    overall = round((task_score * 0.50) + (cq_score * 0.25) + (oq_score * 0.25))
+    overall = max(0, min(100, overall))
+    base["overall_score"] = overall
+
+    # Narrative fields
+    base["feedback_summary"] = _str(raw.get("feedback_summary"), 500)
+    base["one_liner"]        = _str(raw.get("one_liner"), 200)
+
+    base["strengths"]             = _list_of_str(raw.get("strengths"))
+    base["areas_for_improvement"] = _list_of_str(raw.get("areas_for_improvement"))
+    base["suggestions"]           = _list_of_str(raw.get("suggestions"))
+    base["deduction_reasons"]     = _list_of_str(raw.get("deduction_reasons"))
+
+    base["ai_generated"] = True
+    return base
 
 
 def _product_empty() -> dict:
@@ -139,129 +203,83 @@ def _product_empty() -> dict:
         "one_liner": "",
         "task_scores": [],
         "task_completion": {"completed": 0, "total": 0, "details": []},
-        "code_quality": {"score": 0, "comments": ""},
-        "library_usage": {"score": 0, "comments": ""},
+        "code_quality":   {"score": 0, "comments": ""},
+        "library_usage":  {"score": 0, "comments": ""},
         "output_quality": {"score": 0, "comments": ""},
-        "strengths": [],
+        "strengths":             [],
         "areas_for_improvement": [],
-        "suggestions": [],
-        "deduction_reasons": [],
+        "suggestions":           [],
+        "deduction_reasons":     [],
         "ai_generated": True,
     }
 
 
-def _normalize_product(raw: dict) -> dict:
+def _fallback_response(payload: dict) -> dict:
+    """Deterministic fallback when Qwen fails."""
+    tasks = payload.get("tasks") or []
     base = _product_empty()
-    if not isinstance(raw, dict):
-        return base
-
-    # If the model did not return valid product JSON, `safe_parse` returns
-    # {"overall_summary": <raw_text>, "parse_error": True}. In that case, avoid
-    # returning a completely empty contract: surface a short parse hint in the
-    # allowed fields so callers can diagnose issues.
-    if raw.get("parse_error") is True:
-        summary = str(raw.get("overall_summary") or "").strip()
-        if summary:
-            summary = summary[:800] + ("…" if len(summary) > 800 else "")
-            base["feedback_summary"] = summary
-            base["one_liner"] = "Evaluation output was not valid JSON; please retry."
-            base["deduction_reasons"] = ["EVALUATION_PARSE_ERROR"]
-        return base
-
-    # Copy only known keys to enforce contract.
-    for k in list(base.keys()):
-        if k in raw:
-            base[k] = raw[k]
-
-    def _to_int(v, default: int = 0) -> int:
-        try:
-            if isinstance(v, bool):
-                return default
-            return int(v)
-        except Exception:
-            return default
-
-    def _clamp_int(v: int, lo: int, hi: int) -> int:
-        return lo if v < lo else hi if v > hi else v
-
-    def _norm_status(v) -> str:
-        s = str(v or "").strip().lower().replace("-", "_").replace(" ", "_")
-        # Common model variants
-        if s in {"completed", "complete", "done", "success"}:
-            return "completed"
-        if s in {"partially_completed", "partial", "partially_complete", "incomplete"}:
-            return "partially_completed"
-        if s in {"attempted_incorrect", "incorrect", "wrong", "failed"}:
-            return "attempted_incorrect"
-        if s in {"not_attempted", "not_completed", "notcomplete", "na", "n_a"}:
-            return "not_attempted"
-        # Default to not_attempted when unknown
-        return "not_attempted"
-
-    # Ensure types
-    if not isinstance(base.get("task_scores"), list):
-        base["task_scores"] = []
-    if not isinstance(base.get("task_completion"), dict):
-        base["task_completion"] = {"completed": 0, "total": 0, "details": []}
-
-    # Normalize task_completion.details to list[str]
-    tc = base.get("task_completion") or {}
-    if isinstance(tc, dict):
-        details = tc.get("details")
-        if isinstance(details, str):
-            tc["details"] = [details] if details.strip() else []
-        elif isinstance(details, list):
-            tc["details"] = [str(x) for x in details if str(x).strip()]
-        else:
-            tc["details"] = []
-        tc["completed"] = _clamp_int(_to_int(tc.get("completed"), 0), 0, 10_000)
-        tc["total"] = _clamp_int(_to_int(tc.get("total"), 0), 0, 10_000)
-        base["task_completion"] = tc
-
-    # Normalize task_scores entries to the contract shape.
-    norm_scores: list[dict] = []
-    for i, item in enumerate(base.get("task_scores") or []):
-        if not isinstance(item, dict):
-            continue
-        task_number = _to_int(item.get("task_number"), i + 1)
-        task_desc = str(item.get("task_description") or "").strip()
-        score = _to_int(item.get("score"), 0)
-        max_score = _to_int(item.get("max_score"), 10)
-        max_score = _clamp_int(max_score, 1, 10)
-        score = _clamp_int(score, 0, max_score)
-        status = _norm_status(item.get("status"))
-        feedback = str(item.get("feedback") or "").strip()
-        norm_scores.append(
-            {
-                "task_number": task_number,
-                "task_description": task_desc,
-                "score": score,
-                "max_score": max_score,
-                "status": status,
-                "feedback": feedback,
-            }
-        )
-    base["task_scores"] = norm_scores
-
-    # Normalize top-level overall_score to 0-100 int.
-    base["overall_score"] = _clamp_int(_to_int(base.get("overall_score"), 0), 0, 100)
-
-    for k in ("code_quality", "library_usage", "output_quality"):
-        if not isinstance(base.get(k), dict):
-            base[k] = {"score": 0, "comments": ""}
-        else:
-            base[k].setdefault("score", 0)
-            base[k].setdefault("comments", "")
-            base[k]["score"] = _clamp_int(_to_int(base[k].get("score"), 0), 0, 100)
-            base[k]["comments"] = str(base[k].get("comments") or "")
-
-    for arr in ("strengths", "areas_for_improvement", "suggestions", "deduction_reasons"):
-        if not isinstance(base.get(arr), list):
-            base[arr] = []
-        else:
-            base[arr] = [str(x) for x in base[arr] if str(x).strip()]
-
-    # Ensure ai_generated is true for this LLM path.
-    base["ai_generated"] = True
+    base["feedback_summary"] = "Automated scoring applied. Human review recommended."
+    base["one_liner"]        = "Evaluation unavailable."
+    base["task_completion"]["total"] = len(tasks)
     return base
 
+
+# ─────────────────────────────────────────────────────────────
+# Public entry point
+# ─────────────────────────────────────────────────────────────
+
+def get_aiml_feedback_product_contract(
+    *,
+    payload: dict,
+    usage_meta: dict | None,
+) -> dict:
+    """
+    Redesigned AIML evaluator.
+    - overall_score on 0-100 scale using formula
+    - Compact prompt fits within 1024 token context
+    - Score formula: task_score(50%) + code_quality(25%) + output_quality(25%)
+    - Proper fallback with human review flag
+    """
+    code = str(payload.get("source_code") or "")
+    title = str(payload.get("question_title") or "")
+    outputs = payload.get("outputs") or []
+
+    # Cache key
+    cache_key = hashlib.md5(
+        f"{title}:{code}:{json.dumps(outputs, sort_keys=True, default=str)[:500]}".encode()
+    ).hexdigest()
+
+    if cache_key in _cache:
+        emit_eval_usage(usage_meta, "aiml_evaluation", latency_ms=0, cache_hit=True)
+        return _cache[cache_key]
+
+    # Short-circuit on empty code
+    if not code or len(code.strip()) < 20:
+        fb = _product_empty()
+        _cache[cache_key] = fb
+        return fb
+
+    messages = [
+        {"role": "system", "content": _SYSTEM_PROMPT},
+        {"role": "user",   "content": _build_user_prompt(payload)},
+    ]
+
+    try:
+        start = time.time()
+        raw, _, _ = _llm_chat_coder(messages=messages, temperature=0.0, max_tokens=900)
+        latency_ms = (time.time() - start) * 1000
+        emit_eval_usage(usage_meta, "aiml_evaluation", latency_ms=latency_ms, cache_hit=False)
+
+        out = safe_parse(raw)
+        if out.get("parse_error"):
+            raise ValueError(f"safe_parse error: {out.get('overall_summary', '')[:200]}")
+
+        fb = _normalize_product(out)
+
+    except Exception as e:
+        logger.warning("[AIML_EVAL] Qwen failed: %s", str(e))
+        emit_eval_usage(usage_meta, "aiml_evaluation", latency_ms=0, status="error", error_detail=str(e))
+        fb = _fallback_response(payload)
+
+    _cache[cache_key] = fb
+    return fb

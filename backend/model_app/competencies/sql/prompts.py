@@ -92,12 +92,15 @@ ORIGINAL DESCRIPTION:
 ORIGINAL HINTS:
 {hints}
 
-SCHEMA TABLES (use these exact names — do NOT invent new table names):
+SCHEMA TABLES with columns (use these exact names — do NOT invent new table names):
 {tables}
+
+REFERENCE QUERY (the correct answer — hints must guide toward this logic):
+{reference_query}
 
 DOMAIN INSTRUCTION: {domain_instruction}
 
 Return ONLY this JSON (no markdown, no explanation):
 {{"title": "Concise title consistent with the schema tables",
 "description": "3 short paragraphs under 120 words, consistent with schema tables: {tables}",
-"hints": ["hint 1 consistent with schema", "hint 2 consistent with schema", "hint 3 consistent with schema"]}}"""
+"hints": ["hint 1 — reference actual table/column names and guide toward the SQL technique in the reference query", "hint 2 — reference actual table/column names", "hint 3 — guide toward the specific SQL function or clause used in the reference query (e.g. RANK, PARTITION BY, GROUP BY, JOIN type)"]}}"""

@@ -104,6 +104,10 @@ export default function MonitoringPage() {
 
   const gpuAvailable = gpuQuery.data?.available !== false;
   const gpuError = gpuQuery.data?.error as string | null | undefined;
+  const gpu = gpuQuery.data ?? null;
+  const usedGb = gpu?.memory_used_gb ?? null;
+  const totalGb = gpu?.memory_total_gb ?? null;
+  const powerW = gpu?.power_watts ?? null;
 
   const anyError =
     Boolean(gpuQuery.error) || Boolean(inferenceQuery.error) ||
@@ -123,6 +127,15 @@ export default function MonitoringPage() {
   const hasGpuHistory       = gpuHistory.length > 0;
   const hasInferenceHistory = inferenceHistory.length > 0;
   const hasQueueHistory     = queueHistory.length > 0;
+
+  // Inference-derived stats
+  const cacheHits    = (inferenceQuery.data as any)?.cache_hits ?? null;
+  const cacheMisses  = (inferenceQuery.data as any)?.cache_misses ?? null;
+  const totalRequests = cacheHits != null && cacheMisses != null ? cacheHits + cacheMisses : null;
+  const cacheHitRate = totalRequests != null && totalRequests > 0
+    ? (cacheHits / totalRequests) * 100
+    : null;
+  const avgBatchSize = (inferenceQuery.data as any)?.avg_batch_size ?? null;
 
   return (
     <div className="animate-fade-in space-y-10">

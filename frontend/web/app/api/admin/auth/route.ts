@@ -6,6 +6,19 @@ import {
   getAdminSessionExpiryDate,
 } from "@/lib/adminSession";
 
+export async function DELETE() {
+  cookies().set({
+    name: getAdminSessionCookieName(),
+    value: "",
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "lax",
+    path: "/",
+    maxAge: 0,
+  });
+  return NextResponse.json({ ok: true });
+}
+
 export async function POST(req: NextRequest) {
   const body = await req.json().catch(() => ({}));
   const token = typeof body?.token === "string" ? body.token : "";

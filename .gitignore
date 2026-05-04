@@ -87,9 +87,14 @@ qwen_model_server_script.py
 *.onnx
 *.h5
 
+
+*:Zone.Identifier
+
+
 # ===============================
 # GitHub / Actions
 # ===============================
 *.cache
 devops_clean.json
 qwen_dataset_cleaner.py
+

@@ -1,9 +1,10 @@
 "use client";
 
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { ThemeToggle } from "./ThemeToggle";
 import { useHealthQuery } from "@/hooks/useMetrics";
 import { cn } from "@/lib/utils";
+import { LogOut } from "lucide-react";
 
 const PAGE_TITLES: Record<string, string> = {
   "/dashboard": "Overview",
@@ -33,11 +34,17 @@ function titleFromPath(pathname: string): string {
 
 export function TopBar() {
   const pathname = usePathname();
+  const router = useRouter();
   const title = titleFromPath(pathname);
   const health = useHealthQuery();
 
   const modelLoaded = health.data?.model_loaded;
   const unreachable = health.isError;
+
+  async function handleLogout() {
+    await fetch("/api/admin/auth", { method: "DELETE" });
+    router.replace("/login");
+  }
 
   return (
     <header className="sticky top-0 z-20 flex h-14 items-center justify-between border-b border-zinc-800/60 bg-zinc-950/90 px-6 backdrop-blur-md sm:px-8">
@@ -93,6 +100,14 @@ export function TopBar() {
         </div>
         <div className="h-4 w-px bg-zinc-800" />
         <ThemeToggle />
+        <div className="h-4 w-px bg-zinc-800" />
+        <button
+          onClick={handleLogout}
+          title="Sign out"
+          className="flex items-center justify-center rounded-md p-1.5 text-zinc-500 transition-colors hover:bg-zinc-800 hover:text-zinc-200"
+        >
+          <LogOut className="h-4 w-4" strokeWidth={1.75} />
+        </button>
       </div>
     </header>
   );

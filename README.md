@@ -6,8 +6,6 @@ An AI-powered assessment platform for technical competency evaluation. The platf
 
 ## Architecture
 
-The platform runs as 3 services + Redis, with an optional RAG service:
-
 ```
 ┌─────────────────┐     ┌─────────────────┐     ┌─────────────────┐
 │   Frontend      │────▶│    Gateway      │────▶│  Model Service  │
@@ -32,9 +30,48 @@ The platform runs as 3 services + Redis, with an optional RAG service:
 
 ---
 
+## Project Structure
+
+```
+gisul_model/
+├── backend/
+│   ├── gateway/              # FastAPI gateway (auth, billing, proxy)
+│   │   └── Dockerfile
+│   └── model_app/
+│       ├── api/routes/       # Route handlers (evaluation, generation, etc.)
+│       ├── competencies/     # Per-competency schemas + generators
+│       │   ├── aiml/
+│       │   ├── cloud/
+│       │   ├── data_engineering/
+│       │   ├── design/
+│       │   ├── devops/
+│       │   ├── dsa/
+│       │   └── sql/
+│       ├── evaluation/       # Evaluator modules (one per competency)
+│       └── services/         # Shared: cache, jobs, model, RAG client
+├── model-service/
+│   ├── Dockerfile            # GPU (vLLM + CUDA)
+│   ├── Dockerfile.mac        # Mac (Ollama)
+│   └── requirements.txt
+├── frontend/
+│   └── web/                  # Next.js admin console
+│       └── Dockerfile
+├── aaptor-rag-service/       # Standalone RAG service (separate repo/deploy)
+│   ├── Dockerfile
+│   ├── docker-compose.yml
+│   └── main.py
+├── assets/                   # FAISS indexes, DSA enriched data
+├── docker-compose.yml        # Production (Linux + GPU)
+├── docker-compose.mac.yml    # Mac override (Ollama)
+└── README.md
+```
+
+---
+
 ## Competencies
 
-### Generation
+### Generation Endpoints
+
 | Competency | Endpoint |
 |---|---|
 | Topics | `POST /api/v1/generate-topics` |
@@ -47,30 +84,38 @@ The platform runs as 3 services + Redis, with an optional RAG service:
 | Cloud (AWS) | `POST /api/v1/generate-cloud-question` |
 | AIML | `POST /api/v1/generate-aiml` |
 
-### Evaluation
-All evaluation endpoints have both sync and async variants. Use async (`/async`) to avoid timeouts.
+### Evaluation Endpoints
 
-| Competency | Async Endpoint |
-|---|---|
-| DSA | `POST /api/v1/evaluation/dsa/async` |
-| AIML | `POST /api/v1/evaluation/aiml/async` |
-| SQL | `POST /api/v1/evaluation/sql/async` |
-| DevOps | `POST /api/v1/evaluation/devops/async` |
-| Cloud | `POST /api/v1/evaluation/cloud/async` |
-| Linux | `POST /api/v1/evaluation/linux/async` |
-| Design | `POST /api/v1/evaluation/design/async` |
-| Data Engineering | `POST /api/v1/evaluation/data-engineering/async` |
+All evaluation endpoints have both sync and async variants. Use async to avoid timeouts on concurrent submissions.
 
-Poll async job results:
-```
+| Competency | Async Endpoint | Scoring Method |
+|---|---|---|
+| DSA | `POST /api/v1/evaluation/dsa/async` | Task completion + code quality via Qwen |
+| AIML | `POST /api/v1/evaluation/aiml/async` | Task completion + output quality via Qwen |
+| SQL | `POST /api/v1/evaluation/sql/async` | Test result pass/fail + criteria scoring via Qwen |
+| DevOps | `POST /api/v1/evaluation/devops/async` | Terminal command analysis or written answer via Qwen |
+| Cloud | `POST /api/v1/evaluation/cloud/async` | Same as DevOps with cloud billing route |
+| Linux | `POST /api/v1/evaluation/linux/async` | Terminal command analysis via Qwen |
+| Design | `POST /api/v1/evaluation/design/async` | Rule-based metrics + Qwen text analysis |
+| Data Engineering | `POST /api/v1/evaluation/data-engineering/async` | 3-layer: deterministic + static + Qwen AI review |
+
+**Async flow:**
+
+```bash
+# 1. Submit
+POST /api/v1/evaluation/{competency}/async
+X-Api-Key: <key>
+→ { "job_id": "...", "status": "pending" }
+
+# 2. Poll until complete
 GET /api/v1/job/{job_id}
+X-Api-Key: <key>
+→ { "status": "complete", "result": { ... } }
 ```
 
 ---
 
-## Data Engineering Evaluation
-
-The Data Engineering evaluator uses a 3-layer scoring pipeline:
+## Evaluation — Data Engineering (3-Layer Scoring)
 
 ```
 Candidate submits PySpark code / written answer
@@ -82,113 +127,73 @@ Layer 3: AI Review                  (Qwen Coder — code quality, performance, b
 Final score = deterministic overrides AI (with fallback exceptions)
 ```
 
-**Request body:**
-```json
-{
-  "question": {
-    "id": "q-001",
-    "title": "GroupBy Aggregation",
-    "description": "Compute total sales per region",
-    "question_type": "coding",
-    "difficulty": "medium",
-    "rubric_items": ["use groupBy", "aggregate sum"],
-    "test_cases": [
-      {
-        "input_data": { "rows": [{"region": "North", "amount": 100}] },
-        "expected_output": [{"region": "North", "total": 100}]
-      }
-    ]
-  },
-  "submission": {
-    "code": "...",
-    "answer": "",
-    "execution_results": [
-      {
-        "test_case_index": 0,
-        "status": "success",
-        "output_df": [{"region": "North", "total": 100}],
-        "error_message": null
-      }
-    ]
-  },
-  "use_cache": true
-}
-```
+Score caps for coding questions:
 
-**Response:**
-```json
-{
-  "final_score": 100.0,
-  "deterministic_score": 100.0,
-  "static_partial_score": 0.0,
-  "ai_score": 85.0,
-  "score_reason": "exact_match",
-  "is_correct": true,
-  "per_test_case_results": [...],
-  "ai_feedback": {
-    "overall_score": 85.0,
-    "correctness_feedback": "...",
-    "performance_feedback": "...",
-    "best_practices_feedback": "...",
-    "improvement_suggestions": [...],
-    "strengths": [...],
-    "areas_for_improvement": [...]
-  }
-}
-```
+| Condition | Score cap |
+|---|---|
+| Schema mismatch | 40% |
+| Row count mismatch | 60% |
+| Data mismatch | 85% |
+| All match | 100% |
+| Execution failed | AI fallback or static partial credit |
+
+The `execution_results` field is populated by your external execution engine and sent with the request — this service does not run PySpark itself.
 
 ---
 
-## Project Structure
+## RAG Service
 
+The RAG service (`aaptor-rag-service`) runs as a separate service on port **7003**. It provides FAISS vector search and MongoDB-backed catalog retrieval used by the model service for question generation.
+
+**Supported competency indexes:** `aiml`, `dsa`, `devops`, `data_engineering`, `design`, `cloud`, `fullstack`, `prompt_engineering`
+
+### Run
+
+```bash
+cd aaptor-rag-service
+cp .env.example .env   # set ADMIN_API_KEY
+docker compose up -d
 ```
-gisul_model/
-├── backend/
-│   ├── gateway/              # FastAPI gateway (auth, billing, proxy)
-│   │   ├── Dockerfile
-│   │   └── main.py
-│   └── model_app/
-│       ├── api/routes/       # All API route handlers
-│       ├── competencies/     # Per-competency schemas + generators
-│       │   ├── aiml/
-│       │   ├── cloud/
-│       │   ├── data_engineering/
-│       │   ├── design/
-│       │   ├── devops/
-│       │   ├── dsa/
-│       │   └── sql/
-│       ├── evaluation/       # Evaluator modules (one per competency)
-│       └── services/         # Shared: cache, jobs, model, RAG
-├── model-service/
-│   ├── Dockerfile            # GPU (vLLM + CUDA)
-│   ├── Dockerfile.mac        # Mac (Ollama)
-│   └── requirements.txt
-├── frontend/
-│   └── web/                  # Next.js admin console
-│       └── Dockerfile
-├── assets/                   # FAISS indexes, DSA enriched data
-├── docker-compose.yml        # Production (Linux + GPU)
-├── docker-compose.mac.yml    # Mac override (Ollama)
-└── README.md
+
+This starts `rag-service` on port `7003` and MongoDB on port `27018`.
+
+### Connect to model service
+
+Set in `model-service/.env`:
 ```
+RAG_SERVICE_URL=http://127.0.0.1:7003
+```
+
+In Docker Compose (same network):
+```
+RAG_SERVICE_URL=http://rag-service:7003
+```
+
+### RAG API
+
+| Method | Endpoint | Description |
+|---|---|---|
+| GET | `/api/v1/health` | Health check + index stats |
+| POST | `/api/v1/retrieve` | Search for matching dataset/problem |
+| POST | `/api/v1/ingest/{competency}` | Add new entries + rebuild index |
+| POST | `/api/v1/rebuild/{competency}` | Rebuild FAISS index from catalog |
 
 ---
 
-## Quick Start
+## Quick Start (Docker)
 
 ### Prerequisites
 - Docker + Docker Compose
-- NVIDIA GPU + CUDA (for model-service)
-- NVIDIA Container Toolkit
+- NVIDIA GPU + CUDA + NVIDIA Container Toolkit
 
-### 1. Clone and configure
+### 1. Clone
 
 ```bash
 git clone https://github.com/Gisul-Software-Services/ai-orchestrator.git
 cd ai-orchestrator
 ```
 
-Copy and fill in the env files:
+### 2. Configure environment files
 
 ```bash
 cp backend/.env.example backend/.env
@@ -196,9 +201,7 @@ cp model-service/.env.example model-service/.env
 cp frontend/web/.env.example frontend/web/.env.local
 ```
 
-Key values to set:
-
-**`backend/.env`**
+**`backend/.env`** — key values:
 ```
 MONGODB_URI=mongodb+srv://...
 ADMIN_API_KEY=your-admin-key
@@ -206,14 +209,14 @@ REDIS_URL=redis://redis:6379
 MODEL_SERVICE_URL=http://model-service:7001
 ```
 
-**`model-service/.env`**
+**`model-service/.env`** — key values:
 ```
 MONGODB_URI=mongodb+srv://...
 REDIS_URL=redis://redis:6379
 MODEL_NAME=Qwen/Qwen2.5-7B-Instruct-AWQ
 ```
 
-**`frontend/web/.env.local`**
+**`frontend/web/.env.local`** — key values:
 ```
 ADMIN_TOKEN=your-admin-token
 ADMIN_SESSION_SECRET=your-session-secret
@@ -221,21 +224,19 @@ ADMIN_API_KEY=your-admin-key
 GATEWAY_BASE_URL=http://backend-api:7000
 ```
 
-### 2. Build and run
+### 3. Build and run
 
 ```bash
 docker compose up -d --build
 docker compose ps
+docker compose logs -f model-service
 ```
 
-### 3. Verify
+### 4. Verify
 
 ```bash
-# Gateway health
 curl http://localhost:7000/api/v1/health
-
-# Frontend
-open http://localhost:7002
+# Frontend: http://localhost:7002
 ```
 
 ---
@@ -246,7 +247,6 @@ Requires [Ollama](https://ollama.com) running on the host:
 
 ```bash
 ollama pull qwen2.5:7b-instruct
-
 docker compose -f docker-compose.yml -f docker-compose.mac.yml up -d
 ```
 
@@ -292,76 +292,6 @@ All API calls require one of:
 
 ---
 
-## RAG Service
-
-The RAG service (`aaptor-rag-service`) runs separately on port **7003**. It provides FAISS vector search and MongoDB-backed catalog retrieval used by the model service for question generation across competencies.
-
-**Supported competency indexes:**
-- `aiml`, `dsa`, `devops`, `data_engineering`, `design`, `cloud`, `fullstack`, `prompt_engineering`
-
-### Run the RAG service
-
-```bash
-cd aaptor-rag-service
-cp .env.example .env   # set ADMIN_API_KEY
-docker compose up -d
-```
-
-This starts:
-- `rag-service` on port `7003`
-- `rag-mongo` (MongoDB) on port `27018`
-
-### Connect model service to RAG
-
-Set in `model-service/.env` or `backend/.env`:
-```
-RAG_SERVICE_URL=http://127.0.0.1:7003
-```
-
-In Docker Compose, if running on the same network:
-```
-RAG_SERVICE_URL=http://rag-service:7003
-```
-
-### RAG API
-
-```bash
-# Health check
-GET http://localhost:7003/health
-
-# Retrieve similar questions (used internally by model service)
-POST http://localhost:7003/retrieve
-Headers: X-Api-Key: <ADMIN_API_KEY>
-Body: { "competency": "data_engineering", "query": "...", "top_k": 5 }
-
-# Ingest new documents
-POST http://localhost:7003/ingest
-Headers: X-Api-Key: <ADMIN_API_KEY>
-
-# Rebuild FAISS index
-POST http://localhost:7003/rebuild
-Headers: X-Api-Key: <ADMIN_API_KEY>
-```
-
-Data (FAISS indexes + catalog JSON files) is mounted at `aaptor-rag-service/data/`.
-
----
-
-## Testing
-
-```bash
-# Test all evaluation endpoints
-python3 test_all_evaluations.py
-
-# Test data engineering endpoint specifically
-python3 test_de_endpoint.py
-
-# Test deterministic scoring logic (no server needed)
-python3 test_de_eval_logic.py
-```
-
----
-
 ## Dependencies
 
 | Area | Manifest |
@@ -369,3 +299,4 @@ python3 test_de_eval_logic.py
 | Gateway | `backend/requirements.txt` |
 | Model service | `model-service/requirements.txt` |
 | Frontend | `frontend/web/package.json` |
+| RAG service | `aaptor-rag-service/requirements.txt` |

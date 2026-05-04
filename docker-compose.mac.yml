@@ -1,0 +1,18 @@
+version: '3.8'
+
+# Mac override — replaces GPU model-service with Ollama-backed image.
+# Usage: docker compose -f docker-compose.yml -f docker-compose.mac.yml up -d
+
+services:
+  model-service:
+    build:
+      context: .
+      dockerfile: model-service/Dockerfile.mac
+    image: gisul/model-service:mac
+    deploy: {}   # remove GPU reservation
+    environment:
+      - LLM_BACKEND=ollama
+      - OLLAMA_BASE_URL=http://host.docker.internal:11434
+      - OLLAMA_MODEL=qwen2.5:7b-instruct
+      - REDIS_URL=redis://redis:6379
+      - ASSETS_DIR=/app/assets

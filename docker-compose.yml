@@ -1,0 +1,101 @@
+version: '3.8'
+
+# ─────────────────────────────────────────────────────────────
+# Gisul Model — Production Stack
+#
+# Services:
+#   redis          — job queue + cache (official image, no build)
+#   model-service  — Qwen/vLLM evaluators + generation (port 7001, GPU)
+#   backend-api    — FastAPI gateway, auth, billing (port 7000)
+#   frontend       — Next.js admin UI (port 7002)
+#
+# Usage:
+#   docker compose up -d --build
+#   docker compose ps
+#   docker compose logs -f model-service
+# ─────────────────────────────────────────────────────────────
+
+services:
+
+  # ── Redis ──────────────────────────────────────────────────
+  redis:
+    image: redis:7-alpine
+    container_name: aaptor-redis
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ── Model Service (Qwen/vLLM, GPU) ────────────────────────
+  model-service:
+    build:
+      context: .
+      dockerfile: model-service/Dockerfile
+    image: gisul/model-service:latest
+    container_name: aaptor-model-service
+    expose:
+      - "7001"
+    env_file:
+      - model-service/.env
+    environment:
+      - REDIS_URL=redis://redis:6379
+      - ASSETS_DIR=/app/assets
+    volumes:
+      - ~/.cache/huggingface:/root/.cache/huggingface
+    depends_on:
+      redis:
+        condition: service_healthy
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:7001/docs"]
+      interval: 30s
+      timeout: 10s
+      start_period: 60s
+      retries: 3
+
+  # ── Gateway (FastAPI proxy + auth + billing) ───────────────
+  backend-api:
+    build:
+      context: .
+      dockerfile: backend/gateway/Dockerfile
+    image: gisul/backend-api:latest
+    container_name: aaptor-gateway
+    ports:
+      - "7000:7000"
+    env_file:
+      - backend/.env
+    environment:
+      - REDIS_URL=redis://redis:6379
+      - MODEL_SERVICE_URL=http://model-service:7001
+    depends_on:
+      redis:
+        condition: service_healthy
+      model-service:
+        condition: service_healthy
+    restart: unless-stopped
+
+  # ── Frontend (Next.js admin UI) ────────────────────────────
+  frontend:
+    build:
+      context: frontend/web
+      dockerfile: Dockerfile
+    image: gisul/model-frontend:latest
+    container_name: aaptor-frontend
+    ports:
+      - "7002:7002"
+    env_file:
+      - frontend/web/.env.local
+    environment:
+      - GATEWAY_BASE_URL=http://backend-api:7000
+    depends_on:
+      - backend-api
+    restart: unless-stopped

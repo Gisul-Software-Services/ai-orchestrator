@@ -336,7 +336,7 @@ def get_linux_feedback(
 
     try:
         start = time.time()
-        raw, _, _ = _llm_chat_coder(messages=messages, temperature=0.1, max_tokens=900)
+        raw, prompt_tokens, completion_tokens = _llm_chat_coder(messages=messages, temperature=0.1, max_tokens=900)
         latency_ms = (time.time() - start) * 1000
 
         parsed = safe_parse(raw)
@@ -344,7 +344,14 @@ def get_linux_feedback(
             raise ValueError(f"safe_parse returned parse_error: {parsed.get('overall_summary', '')[:200]}")
 
         result = _normalize_response(parsed, vs)
-        emit_eval_usage(usage_meta, "linux_evaluation", latency_ms=latency_ms, cache_hit=False)
+        emit_eval_usage(
+            usage_meta,
+            "linux_evaluation",
+            latency_ms=latency_ms,
+            cache_hit=False,
+            prompt_tokens=prompt_tokens,
+            completion_tokens=completion_tokens,
+        )
 
     except Exception as e:
         logger.warning("[LINUX_EVAL] Qwen failed for question_id=%s: %s", question_id, str(e))

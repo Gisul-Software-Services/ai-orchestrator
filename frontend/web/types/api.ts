@@ -168,7 +168,7 @@ export interface ListApiKeysResponse {
 
 // Existing console/playground registry types (kept for compatibility)
 
-export type ApiEndpointSection = "generation" | "dsa" | "future";
+export type ApiEndpointSection = "generation" | "dsa" | "evaluation" | "future";
 
 export interface ApiEndpointMeta {
   id: string;

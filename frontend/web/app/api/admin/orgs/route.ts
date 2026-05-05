@@ -31,10 +31,36 @@ export async function GET() {
   }
 
   try {
-    // Limitation: backend has no list-all-orgs endpoint, so org list is derived
-    // from current-period admin usage activity only.
+    // Primary: fetch all orgs directly from the organizations collection
+    const orgsResp = await fetch(
+      `${gatewayBase()}/billing/v1/admin/orgs`,
+      {
+        method: "GET",
+        headers: { "X-Api-Key": apiKey },
+        cache: "no-store",
+      }
+    );
+
+    if (orgsResp.ok) {
+      const data = await orgsResp.json() as {
+        orgs?: Array<{ orgId?: string; name?: string }>;
+      };
+      const orgs = Array.isArray(data.orgs)
+        ? data.orgs
+            .map((o) => ({
+              org_id: String(o?.orgId ?? ""),
+              name: String(o?.name ?? ""),
+              total_tokens: 0,
+              call_count: 0,
+            }))
+            .filter((o) => o.org_id.length > 0)
+        : [];
+      return NextResponse.json({ period: currentUtcMonth(), orgs });
+    }
+
+    // Fallback: derive from current-period usage logs
     const period = currentUtcMonth();
-    const resp = await fetch(
+    const usageResp = await fetch(
       `${gatewayBase()}/billing/v1/admin/usage?period=${encodeURIComponent(period)}`,
       {
         method: "GET",
@@ -43,30 +69,30 @@ export async function GET() {
       }
     );
 
-    const contentType = resp.headers.get("content-type") || "application/json";
-    const text = await resp.text();
-    if (!resp.ok) {
+    const text = await usageResp.text();
+    if (!usageResp.ok) {
       return new NextResponse(text, {
-        status: resp.status,
-        headers: { "content-type": contentType },
+        status: usageResp.status,
+        headers: { "content-type": usageResp.headers.get("content-type") || "application/json" },
       });
     }
 
-    const data = JSON.parse(text) as {
+    const usageData = JSON.parse(text) as {
       period?: string;
       orgs?: Array<{ _id?: string; total_tokens?: number; call_count?: number }>;
     };
-    const orgs = Array.isArray(data.orgs)
-      ? data.orgs
+    const orgs = Array.isArray(usageData.orgs)
+      ? usageData.orgs
           .map((o) => ({
             org_id: String(o?._id ?? ""),
+            name: "",
             total_tokens: o?.total_tokens ?? 0,
             call_count: o?.call_count ?? 0,
           }))
           .filter((o) => o.org_id.length > 0)
       : [];
 
-    return NextResponse.json({ period: data.period ?? period, orgs });
+    return NextResponse.json({ period: usageData.period ?? period, orgs });
   } catch {
     return NextResponse.json(
       { error: "model-service unreachable" },
@@ -74,4 +100,3 @@ export async function GET() {
     );
   }
 }
-

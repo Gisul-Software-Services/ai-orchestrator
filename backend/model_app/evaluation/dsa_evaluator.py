@@ -171,9 +171,10 @@ def get_dsa_feedback_product_contract(
 
     try:
         start = time.time()
-        raw, _, _ = _llm_chat_coder(messages=messages, temperature=0.0, max_tokens=900)
+        raw, prompt_tokens, completion_tokens = _llm_chat_coder(messages=messages, temperature=0.0, max_tokens=900)
         latency_ms = (time.time() - start) * 1000
-        emit_eval_usage(usage_meta, "dsa_evaluation", latency_ms=latency_ms, cache_hit=False)
+        emit_eval_usage(usage_meta, "dsa_evaluation", latency_ms=latency_ms, cache_hit=False,
+                        prompt_tokens=prompt_tokens, completion_tokens=completion_tokens)
 
         out = safe_parse(raw)
         if out.get("parse_error"):

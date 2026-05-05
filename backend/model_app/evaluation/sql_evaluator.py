@@ -367,7 +367,7 @@ def get_sql_feedback(*, payload: dict, usage_meta: dict | None) -> dict:
 
     try:
         start = time.time()
-        raw, _, _ = _llm_chat_coder(messages=messages, temperature=0.0, max_tokens=500)
+        raw, prompt_tokens, completion_tokens = _llm_chat_coder(messages=messages, temperature=0.0, max_tokens=500)
         latency_ms = (time.time() - start) * 1000
 
         parsed = safe_parse(raw)
@@ -386,7 +386,8 @@ def get_sql_feedback(*, payload: dict, usage_meta: dict | None) -> dict:
         result["answer_log"]["submitted_answer"] = user_query
         result["answer_log"]["expected_answer"] = ""
 
-        emit_eval_usage(usage_meta, "sql_evaluation", latency_ms=latency_ms, cache_hit=False)
+        emit_eval_usage(usage_meta, "sql_evaluation", latency_ms=latency_ms, cache_hit=False,
+                        prompt_tokens=prompt_tokens, completion_tokens=completion_tokens)
 
     except Exception as e:
         logger.warning("[SQL_EVAL] Qwen failed for question_id=%s: %s", question_id, str(e))

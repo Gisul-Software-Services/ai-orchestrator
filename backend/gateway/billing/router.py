@@ -178,6 +178,14 @@ async def get_org_dashboard(
     }
 
 
+@router.get("/admin/orgs")
+async def list_all_orgs():
+    """List all organisations from the organization collection."""
+    cursor = aaptor_orgs().find({}, projection={"_id": 0, "orgId": 1, "name": 1})
+    orgs = await cursor.to_list(500)
+    return {"orgs": orgs}
+
+
 @router.get("/admin/usage")
 async def get_all_orgs_usage(period: str | None = Query(default=None)):
     if not period:

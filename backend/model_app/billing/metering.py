@@ -109,9 +109,30 @@ async def emit_usage_after_job(
     status: str = "success",
     error_detail: str | None = None,
     model_name: str | None = None,
+    prompt_tokens: int | None = None,
+    completion_tokens: int | None = None,
 ) -> None:
     try:
-        counts = current_token_counts.get(None) or {}
+        # Use passed token counts if provided, otherwise fall back to ContextVar
+        if prompt_tokens is not None or completion_tokens is not None:
+            pt = int(prompt_tokens or 0)
+            ct = int(completion_tokens or 0)
+            counts = {
+                "prompt_tokens": pt,
+                "completion_tokens": ct,
+                "total_tokens": pt + ct,
+            }
+            # DEBUG: Log when tokens are passed
+            import logging
+            logger = logging.getLogger(__name__)
+            logger.info(f"[TOKEN_DEBUG] emit_usage_after_job received tokens: prompt={pt}, completion={ct}, job_id={job_id[:8]}")
+        else:
+            counts = current_token_counts.get(None) or {}
+            # DEBUG: Log when falling back to ContextVar
+            import logging
+            logger = logging.getLogger(__name__)
+            logger.info(f"[TOKEN_DEBUG] emit_usage_after_job using ContextVar: {counts}, job_id={job_id[:8]}")
+        
         meta = usage_meta if usage_meta is not None else peek_usage_meta() or snapshot_usage_meta(None)
         s = get_settings()
         await record_usage(
@@ -139,10 +160,34 @@ async def emit_usage_after_job(
 
 
 def schedule_usage_emit(**kwargs) -> None:
+    """Schedule usage emission in the background.
+    
+    Handles both sync and async contexts by checking for an active event loop.
+    """
     try:
         async def _run() -> None:
             await emit_usage_after_job(**kwargs)
 
-        asyncio.create_task(_run())
+        # Try to get the running event loop
+        try:
+            loop = asyncio.get_running_loop()
+            # We're in an async context, create task directly
+            loop.create_task(_run())
+        except RuntimeError:
+            # No running loop - we're in a sync context
+            # Create a new event loop in a background thread
+            import threading
+            
+            def _run_in_thread():
+                try:
+                    new_loop = asyncio.new_event_loop()
+                    asyncio.set_event_loop(new_loop)
+                    new_loop.run_until_complete(_run())
+                    new_loop.close()
+                except Exception:
+                    pass
+            
+            thread = threading.Thread(target=_run_in_thread, daemon=True)
+            thread.start()
     except Exception:
         pass

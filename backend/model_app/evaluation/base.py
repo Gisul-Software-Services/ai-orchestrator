@@ -111,20 +111,42 @@ def emit_eval_usage(
     cache_hit: bool = False,
     status: str = "success",
     error_detail: str | None = None,
+    prompt_tokens: int | None = None,
+    completion_tokens: int | None = None,
 ) -> None:
     """
     Emit billing for an evaluation call.
     Uses `coder_model_name` so usage_logs records correct model for eval traffic.
-    """
-    # Ensure token counters are not stale on cache hits / errors.
-    # (Usage rows should reflect 0 tokens when no model call happened.)
-    try:
-        if cache_hit or status != "success":
-            current_token_counts.set({"prompt_tokens": 0, "completion_tokens": 0, "total_tokens": 0})
-    except Exception:
-        pass
 
+    Pass prompt_tokens/completion_tokens directly when calling from a background
+    thread — ContextVar values don't cross thread boundaries via asyncio.to_thread().
+    """
     s = get_settings()
+
+    # DEBUG: Log token counts received
+    import logging
+    logger = logging.getLogger(__name__)
+    logger.info(f"[TOKEN_DEBUG] emit_eval_usage called: route={route}, prompt={prompt_tokens}, completion={completion_tokens}")
+
+    # If token counts are passed directly, use them (thread-safe path)
+    if prompt_tokens is not None or completion_tokens is not None:
+        pt = max(0, int(prompt_tokens or 0))
+        ct = max(0, int(completion_tokens or 0))
+        try:
+            current_token_counts.set({
+                "prompt_tokens": pt,
+                "completion_tokens": ct,
+                "total_tokens": pt + ct,
+            })
+        except Exception:
+            pass
+    elif cache_hit or status != "success":
+        # Ensure token counters are not stale on cache hits / errors.
+        try:
+            current_token_counts.set({"prompt_tokens": 0, "completion_tokens": 0, "total_tokens": 0})
+        except Exception:
+            pass
+
     schedule_usage_emit(
         job_id=str(uuid4()),
         usage_meta=usage_meta,
@@ -134,6 +156,8 @@ def emit_eval_usage(
         status=status,
         error_detail=error_detail,
         model_name=s.coder_model_name,
+        prompt_tokens=prompt_tokens,
+        completion_tokens=completion_tokens,
     )
 
 

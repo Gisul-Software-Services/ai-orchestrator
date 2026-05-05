@@ -462,7 +462,7 @@ def get_design_feedback(
 
     try:
         start = time.time()
-        raw, _, _ = _llm_chat_coder(messages=messages, temperature=0.1, max_tokens=800)
+        raw, prompt_tokens, completion_tokens = _llm_chat_coder(messages=messages, temperature=0.1, max_tokens=800)
         latency_ms = (time.time() - start) * 1000
 
         parsed = safe_parse(raw)
@@ -495,7 +495,14 @@ def get_design_feedback(
         result["ai_generated"] = True
         result["ai_vision_available"] = False
 
-        emit_eval_usage(usage_meta, "design_evaluation", latency_ms=latency_ms, cache_hit=False)
+        emit_eval_usage(
+            usage_meta,
+            "design_evaluation",
+            latency_ms=latency_ms,
+            cache_hit=False,
+            prompt_tokens=prompt_tokens,
+            completion_tokens=completion_tokens,
+        )
 
     except Exception as e:
         logger.warning("[DESIGN_EVAL] Qwen failed for question_id=%s: %s", question_id, str(e))

@@ -30,6 +30,8 @@ class ModelSettings(BaseSettings):
     vllm_gpu_memory_utilization: float = 0.86
     vllm_max_model_len: int = 1024
     vllm_max_num_seqs: int = 1
+    # PostgreSQL — SQL query validation engine
+    validation_db_url: str = "postgresql://aaptor:aaptor_validation@localhost:5432/validation_db"
 
     @property
     def aiml_catalog_path(self) -> Path:

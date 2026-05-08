@@ -34,7 +34,16 @@ REQUEST_LOG = deque(maxlen=1000)
 llm = None
 coder_llm = None
 
-# Global semaphore — ensures only one LLM call runs at a time.
-# vLLM with max_num_seqs=1 cannot handle concurrent inference requests.
-# All evaluation async tasks must acquire this before calling _llm_chat_coder.
-llm_semaphore: asyncio.Semaphore = asyncio.Semaphore(1)
+# ── LLM Concurrency Control ──────────────────────────────────────────────────
+# Controls how many LLM requests run simultaneously.
+# Single 8GB GPU: LLM_CONCURRENCY = 1
+# Multi-GPU or larger GPU: increase LLM_CONCURRENCY to match GPU count
+# This is the ONLY value to change when scaling to more GPUs.
+import os
+LLM_CONCURRENCY: int = int(os.getenv("LLM_CONCURRENCY", "1"))
+
+# Global semaphore — serializes ALL LLM calls (generation + evaluation).
+# Covers: SQL generation, DSA eval, SQL eval, AIML eval, DevOps eval, Cloud eval.
+# With LLM_CONCURRENCY=1: one request at a time (8GB GPU safe).
+# With LLM_CONCURRENCY=N: N concurrent requests (for N GPUs or larger GPU).
+llm_semaphore: asyncio.Semaphore = asyncio.Semaphore(LLM_CONCURRENCY)

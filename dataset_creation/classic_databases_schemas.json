@@ -1,0 +1,3742 @@
+[
+  {
+    "schema_id": "classic_music_album",
+    "name": "Classic - Music",
+    "domain": "music",
+    "description": "Digital music store with artists, albums, tracks, customers, invoices",
+    "source": "classic_database",
+    "tables": {
+      "album": {
+        "columns": [
+          {
+            "name": "album_id",
+            "type": "INT",
+            "constraints": "NOT NULL"
+          },
+          {
+            "name": "title",
+            "type": "VARCHAR(160)",
+            "constraints": "NOT NULL"
+          },
+          {
+            "name": "artist_id",
+            "type": "INT",
+            "constraints": "NOT NULL"
+          }
+        ]
+      },
+      "artist": {
+        "columns": [
+          {
+            "name": "artist_id",
+            "type": "INT",
+            "constraints": "NOT NULL"
+          },
+          {
+            "name": "name",
+            "type": "VARCHAR(120)",
+            "constraints": ""
+          }
+        ]
+      },
+      "customer": {
+        "columns": [
+          {
+            "name": "customer_id",
+            "type": "INT",
+            "constraints": "NOT NULL"
+          },
+          {
+            "name": "first_name",
+            "type": "VARCHAR(40)",
+            "constraints": "NOT NULL"
+          },
+          {
+            "name": "last_name",
+            "type": "VARCHAR(20)",
+            "constraints": "NOT NULL"
+          },
+          {
+            "name": "company",
+            "type": "VARCHAR(80)",
+            "constraints": ""
+          },
+          {
+            "name": "address",
+            "type": "VARCHAR(70)",
+            "constraints": ""
+          },
+          {
+            "name": "city",
+            "type": "VARCHAR(40)",
+            "constraints": ""
+          },
+          {
+            "name": "state",
+            "type": "VARCHAR(40)",
+            "constraints": ""
+          },
+          {
+            "name": "country",
+            "type": "VARCHAR(40)",
+            "constraints": ""
+          },
+          {
+            "name": "postal_code",
+            "type": "VARCHAR(10)",
+            "constraints": ""
+          },
+          {
+            "name": "phone",
+            "type": "VARCHAR(24)",
+            "constraints": ""
+          },
+          {
+            "name": "fax",
+            "type": "VARCHAR(24)",
+            "constraints": ""
+          },
+          {
+            "name": "email",
+            "type": "VARCHAR(60)",
+            "constraints": "NOT NULL"
+          },
+          {
+            "name": "support_rep_id",
+            "type": "INT",
+            "constraints": ""
+          }
+        ]
+      },
+      "employee": {
+        "columns": [
+          {
+            "name": "employee_id",
+            "type": "INT",
+            "constraints": "NOT NULL"
+          },
+          {
+            "name": "last_name",
+            "type": "VARCHAR(20)",
+            "constraints": "NOT NULL"
+          },
+          {
+            "name": "first_name",
+            "type": "VARCHAR(20)",
+            "constraints": "NOT NULL"
+          },
+          {
+            "name": "title",
+            "type": "VARCHAR(30)",
+            "constraints": ""
+          },
+          {
+            "name": "reports_to",
+            "type": "INT",
+            "constraints": ""
+          },
+          {
+            "name": "birth_date",
+            "type": "TIMESTAMP",
+            "constraints": ""
+          },
+          {
+            "name": "hire_date",
+            "type": "TIMESTAMP",
+            "constraints": ""
+          },
+          {
+            "name": "address",
+            "type": "VARCHAR(70)",
+            "constraints": ""
+          },
+          {
+            "name": "city",
+            "type": "VARCHAR(40)",
+            "constraints": ""
+          },
+          {
+            "name": "state",
+            "type": "VARCHAR(40)",
+            "constraints": ""
+          },
+          {
+            "name": "country",
+            "type": "VARCHAR(40)",
+            "constraints": ""
+          },
+          {
+            "name": "postal_code",
+            "type": "VARCHAR(10)",
+            "constraints": ""
+          },
+          {
+            "name": "phone",
+            "type": "VARCHAR(24)",
+            "constraints": ""
+          },
+          {
+            "name": "fax",
+            "type": "VARCHAR(24)",
+            "constraints": ""
+          },
+          {
+            "name": "email",
+            "type": "VARCHAR(60)",
+            "constraints": ""
+          }
+        ]
+      },
+      "genre": {
+        "columns": [
+          {
+            "name": "genre_id",
+            "type": "INT",
+            "constraints": "NOT NULL"
+          },
+          {
+            "name": "name",
+            "type": "VARCHAR(120)",
+            "constraints": ""
+          }
+        ]
+      },
+      "invoice": {
+        "columns": [
+          {
+            "name": "invoice_id",
+            "type": "INT",
+            "constraints": "NOT NULL"
+          },
+          {
+            "name": "customer_id",
+            "type": "INT",
+            "constraints": "NOT NULL"
+          },
+          {
+            "name": "invoice_date",
+            "type": "TIMESTAMP",
+            "constraints": "NOT NULL"
+          },
+          {
+            "name": "billing_address",
+            "type": "VARCHAR(70)",
+            "constraints": ""
+          },
+          {
+            "name": "billing_city",
+            "type": "VARCHAR(40)",
+            "constraints": ""
+          },
+          {
+            "name": "billing_state",
+            "type": "VARCHAR(40)",
+            "constraints": ""
+          },
+          {
+            "name": "billing_country",
+            "type": "VARCHAR(40)",
+            "constraints": ""
+          },
+          {
+            "name": "billing_postal_code",
+            "type": "VARCHAR(10)",
+            "constraints": ""
+          },
+          {
+            "name": "total",
+            "type": "NUMERIC(10,2)",
+            "constraints": "NOT NULL"
+          }
+        ]
+      },
+      "invoice_line": {
+        "columns": [
+          {
+            "name": "invoice_line_id",
+            "type": "INT",
+            "constraints": "NOT NULL"
+          },
+          {
+            "name": "invoice_id",
+            "type": "INT",
+            "constraints": "NOT NULL"
+          },
+          {
+            "name": "track_id",
+            "type": "INT",
+            "constraints": "NOT NULL"
+          },
+          {
+            "name": "unit_price",
+            "type": "NUMERIC(10,2)",
+            "constraints": "NOT NULL"
+          },
+          {
+            "name": "quantity",
+            "type": "INT",
+            "constraints": "NOT NULL"
+          }
+        ]
+      },
+      "media_type": {
+        "columns": [
+          {
+            "name": "media_type_id",
+            "type": "INT",
+            "constraints": "NOT NULL"
+          },
+          {
+            "name": "name",
+            "type": "VARCHAR(120)",
+            "constraints": ""
+          }
+        ]
+      },
+      "playlist": {
+        "columns": [
+          {
+            "name": "playlist_id",
+            "type": "INT",
+            "constraints": "NOT NULL"
+          },
+          {
+            "name": "name",
+            "type": "VARCHAR(120)",
+            "constraints": ""
+          }
+        ]
+      },
+      "playlist_track": {
+        "columns": [
+          {
+            "name": "playlist_id",
+            "type": "INT",
+            "constraints": "NOT NULL"
+          },
+          {
+            "name": "track_id",
+            "type": "INT",
+            "constraints": "NOT NULL"
+          }
+        ]
+      },
+      "track": {
+        "columns": [
+          {
+            "name": "track_id",
+            "type": "INT",
+            "constraints": "NOT NULL"
+          },
+          {
+            "name": "name",
+            "type": "VARCHAR(200)",
+            "constraints": "NOT NULL"
+          },
+          {
+            "name": "album_id",
+            "type": "INT",
+            "constraints": ""
+          },
+          {
+            "name": "media_type_id",
+            "type": "INT",
+            "constraints": "NOT NULL"
+          },
+          {
+            "name": "genre_id",
+            "type": "INT",
+            "constraints": ""
+          },
+          {
+            "name": "composer",
+            "type": "VARCHAR(220)",
+            "constraints": ""
+          },
+          {
+            "name": "milliseconds",
+            "type": "INT",
+            "constraints": "NOT NULL"
+          },
+          {
+            "name": "bytes",
+            "type": "INT",
+            "constraints": ""
+          },
+          {
+            "name": "unit_price",
+            "type": "NUMERIC(10,2)",
+            "constraints": "NOT NULL"
+          }
+        ]
+      }
+    },
+    "relationships": [],
+    "sample_data": {
+      "album": [
+        {
+          "album_id": 1,
+          "title": "Album 1",
+          "artist_id": 1
+        },
+        {
+          "album_id": 2,
+          "title": "Album 2",
+          "artist_id": 2
+        },
+        {
+          "album_id": 3,
+          "title": "Album 3",
+          "artist_id": 3
+        },
+        {
+          "album_id": 4,
+          "title": "Album 4",
+          "artist_id": 4
+        },
+        {
+          "album_id": 5,
+          "title": "Album 5",
+          "artist_id": 5
+        }
+      ],
+      "artist": [
+        {
+          "artist_id": 1,
+          "name": "Artist 1"
+        },
+        {
+          "artist_id": 2,
+          "name": "Artist 2"
+        },
+        {
+          "artist_id": 3,
+          "name": "Artist 3"
+        },
+        {
+          "artist_id": 4,
+          "name": "Artist 4"
+        },
+        {
+          "artist_id": 5,
+          "name": "Artist 5"
+        }
+      ],
+      "customer": [
+        {
+          "customer_id": 1,
+          "first_name": "Emma",
+          "last_name": "Brown",
+          "company": "Acme Corp",
+          "address": "10 Main Street",
+          "city": "London",
+          "state": "Region 1",
+          "country": "France",
+          "postal_code": "10001",
+          "phone": "+1-555-1001",
+          "fax": "+1-555-2001",
+          "email": "user1@example.com",
+          "support_rep_id": 1
+        },
+        {
+          "customer_id": 2,
+          "first_name": "Bob",
+          "last_name": "Wilson",
+          "company": "GlobalTrade",
+          "address": "20 Main Street",
+          "city": "New York",
+          "state": "Region 2",
+          "country": "Australia",
+          "postal_code": "10002",
+          "phone": "+1-555-1002",
+          "fax": "+1-555-2002",
+          "email": "user2@example.com",
+          "support_rep_id": 2
+        },
+        {
+          "customer_id": 3,
+          "first_name": "Bob",
+          "last_name": "Miller",
+          "company": "CloudWorks",
+          "address": "30 Main Street",
+          "city": "Dubai",
+          "state": "Region 3",
+          "country": "Singapore",
+          "postal_code": "10003",
+          "phone": "+1-555-1003",
+          "fax": "+1-555-2003",
+          "email": "user3@example.com",
+          "support_rep_id": 3
+        },
+        {
+          "customer_id": 4,
+          "first_name": "Iris",
+          "last_name": "Smith",
+          "company": "CloudWorks",
+          "address": "40 Main Street",
+          "city": "London",
+          "state": "Region 4",
+          "country": "France",
+          "postal_code": "10004",
+          "phone": "+1-555-1004",
+          "fax": "+1-555-2004",
+          "email": "user4@example.com",
+          "support_rep_id": 4
+        },
+        {
+          "customer_id": 5,
+          "first_name": "Henry",
+          "last_name": "Miller",
+          "company": "PrimeCo",
+          "address": "50 Main Street",
+          "city": "Dubai",
+          "state": "Region 5",
+          "country": "Canada",
+          "postal_code": "10005",
+          "phone": "+1-555-1005",
+          "fax": "+1-555-2005",
+          "email": "user5@example.com",
+          "support_rep_id": 5
+        }
+      ],
+      "employee": [
+        {
+          "employee_id": 1,
+          "last_name": "Wilson",
+          "first_name": "Grace",
+          "title": "Sales Manager",
+          "reports_to": 1,
+          "birth_date": "2023-07-20",
+          "hire_date": "2022-07-31",
+          "address": "10 Main Street",
+          "city": "Toronto",
+          "state": "Region 1",
+          "country": "UAE",
+          "postal_code": "10001",
+          "phone": "+1-555-1001",
+          "fax": "+1-555-2001",
+          "email": "user1@example.com"
+        },
+        {
+          "employee_id": 2,
+          "last_name": "Moore",
+          "first_name": "Grace",
+          "title": "Account Executive",
+          "reports_to": 2,
+          "birth_date": "2022-11-20",
+          "hire_date": "2023-01-01",
+          "address": "20 Main Street",
+          "city": "Paris",
+          "state": "Region 2",
+          "country": "UAE",
+          "postal_code": "10002",
+          "phone": "+1-555-1002",
+          "fax": "+1-555-2002",
+          "email": "user2@example.com"
+        },
+        {
+          "employee_id": 3,
+          "last_name": "Wilson",
+          "first_name": "Jack",
+          "title": "IT Specialist",
+          "reports_to": 3,
+          "birth_date": "2022-04-05",
+          "hire_date": "2024-07-24",
+          "address": "30 Main Street",
+          "city": "Mumbai",
+          "state": "Region 3",
+          "country": "UK",
+          "postal_code": "10003",
+          "phone": "+1-555-1003",
+          "fax": "+1-555-2003",
+          "email": "user3@example.com"
+        },
+        {
+          "employee_id": 4,
+          "last_name": "Jones",
+          "first_name": "David",
+          "title": "HR Manager",
+          "reports_to": 4,
+          "birth_date": "2022-10-25",
+          "hire_date": "2022-03-22",
+          "address": "40 Main Street",
+          "city": "London",
+          "state": "Region 4",
+          "country": "Germany",
+          "postal_code": "10004",
+          "phone": "+1-555-1004",
+          "fax": "+1-555-2004",
+          "email": "user4@example.com"
+        },
+        {
+          "employee_id": 5,
+          "last_name": "Wilson",
+          "first_name": "Alice",
+          "title": "Operations Lead",
+          "reports_to": 5,
+          "birth_date": "2024-09-08",
+          "hire_date": "2023-06-16",
+          "address": "50 Main Street",
+          "city": "Tokyo",
+          "state": "Region 5",
+          "country": "UK",
+          "postal_code": "10005",
+          "phone": "+1-555-1005",
+          "fax": "+1-555-2005",
+          "email": "user5@example.com"
+        }
+      ],
+      "genre": [
+        {
+          "genre_id": 1,
+          "name": "Genre 1"
+        },
+        {
+          "genre_id": 2,
+          "name": "Genre 2"
+        },
+        {
+          "genre_id": 3,
+          "name": "Genre 3"
+        },
+        {
+          "genre_id": 4,
+          "name": "Genre 4"
+        },
+        {
+          "genre_id": 5,
+          "name": "Genre 5"
+        }
+      ],
+      "invoice": [
+        {
+          "invoice_id": 1,
+          "customer_id": 1,
+          "invoice_date": "2023-08-13",
+          "billing_address": "10 Main Street",
+          "billing_city": "London",
+          "billing_state": "Region 1",
+          "billing_country": "Japan",
+          "billing_postal_code": "10001",
+          "total": 2344.54
+        },
+        {
+          "invoice_id": 2,
+          "customer_id": 2,
+          "invoice_date": "2023-10-05",
+          "billing_address": "20 Main Street",
+          "billing_city": "Singapore",
+          "billing_state": "Region 2",
+          "billing_country": "India",
+          "billing_postal_code": "10002",
+          "total": 1798.99
+        },
+        {
+          "invoice_id": 3,
+          "customer_id": 3,
+          "invoice_date": "2023-07-30",
+          "billing_address": "30 Main Street",
+          "billing_city": "Paris",
+          "billing_state": "Region 3",
+          "billing_country": "Germany",
+          "billing_postal_code": "10003",
+          "total": 1692.11
+        },
+        {
+          "invoice_id": 4,
+          "customer_id": 4,
+          "invoice_date": "2024-08-27",
+          "billing_address": "40 Main Street",
+          "billing_city": "Singapore",
+          "billing_state": "Region 4",
+          "billing_country": "France",
+          "billing_postal_code": "10004",
+          "total": 4359.57
+        },
+        {
+          "invoice_id": 5,
+          "customer_id": 5,
+          "invoice_date": "2023-03-19",
+          "billing_address": "50 Main Street",
+          "billing_city": "Sydney",
+          "billing_state": "Region 5",
+          "billing_country": "India",
+          "billing_postal_code": "10005",
+          "total": 1459.74
+        }
+      ],
+      "invoice_line": [
+        {
+          "invoice_line_id": 1,
+          "invoice_id": 1,
+          "track_id": 1,
+          "unit_price": 3582.69,
+          "quantity": 71
+        },
+        {
+          "invoice_line_id": 2,
+          "invoice_id": 2,
+          "track_id": 2,
+          "unit_price": 3631.42,
+          "quantity": 86
+        },
+        {
+          "invoice_line_id": 3,
+          "invoice_id": 3,
+          "track_id": 3,
+          "unit_price": 1205.31,
+          "quantity": 57
+        },
+        {
+          "invoice_line_id": 4,
+          "invoice_id": 4,
+          "track_id": 4,
+          "unit_price": 1400.13,
+          "quantity": 93
+        },
+        {
+          "invoice_line_id": 5,
+          "invoice_id": 5,
+          "track_id": 5,
+          "unit_price": 4533.44,
+          "quantity": 64
+        }
+      ],
+      "media_type": [
+        {
+          "media_type_id": 1,
+          "name": "Media_Type 1"
+        },
+        {
+          "media_type_id": 2,
+          "name": "Media_Type 2"
+        },
+        {
+          "media_type_id": 3,
+          "name": "Media_Type 3"
+        },
+        {
+          "media_type_id": 4,
+          "name": "Media_Type 4"
+        },
+        {
+          "media_type_id": 5,
+          "name": "Media_Type 5"
+        }
+      ],
+      "playlist": [
+        {
+          "playlist_id": 1,
+          "name": "Playlist 1"
+        },
+        {
+          "playlist_id": 2,
+          "name": "Playlist 2"
+        },
+        {
+          "playlist_id": 3,
+          "name": "Playlist 3"
+        },
+        {
+          "playlist_id": 4,
+          "name": "Playlist 4"
+        },
+        {
+          "playlist_id": 5,
+          "name": "Playlist 5"
+        }
+      ],
+      "playlist_track": [
+        {
+          "playlist_id": 1,
+          "track_id": 1
+        },
+        {
+          "playlist_id": 2,
+          "track_id": 2
+        },
+        {
+          "playlist_id": 3,
+          "track_id": 3
+        },
+        {
+          "playlist_id": 4,
+          "track_id": 4
+        },
+        {
+          "playlist_id": 5,
+          "track_id": 5
+        }
+      ],
+      "track": [
+        {
+          "track_id": 1,
+          "name": "Track 1",
+          "album_id": 1,
+          "media_type_id": 1,
+          "genre_id": 1,
+          "composer": "Track 1",
+          "milliseconds": 1,
+          "bytes": 1,
+          "unit_price": 3986.63
+        },
+        {
+          "track_id": 2,
+          "name": "Track 2",
+          "album_id": 2,
+          "media_type_id": 2,
+          "genre_id": 2,
+          "composer": "Track 2",
+          "milliseconds": 2,
+          "bytes": 2,
+          "unit_price": 2021.86
+        },
+        {
+          "track_id": 3,
+          "name": "Track 3",
+          "album_id": 3,
+          "media_type_id": 3,
+          "genre_id": 3,
+          "composer": "Track 3",
+          "milliseconds": 3,
+          "bytes": 3,
+          "unit_price": 2654.74
+        },
+        {
+          "track_id": 4,
+          "name": "Track 4",
+          "album_id": 4,
+          "media_type_id": 4,
+          "genre_id": 4,
+          "composer": "Track 4",
+          "milliseconds": 4,
+          "bytes": 4,
+          "unit_price": 2752.39
+        },
+        {
+          "track_id": 5,
+          "name": "Track 5",
+          "album_id": 5,
+          "media_type_id": 5,
+          "genre_id": 5,
+          "composer": "Track 5",
+          "milliseconds": 5,
+          "bytes": 5,
+          "unit_price": 4294.44
+        }
+      ]
+    },
+    "difficulty_levels": [
+      "easy",
+      "medium",
+      "hard"
+    ],
+    "sql_categories": [
+      "select",
+      "join",
+      "aggregation",
+      "subquery",
+      "window",
+      "cte"
+    ],
+    "metadata": {
+      "table_count": 11,
+      "total_columns": 64,
+      "has_foreign_keys": false,
+      "has_numeric_columns": true,
+      "has_date_columns": true
+    }
+  },
+  {
+    "schema_id": "classic_e-commerce_categories",
+    "name": "Classic - E-Commerce",
+    "domain": "e-commerce",
+    "description": "Trading company with products, orders, customers, employees",
+    "source": "classic_database",
+    "tables": {
+      "categories": {
+        "columns": [
+          {
+            "name": "category_id",
+            "type": "SMALLINT",
+            "constraints": "NOT NULL"
+          },
+          {
+            "name": "category_name",
+            "type": "CHARACTER",
+            "constraints": "NOT NULL"
+          },
+          {
+            "name": "description",
+            "type": "TEXT",
+            "constraints": ""
+          },
+          {
+            "name": "picture",
+            "type": "BYTEA",
+            "constraints": ""
+          }
+        ]
+      },
+      "customer_customer_demo": {
+        "columns": [
+          {
+            "name": "customer_id",
+            "type": "CHARACTER",
+            "constraints": "NOT NULL"
+          },
+          {
+            "name": "customer_type_id",
+            "type": "CHARACTER",
+            "constraints": "NOT NULL"
+          }
+        ]
+      },
+      "customer_demographics": {
+        "columns": [
+          {
+            "name": "customer_type_id",
+            "type": "CHARACTER",
+            "constraints": "NOT NULL"
+          },
+          {
+            "name": "customer_desc",
+            "type": "TEXT",
+            "constraints": ""
+          }
+        ]
+      },
+      "customers": {
+        "columns": [
+          {
+            "name": "customer_id",
+            "type": "CHARACTER",
+            "constraints": "NOT NULL"
+          },
+          {
+            "name": "company_name",
+            "type": "CHARACTER",
+            "constraints": "NOT NULL"
+          },
+          {
+            "name": "contact_name",
+            "type": "CHARACTER",
+            "constraints": ""
+          },
+          {
+            "name": "contact_title",
+            "type": "CHARACTER",
+            "constraints": ""
+          },
+          {
+            "name": "address",
+            "type": "CHARACTER",
+            "constraints": ""
+          },
+          {
+            "name": "city",
+            "type": "CHARACTER",
+            "constraints": ""
+          },
+          {
+            "name": "region",
+            "type": "CHARACTER",
+            "constraints": ""
+          },
+          {
+            "name": "postal_code",
+            "type": "CHARACTER",
+            "constraints": ""
+          },
+          {
+            "name": "country",
+            "type": "CHARACTER",
+            "constraints": ""
+          },
+          {
+            "name": "phone",
+            "type": "CHARACTER",
+            "constraints": ""
+          },
+          {
+            "name": "fax",
+            "type": "CHARACTER",
+            "constraints": ""
+          }
+        ]
+      },
+      "employees": {
+        "columns": [
+          {
+            "name": "employee_id",
+            "type": "SMALLINT",
+            "constraints": "NOT NULL"
+          },
+          {
+            "name": "last_name",
+            "type": "CHARACTER",
+            "constraints": "NOT NULL"
+          },
+          {
+            "name": "first_name",
+            "type": "CHARACTER",
+            "constraints": "NOT NULL"
+          },
+          {
+            "name": "title",
+            "type": "CHARACTER",
+            "constraints": ""
+          },
+          {
+            "name": "title_of_courtesy",
+            "type": "CHARACTER",
+            "constraints": ""
+          },
+          {
+            "name": "birth_date",
+            "type": "DATE",
+            "constraints": ""
+          },
+          {
+            "name": "hire_date",
+            "type": "DATE",
+            "constraints": ""
+          },
+          {
+            "name": "address",
+            "type": "CHARACTER",
+            "constraints": ""
+          },
+          {
+            "name": "city",
+            "type": "CHARACTER",
+            "constraints": ""
+          },
+          {
+            "name": "region",
+            "type": "CHARACTER",
+            "constraints": ""
+          },
+          {
+            "name": "postal_code",
+            "type": "CHARACTER",
+            "constraints": ""
+          },
+          {
+            "name": "country",
+            "type": "CHARACTER",
+            "constraints": ""
+          },
+          {
+            "name": "home_phone",
+            "type": "CHARACTER",
+            "constraints": ""
+          },
+          {
+            "name": "extension",
+            "type": "CHARACTER",
+            "constraints": ""
+          },
+          {
+            "name": "photo",
+            "type": "BYTEA",
+            "constraints": ""
+          },
+          {
+            "name": "notes",
+            "type": "TEXT",
+            "constraints": ""
+          },
+          {
+            "name": "reports_to",
+            "type": "SMALLINT",
+            "constraints": ""
+          },
+          {
+            "name": "photo_path",
+            "type": "CHARACTER",
+            "constraints": ""
+          }
+        ]
+      },
+      "employee_territories": {
+        "columns": [
+          {
+            "name": "employee_id",
+            "type": "SMALLINT",
+            "constraints": "NOT NULL"
+          },
+          {
+            "name": "territory_id",
+            "type": "CHARACTER",
+            "constraints": "NOT NULL"
+          }
+        ]
+      },
+      "order_details": {
+        "columns": [
+          {
+            "name": "order_id",
+            "type": "SMALLINT",
+            "constraints": "NOT NULL"
+          },
+          {
+            "name": "product_id",
+            "type": "SMALLINT",
+            "constraints": "NOT NULL"
+          },
+          {
+            "name": "unit_price",
+            "type": "REAL",
+            "constraints": "NOT NULL"
+          },
+          {
+            "name": "quantity",
+            "type": "SMALLINT",
+            "constraints": "NOT NULL"
+          },
+          {
+            "name": "discount",
+            "type": "REAL",
+            "constraints": "NOT NULL"
+          }
+        ]
+      },
+      "orders": {
+        "columns": [
+          {
+            "name": "order_id",
+            "type": "SMALLINT",
+            "constraints": "NOT NULL"
+          },
+          {
+            "name": "customer_id",
+            "type": "CHARACTER",
+            "constraints": ""
+          },
+          {
+            "name": "employee_id",
+            "type": "SMALLINT",
+            "constraints": ""
+          },
+          {
+            "name": "order_date",
+            "type": "DATE",
+            "constraints": ""
+          },
+          {
+            "name": "required_date",
+            "type": "DATE",
+            "constraints": ""
+          },
+          {
+            "name": "shipped_date",
+            "type": "DATE",
+            "constraints": ""
+          },
+          {
+            "name": "ship_via",
+            "type": "SMALLINT",
+            "constraints": ""
+          },
+          {
+            "name": "freight",
+            "type": "REAL",
+            "constraints": ""
+          },
+          {
+            "name": "ship_name",
+            "type": "CHARACTER",
+            "constraints": ""
+          },
+          {
+            "name": "ship_address",
+            "type": "CHARACTER",
+            "constraints": ""
+          },
+          {
+            "name": "ship_city",
+            "type": "CHARACTER",
+            "constraints": ""
+          },
+          {
+            "name": "ship_region",
+            "type": "CHARACTER",
+            "constraints": ""
+          },
+          {
+            "name": "ship_postal_code",
+            "type": "CHARACTER",
+            "constraints": ""
+          },
+          {
+            "name": "ship_country",
+            "type": "CHARACTER",
+            "constraints": ""
+          }
+        ]
+      },
+      "products": {
+        "columns": [
+          {
+            "name": "product_id",
+            "type": "SMALLINT",
+            "constraints": "NOT NULL"
+          },
+          {
+            "name": "product_name",
+            "type": "CHARACTER",
+            "constraints": "NOT NULL"
+          },
+          {
+            "name": "supplier_id",
+            "type": "SMALLINT",
+            "constraints": ""
+          },
+          {
+            "name": "category_id",
+            "type": "SMALLINT",
+            "constraints": ""
+          },
+          {
+            "name": "quantity_per_unit",
+            "type": "CHARACTER",
+            "constraints": ""
+          },
+          {
+            "name": "unit_price",
+            "type": "REAL",
+            "constraints": ""
+          },
+          {
+            "name": "units_in_stock",
+            "type": "SMALLINT",
+            "constraints": ""
+          },
+          {
+            "name": "units_on_order",
+            "type": "SMALLINT",
+            "constraints": ""
+          },
+          {
+            "name": "reorder_level",
+            "type": "SMALLINT",
+            "constraints": ""
+          },
+          {
+            "name": "discontinued",
+            "type": "INTEGER",
+            "constraints": "NOT NULL"
+          }
+        ]
+      },
+      "region": {
+        "columns": [
+          {
+            "name": "region_id",
+            "type": "SMALLINT",
+            "constraints": "NOT NULL"
+          },
+          {
+            "name": "region_description",
+            "type": "CHARACTER",
+            "constraints": "NOT NULL"
+          }
+        ]
+      },
+      "shippers": {
+        "columns": [
+          {
+            "name": "shipper_id",
+            "type": "SMALLINT",
+            "constraints": "NOT NULL"
+          },
+          {
+            "name": "company_name",
+            "type": "CHARACTER",
+            "constraints": "NOT NULL"
+          },
+          {
+            "name": "phone",
+            "type": "CHARACTER",
+            "constraints": ""
+          }
+        ]
+      },
+      "suppliers": {
+        "columns": [
+          {
+            "name": "supplier_id",
+            "type": "SMALLINT",
+            "constraints": "NOT NULL"
+          },
+          {
+            "name": "company_name",
+            "type": "CHARACTER",
+            "constraints": "NOT NULL"
+          },
+          {
+            "name": "contact_name",
+            "type": "CHARACTER",
+            "constraints": ""
+          },
+          {
+            "name": "contact_title",
+            "type": "CHARACTER",
+            "constraints": ""
+          },
+          {
+            "name": "address",
+            "type": "CHARACTER",
+            "constraints": ""
+          },
+          {
+            "name": "city",
+            "type": "CHARACTER",
+            "constraints": ""
+          },
+          {
+            "name": "region",
+            "type": "CHARACTER",
+            "constraints": ""
+          },
+          {
+            "name": "postal_code",
+            "type": "CHARACTER",
+            "constraints": ""
+          },
+          {
+            "name": "country",
+            "type": "CHARACTER",
+            "constraints": ""
+          },
+          {
+            "name": "phone",
+            "type": "CHARACTER",
+            "constraints": ""
+          },
+          {
+            "name": "fax",
+            "type": "CHARACTER",
+            "constraints": ""
+          },
+          {
+            "name": "homepage",
+            "type": "TEXT",
+            "constraints": ""
+          }
+        ]
+      },
+      "territories": {
+        "columns": [
+          {
+            "name": "territory_id",
+            "type": "CHARACTER",
+            "constraints": "NOT NULL"
+          },
+          {
+            "name": "territory_description",
+            "type": "CHARACTER",
+            "constraints": "NOT NULL"
+          },
+          {
+            "name": "region_id",
+            "type": "SMALLINT",
+            "constraints": "NOT NULL"
+          }
+        ]
+      },
+      "us_states": {
+        "columns": [
+          {
+            "name": "state_id",
+            "type": "SMALLINT",
+            "constraints": "NOT NULL"
+          },
+          {
+            "name": "state_name",
+            "type": "CHARACTER",
+            "constraints": ""
+          },
+          {
+            "name": "state_abbr",
+            "type": "CHARACTER",
+            "constraints": ""
+          },
+          {
+            "name": "state_region",
+            "type": "CHARACTER",
+            "constraints": ""
+          }
+        ]
+      }
+    },
+    "relationships": [],
+    "sample_data": {
+      "categories": [
+        {
+          "category_id": 1,
+          "category_name": "Electronics",
+          "description": "Description for categories 1",
+          "picture": "/images/categories_1.png"
+        },
+        {
+          "category_id": 2,
+          "category_name": "Clothing",
+          "description": "Description for categories 2",
+          "picture": "/images/categories_2.png"
+        },
+        {
+          "category_id": 3,
+          "category_name": "Food",
+          "description": "Description for categories 3",
+          "picture": "/images/categories_3.png"
+        },
+        {
+          "category_id": 4,
+          "category_name": "Books",
+          "description": "Description for categories 4",
+          "picture": "/images/categories_4.png"
+        },
+        {
+          "category_id": 5,
+          "category_name": "Sports",
+          "description": "Description for categories 5",
+          "picture": "/images/categories_5.png"
+        }
+      ],
+      "customer_customer_demo": [
+        {
+          "customer_id": 1,
+          "customer_type_id": 1
+        },
+        {
+          "customer_id": 2,
+          "customer_type_id": 2
+        },
+        {
+          "customer_id": 3,
+          "customer_type_id": 3
+        },
+        {
+          "customer_id": 4,
+          "customer_type_id": 4
+        },
+        {
+          "customer_id": 5,
+          "customer_type_id": 5
+        }
+      ],
+      "customer_demographics": [
+        {
+          "customer_type_id": 1,
+          "customer_desc": "New customer"
+        },
+        {
+          "customer_type_id": 2,
+          "customer_desc": "VIP member"
+        },
+        {
+          "customer_type_id": 3,
+          "customer_desc": "Regular customer"
+        },
+        {
+          "customer_type_id": 4,
+          "customer_desc": "Premium customer"
+        },
+        {
+          "customer_type_id": 5,
+          "customer_desc": "New customer"
+        }
+      ],
+      "customers": [
+        {
+          "customer_id": 1,
+          "company_name": "CloudWorks",
+          "contact_name": "Carol Miller",
+          "contact_title": "Mrs.",
+          "address": "10 Main Street",
+          "city": "Mumbai",
+          "region": "Region 1",
+          "postal_code": "10001",
+          "country": "Japan",
+          "phone": "+1-555-1001",
+          "fax": "+1-555-2001"
+        },
+        {
+          "customer_id": 2,
+          "company_name": "CloudWorks",
+          "contact_name": "Carol Williams",
+          "contact_title": "Mr.",
+          "address": "20 Main Street",
+          "city": "Dubai",
+          "region": "Region 2",
+          "postal_code": "10002",
+          "country": "Singapore",
+          "phone": "+1-555-1002",
+          "fax": "+1-555-2002"
+        },
+        {
+          "customer_id": 3,
+          "company_name": "Acme Corp",
+          "contact_name": "Iris Brown",
+          "contact_title": "Ms.",
+          "address": "30 Main Street",
+          "city": "Tokyo",
+          "region": "Region 3",
+          "postal_code": "10003",
+          "country": "Canada",
+          "phone": "+1-555-1003",
+          "fax": "+1-555-2003"
+        },
+        {
+          "customer_id": 4,
+          "company_name": "DataSystems",
+          "contact_name": "David Moore",
+          "contact_title": "Mr.",
+          "address": "40 Main Street",
+          "city": "Paris",
+          "region": "Region 4",
+          "postal_code": "10004",
+          "country": "UAE",
+          "phone": "+1-555-1004",
+          "fax": "+1-555-2004"
+        },
+        {
+          "customer_id": 5,
+          "company_name": "Acme Corp",
+          "contact_name": "Frank Wilson",
+          "contact_title": "Mrs.",
+          "address": "50 Main Street",
+          "city": "New York",
+          "region": "Region 5",
+          "postal_code": "10005",
+          "country": "Germany",
+          "phone": "+1-555-1005",
+          "fax": "+1-555-2005"
+        }
+      ],
+      "employees": [
+        {
+          "employee_id": 1,
+          "last_name": "Johnson",
+          "first_name": "David",
+          "title": "Sales Manager",
+          "title_of_courtesy": "Dr.",
+          "birth_date": "2022-06-30",
+          "hire_date": "2022-11-30",
+          "address": "10 Main Street",
+          "city": "Dubai",
+          "region": "Region 1",
+          "postal_code": "10001",
+          "country": "Germany",
+          "home_phone": "+1-555-1001",
+          "extension": "101",
+          "photo": "/photos/employees_1.jpg",
+          "notes": "Note for record 1",
+          "reports_to": 1,
+          "photo_path": "/photos/employees_1.jpg"
+        },
+        {
+          "employee_id": 2,
+          "last_name": "Garcia",
+          "first_name": "Carol",
+          "title": "Account Executive",
+          "title_of_courtesy": "Ms.",
+          "birth_date": "2023-03-13",
+          "hire_date": "2022-07-25",
+          "address": "20 Main Street",
+          "city": "Tokyo",
+          "region": "Region 2",
+          "postal_code": "10002",
+          "country": "Canada",
+          "home_phone": "+1-555-1002",
+          "extension": "102",
+          "photo": "/photos/employees_2.jpg",
+          "notes": "Note for record 2",
+          "reports_to": 2,
+          "photo_path": "/photos/employees_2.jpg"
+        },
+        {
+          "employee_id": 3,
+          "last_name": "Wilson",
+          "first_name": "Alice",
+          "title": "IT Specialist",
+          "title_of_courtesy": "Dr.",
+          "birth_date": "2024-07-20",
+          "hire_date": "2022-06-04",
+          "address": "30 Main Street",
+          "city": "Sydney",
+          "region": "Region 3",
+          "postal_code": "10003",
+          "country": "Canada",
+          "home_phone": "+1-555-1003",
+          "extension": "103",
+          "photo": "/photos/employees_3.jpg",
+          "notes": "Note for record 3",
+          "reports_to": 3,
+          "photo_path": "/photos/employees_3.jpg"
+        },
+        {
+          "employee_id": 4,
+          "last_name": "Moore",
+          "first_name": "Jack",
+          "title": "HR Manager",
+          "title_of_courtesy": "Ms.",
+          "birth_date": "2022-08-14",
+          "hire_date": "2023-03-20",
+          "address": "40 Main Street",
+          "city": "Paris",
+          "region": "Region 4",
+          "postal_code": "10004",
+          "country": "USA",
+          "home_phone": "+1-555-1004",
+          "extension": "104",
+          "photo": "/photos/employees_4.jpg",
+          "notes": "Note for record 4",
+          "reports_to": 4,
+          "photo_path": "/photos/employees_4.jpg"
+        },
+        {
+          "employee_id": 5,
+          "last_name": "Miller",
+          "first_name": "David",
+          "title": "Operations Lead",
+          "title_of_courtesy": "Mrs.",
+          "birth_date": "2023-06-04",
+          "hire_date": "2024-09-25",
+          "address": "50 Main Street",
+          "city": "Singapore",
+          "region": "Region 5",
+          "postal_code": "10005",
+          "country": "Germany",
+          "home_phone": "+1-555-1005",
+          "extension": "105",
+          "photo": "/photos/employees_5.jpg",
+          "notes": "Note for record 5",
+          "reports_to": 5,
+          "photo_path": "/photos/employees_5.jpg"
+        }
+      ],
+      "employee_territories": [
+        {
+          "employee_id": 1,
+          "territory_id": 1
+        },
+        {
+          "employee_id": 2,
+          "territory_id": 2
+        },
+        {
+          "employee_id": 3,
+          "territory_id": 3
+        },
+        {
+          "employee_id": 4,
+          "territory_id": 4
+        },
+        {
+          "employee_id": 5,
+          "territory_id": 5
+        }
+      ],
+      "order_details": [
+        {
+          "order_id": 1,
+          "product_id": 1,
+          "unit_price": 2909.82,
+          "quantity": 23,
+          "discount": 4193.37
+        },
+        {
+          "order_id": 2,
+          "product_id": 2,
+          "unit_price": 4188.39,
+          "quantity": 26,
+          "discount": 222.53
+        },
+        {
+          "order_id": 3,
+          "product_id": 3,
+          "unit_price": 1222.16,
+          "quantity": 14,
+          "discount": 2687.66
+        },
+        {
+          "order_id": 4,
+          "product_id": 4,
+          "unit_price": 4754.46,
+          "quantity": 63,
+          "discount": 4569.56
+        },
+        {
+          "order_id": 5,
+          "product_id": 5,
+          "unit_price": 1869.77,
+          "quantity": 7,
+          "discount": 1756.24
+        }
+      ],
+      "orders": [
+        {
+          "order_id": 1,
+          "customer_id": 1,
+          "employee_id": 1,
+          "order_date": "2023-10-29",
+          "required_date": "2023-06-23",
+          "shipped_date": "2023-03-02",
+          "ship_via": 1,
+          "freight": 562.2,
+          "ship_name": "Standard Delivery",
+          "ship_address": "10 Main Street",
+          "ship_city": "Tokyo",
+          "ship_region": "Region 1",
+          "ship_postal_code": "10001",
+          "ship_country": "USA"
+        },
+        {
+          "order_id": 2,
+          "customer_id": 2,
+          "employee_id": 2,
+          "order_date": "2023-03-02",
+          "required_date": "2023-10-02",
+          "shipped_date": "2022-07-09",
+          "ship_via": 2,
+          "freight": 824.03,
+          "ship_name": "Overnight Courier",
+          "ship_address": "20 Main Street",
+          "ship_city": "Sydney",
+          "ship_region": "Region 2",
+          "ship_postal_code": "10002",
+          "ship_country": "India"
+        },
+        {
+          "order_id": 3,
+          "customer_id": 3,
+          "employee_id": 3,
+          "order_date": "2024-09-13",
+          "required_date": "2024-04-16",
+          "shipped_date": "2023-11-18",
+          "ship_via": 3,
+          "freight": 668.55,
+          "ship_name": "Express Shipping",
+          "ship_address": "30 Main Street",
+          "ship_city": "New York",
+          "ship_region": "Region 3",
+          "ship_postal_code": "10003",
+          "ship_country": "Australia"
+        },
+        {
+          "order_id": 4,
+          "customer_id": 4,
+          "employee_id": 4,
+          "order_date": "2024-02-18",
+          "required_date": "2024-12-14",
+          "shipped_date": "2023-08-01",
+          "ship_via": 4,
+          "freight": 164.82,
+          "ship_name": "Express Shipping",
+          "ship_address": "40 Main Street",
+          "ship_city": "Berlin",
+          "ship_region": "Region 4",
+          "ship_postal_code": "10004",
+          "ship_country": "Australia"
+        },
+        {
+          "order_id": 5,
+          "customer_id": 5,
+          "employee_id": 5,
+          "order_date": "2023-05-15",
+          "required_date": "2024-04-22",
+          "shipped_date": "2022-04-01",
+          "ship_via": 5,
+          "freight": 72.79,
+          "ship_name": "Overnight Courier",
+          "ship_address": "50 Main Street",
+          "ship_city": "London",
+          "ship_region": "Region 5",
+          "ship_postal_code": "10005",
+          "ship_country": "USA"
+        }
+      ],
+      "products": [
+        {
+          "product_id": 1,
+          "product_name": "Laptop Pro",
+          "supplier_id": 1,
+          "category_id": 1,
+          "quantity_per_unit": 64,
+          "unit_price": 3414.75,
+          "units_in_stock": 23,
+          "units_on_order": 80,
+          "reorder_level": 10,
+          "discontinued": 1
+        },
+        {
+          "product_id": 2,
+          "product_name": "Wireless Mouse",
+          "supplier_id": 2,
+          "category_id": 2,
+          "quantity_per_unit": 76,
+          "unit_price": 2460.87,
+          "units_in_stock": 32,
+          "units_on_order": 100,
+          "reorder_level": 76,
+          "discontinued": 2
+        },
+        {
+          "product_id": 3,
+          "product_name": "USB Hub",
+          "supplier_id": 3,
+          "category_id": 3,
+          "quantity_per_unit": 98,
+          "unit_price": 4555.99,
+          "units_in_stock": 21,
+          "units_on_order": 3,
+          "reorder_level": 70,
+          "discontinued": 3
+        },
+        {
+          "product_id": 4,
+          "product_name": "Monitor 4K",
+          "supplier_id": 4,
+          "category_id": 4,
+          "quantity_per_unit": 94,
+          "unit_price": 1704.19,
+          "units_in_stock": 38,
+          "units_on_order": 4,
+          "reorder_level": 17,
+          "discontinued": 4
+        },
+        {
+          "product_id": 5,
+          "product_name": "Keyboard",
+          "supplier_id": 5,
+          "category_id": 5,
+          "quantity_per_unit": 51,
+          "unit_price": 445.83,
+          "units_in_stock": 4,
+          "units_on_order": 84,
+          "reorder_level": 85,
+          "discontinued": 5
+        }
+      ],
+      "region": [
+        {
+          "region_id": 1,
+          "region_description": "Region 1"
+        },
+        {
+          "region_id": 2,
+          "region_description": "Region 2"
+        },
+        {
+          "region_id": 3,
+          "region_description": "Region 3"
+        },
+        {
+          "region_id": 4,
+          "region_description": "Region 4"
+        },
+        {
+          "region_id": 5,
+          "region_description": "Region 5"
+        }
+      ],
+      "shippers": [
+        {
+          "shipper_id": 1,
+          "company_name": "DataSystems",
+          "phone": "+1-555-1001"
+        },
+        {
+          "shipper_id": 2,
+          "company_name": "GlobalTrade",
+          "phone": "+1-555-1002"
+        },
+        {
+          "shipper_id": 3,
+          "company_name": "TechCorp",
+          "phone": "+1-555-1003"
+        },
+        {
+          "shipper_id": 4,
+          "company_name": "TechCorp",
+          "phone": "+1-555-1004"
+        },
+        {
+          "shipper_id": 5,
+          "company_name": "TechCorp",
+          "phone": "+1-555-1005"
+        }
+      ],
+      "suppliers": [
+        {
+          "supplier_id": 1,
+          "company_name": "DataSystems",
+          "contact_name": "Emma Jones",
+          "contact_title": "Dr.",
+          "address": "10 Main Street",
+          "city": "Sydney",
+          "region": "Region 1",
+          "postal_code": "10001",
+          "country": "France",
+          "phone": "+1-555-1001",
+          "fax": "+1-555-2001",
+          "homepage": "https://www.company1.com"
+        },
+        {
+          "supplier_id": 2,
+          "company_name": "TechCorp",
+          "contact_name": "Emma Johnson",
+          "contact_title": "Ms.",
+          "address": "20 Main Street",
+          "city": "London",
+          "region": "Region 2",
+          "postal_code": "10002",
+          "country": "Germany",
+          "phone": "+1-555-1002",
+          "fax": "+1-555-2002",
+          "homepage": "https://www.company2.com"
+        },
+        {
+          "supplier_id": 3,
+          "company_name": "Acme Corp",
+          "contact_name": "Henry Williams",
+          "contact_title": "Mr.",
+          "address": "30 Main Street",
+          "city": "Singapore",
+          "region": "Region 3",
+          "postal_code": "10003",
+          "country": "France",
+          "phone": "+1-555-1003",
+          "fax": "+1-555-2003",
+          "homepage": "https://www.company3.com"
+        },
+        {
+          "supplier_id": 4,
+          "company_name": "GlobalTrade",
+          "contact_name": "Grace Williams",
+          "contact_title": "Ms.",
+          "address": "40 Main Street",
+          "city": "Dubai",
+          "region": "Region 4",
+          "postal_code": "10004",
+          "country": "France",
+          "phone": "+1-555-1004",
+          "fax": "+1-555-2004",
+          "homepage": "https://www.company4.com"
+        },
+        {
+          "supplier_id": 5,
+          "company_name": "DataSystems",
+          "contact_name": "Henry Garcia",
+          "contact_title": "Dr.",
+          "address": "50 Main Street",
+          "city": "Berlin",
+          "region": "Region 5",
+          "postal_code": "10005",
+          "country": "France",
+          "phone": "+1-555-1005",
+          "fax": "+1-555-2005",
+          "homepage": "https://www.company5.com"
+        }
+      ],
+      "territories": [
+        {
+          "territory_id": 1,
+          "territory_description": "North America",
+          "region_id": 1
+        },
+        {
+          "territory_id": 2,
+          "territory_description": "Asia Pacific",
+          "region_id": 2
+        },
+        {
+          "territory_id": 3,
+          "territory_description": "North America",
+          "region_id": 3
+        },
+        {
+          "territory_id": 4,
+          "territory_description": "Asia Pacific",
+          "region_id": 4
+        },
+        {
+          "territory_id": 5,
+          "territory_description": "Asia Pacific",
+          "region_id": 5
+        }
+      ],
+      "us_states": [
+        {
+          "state_id": 1,
+          "state_name": "Region 1",
+          "state_abbr": "Region 1",
+          "state_region": "Region 1"
+        },
+        {
+          "state_id": 2,
+          "state_name": "Region 2",
+          "state_abbr": "Region 2",
+          "state_region": "Region 2"
+        },
+        {
+          "state_id": 3,
+          "state_name": "Region 3",
+          "state_abbr": "Region 3",
+          "state_region": "Region 3"
+        },
+        {
+          "state_id": 4,
+          "state_name": "Region 4",
+          "state_abbr": "Region 4",
+          "state_region": "Region 4"
+        },
+        {
+          "state_id": 5,
+          "state_name": "Region 5",
+          "state_abbr": "Region 5",
+          "state_region": "Region 5"
+        }
+      ]
+    },
+    "difficulty_levels": [
+      "easy",
+      "medium",
+      "hard"
+    ],
+    "sql_categories": [
+      "select",
+      "join",
+      "aggregation",
+      "subquery",
+      "window",
+      "cte"
+    ],
+    "metadata": {
+      "table_count": 14,
+      "total_columns": 92,
+      "has_foreign_keys": false,
+      "has_numeric_columns": true,
+      "has_date_columns": true
+    }
+  },
+  {
+    "schema_id": "classic_entertainment_actor",
+    "name": "Classic - Entertainment",
+    "domain": "entertainment",
+    "description": "DVD rental store with films, actors, customers, rentals, inventory",
+    "source": "classic_database",
+    "tables": {
+      "actor": {
+        "columns": [
+          {
+            "name": "actor_id",
+            "type": "INTEGER",
+            "constraints": "NOT NULL"
+          },
+          {
+            "name": "first_name",
+            "type": "VARCHAR(45)",
+            "constraints": "NOT NULL"
+          },
+          {
+            "name": "last_name",
+            "type": "VARCHAR(45)",
+            "constraints": "NOT NULL"
+          },
+          {
+            "name": "last_update",
+            "type": "TIMESTAMP",
+            "constraints": "NOT NULL"
+          }
+        ]
+      },
+      "country": {
+        "columns": [
+          {
+            "name": "country_id",
+            "type": "INTEGER",
+            "constraints": "NOT NULL"
+          },
+          {
+            "name": "country",
+            "type": "VARCHAR(50)",
+            "constraints": "NOT NULL"
+          },
+          {
+            "name": "last_update",
+            "type": "TIMESTAMP",
+            "constraints": ""
+          }
+        ]
+      },
+      "city": {
+        "columns": [
+          {
+            "name": "city_id",
+            "type": "INTEGER",
+            "constraints": "NOT NULL"
+          },
+          {
+            "name": "city",
+            "type": "VARCHAR(50)",
+            "constraints": "NOT NULL"
+          },
+          {
+            "name": "country_id",
+            "type": "INT",
+            "constraints": "NOT NULL"
+          },
+          {
+            "name": "last_update",
+            "type": "TIMESTAMP",
+            "constraints": "NOT NULL"
+          }
+        ]
+      },
+      "address": {
+        "columns": [
+          {
+            "name": "address_id",
+            "type": "INTEGER",
+            "constraints": "NOT NULL"
+          },
+          {
+            "name": "address",
+            "type": "VARCHAR(50)",
+            "constraints": "NOT NULL"
+          },
+          {
+            "name": "address2",
+            "type": "VARCHAR(50)",
+            "constraints": ""
+          },
+          {
+            "name": "district",
+            "type": "VARCHAR(20)",
+            "constraints": "NOT NULL"
+          },
+          {
+            "name": "city_id",
+            "type": "INT",
+            "constraints": "NOT NULL"
+          },
+          {
+            "name": "postal_code",
+            "type": "VARCHAR(10)",
+            "constraints": ""
+          },
+          {
+            "name": "phone",
+            "type": "VARCHAR(20)",
+            "constraints": "NOT NULL"
+          },
+          {
+            "name": "last_update",
+            "type": "TIMESTAMP",
+            "constraints": "NOT NULL"
+          }
+        ]
+      },
+      "language": {
+        "columns": [
+          {
+            "name": "language_id",
+            "type": "INTEGER",
+            "constraints": "NOT NULL"
+          },
+          {
+            "name": "name",
+            "type": "CHAR(20)",
+            "constraints": "NOT NULL"
+          },
+          {
+            "name": "last_update",
+            "type": "TIMESTAMP",
+            "constraints": "NOT NULL"
+          }
+        ]
+      },
+      "category": {
+        "columns": [
+          {
+            "name": "category_id",
+            "type": "INTEGER",
+            "constraints": "NOT NULL"
+          },
+          {
+            "name": "name",
+            "type": "VARCHAR(25)",
+            "constraints": "NOT NULL"
+          },
+          {
+            "name": "last_update",
+            "type": "TIMESTAMP",
+            "constraints": "NOT NULL"
+          }
+        ]
+      },
+      "customer": {
+        "columns": [
+          {
+            "name": "customer_id",
+            "type": "INTEGER",
+            "constraints": "NOT NULL"
+          },
+          {
+            "name": "store_id",
+            "type": "INT",
+            "constraints": "NOT NULL"
+          },
+          {
+            "name": "first_name",
+            "type": "VARCHAR(45)",
+            "constraints": "NOT NULL"
+          },
+          {
+            "name": "last_name",
+            "type": "VARCHAR(45)",
+            "constraints": "NOT NULL"
+          },
+          {
+            "name": "email",
+            "type": "VARCHAR(50)",
+            "constraints": ""
+          },
+          {
+            "name": "address_id",
+            "type": "INT",
+            "constraints": "NOT NULL"
+          },
+          {
+            "name": "active",
+            "type": "CHAR(1)",
+            "constraints": "NOT NULL"
+          },
+          {
+            "name": "create_date",
+            "type": "TIMESTAMP",
+            "constraints": "NOT NULL"
+          },
+          {
+            "name": "last_update",
+            "type": "TIMESTAMP",
+            "constraints": "NOT NULL"
+          }
+        ]
+      },
+      "film": {
+        "columns": [
+          {
+            "name": "film_id",
+            "type": "INTEGER",
+            "constraints": "NOT NULL"
+          },
+          {
+            "name": "title",
+            "type": "VARCHAR(255)",
+            "constraints": "NOT NULL"
+          },
+          {
+            "name": "description",
+            "type": "BLOB",
+            "constraints": ""
+          },
+          {
+            "name": "release_year",
+            "type": "VARCHAR(4)",
+            "constraints": ""
+          },
+          {
+            "name": "language_id",
+            "type": "INT",
+            "constraints": "NOT NULL"
+          },
+          {
+            "name": "original_language_id",
+            "type": "INT",
+            "constraints": ""
+          },
+          {
+            "name": "rental_duration",
+            "type": "SMALLINT",
+            "constraints": "NOT NULL"
+          },
+          {
+            "name": "rental_rate",
+            "type": "DECIMAL(4,2)",
+            "constraints": "NOT NULL"
+          },
+          {
+            "name": "length",
+            "type": "SMALLINT",
+            "constraints": ""
+          },
+          {
+            "name": "replacement_cost",
+            "type": "DECIMAL(5,2)",
+            "constraints": "NOT NULL"
+          },
+          {
+            "name": "rating",
+            "type": "VARCHAR(10)",
+            "constraints": ""
+          },
+          {
+            "name": "special_features",
+            "type": "VARCHAR(100)",
+            "constraints": ""
+          },
+          {
+            "name": "last_update",
+            "type": "TIMESTAMP",
+            "constraints": "NOT NULL"
+          }
+        ]
+      },
+      "film_actor": {
+        "columns": [
+          {
+            "name": "actor_id",
+            "type": "INT",
+            "constraints": "NOT NULL"
+          },
+          {
+            "name": "film_id",
+            "type": "INT",
+            "constraints": "NOT NULL"
+          },
+          {
+            "name": "last_update",
+            "type": "TIMESTAMP",
+            "constraints": "NOT NULL"
+          }
+        ]
+      },
+      "film_category": {
+        "columns": [
+          {
+            "name": "film_id",
+            "type": "INT",
+            "constraints": "NOT NULL"
+          },
+          {
+            "name": "category_id",
+            "type": "INT",
+            "constraints": "NOT NULL"
+          },
+          {
+            "name": "last_update",
+            "type": "TIMESTAMP",
+            "constraints": "NOT NULL"
+          }
+        ]
+      },
+      "film_text": {
+        "columns": [
+          {
+            "name": "film_id",
+            "type": "INTEGER",
+            "constraints": "NOT NULL"
+          },
+          {
+            "name": "title",
+            "type": "VARCHAR(255)",
+            "constraints": "NOT NULL"
+          },
+          {
+            "name": "description",
+            "type": "BLOB",
+            "constraints": ""
+          }
+        ]
+      },
+      "inventory": {
+        "columns": [
+          {
+            "name": "inventory_id",
+            "type": "INTEGER",
+            "constraints": "NOT NULL"
+          },
+          {
+            "name": "film_id",
+            "type": "INT",
+            "constraints": "NOT NULL"
+          },
+          {
+            "name": "store_id",
+            "type": "INT",
+            "constraints": "NOT NULL"
+          },
+          {
+            "name": "last_update",
+            "type": "TIMESTAMP",
+            "constraints": "NOT NULL"
+          }
+        ]
+      },
+      "staff": {
+        "columns": [
+          {
+            "name": "staff_id",
+            "type": "INTEGER",
+            "constraints": "NOT NULL"
+          },
+          {
+            "name": "first_name",
+            "type": "VARCHAR(45)",
+            "constraints": "NOT NULL"
+          },
+          {
+            "name": "last_name",
+            "type": "VARCHAR(45)",
+            "constraints": "NOT NULL"
+          },
+          {
+            "name": "address_id",
+            "type": "INT",
+            "constraints": "NOT NULL"
+          },
+          {
+            "name": "picture",
+            "type": "BLOB",
+            "constraints": ""
+          },
+          {
+            "name": "email",
+            "type": "VARCHAR(50)",
+            "constraints": ""
+          },
+          {
+            "name": "store_id",
+            "type": "INT",
+            "constraints": "NOT NULL"
+          },
+          {
+            "name": "active",
+            "type": "SMALLINT",
+            "constraints": "NOT NULL"
+          },
+          {
+            "name": "username",
+            "type": "VARCHAR(16)",
+            "constraints": "NOT NULL"
+          },
+          {
+            "name": "password",
+            "type": "VARCHAR(40)",
+            "constraints": ""
+          },
+          {
+            "name": "last_update",
+            "type": "TIMESTAMP",
+            "constraints": "NOT NULL"
+          }
+        ]
+      },
+      "store": {
+        "columns": [
+          {
+            "name": "store_id",
+            "type": "INTEGER",
+            "constraints": "NOT NULL"
+          },
+          {
+            "name": "manager_staff_id",
+            "type": "INT",
+            "constraints": "NOT NULL"
+          },
+          {
+            "name": "address_id",
+            "type": "INT",
+            "constraints": "NOT NULL"
+          },
+          {
+            "name": "last_update",
+            "type": "TIMESTAMP",
+            "constraints": "NOT NULL"
+          }
+        ]
+      },
+      "payment": {
+        "columns": [
+          {
+            "name": "payment_id",
+            "type": "INTEGER",
+            "constraints": "NOT NULL"
+          },
+          {
+            "name": "customer_id",
+            "type": "INT",
+            "constraints": "NOT NULL"
+          },
+          {
+            "name": "staff_id",
+            "type": "INT",
+            "constraints": "NOT NULL"
+          },
+          {
+            "name": "rental_id",
+            "type": "INT",
+            "constraints": ""
+          },
+          {
+            "name": "amount",
+            "type": "DECIMAL(5,2)",
+            "constraints": "NOT NULL"
+          },
+          {
+            "name": "payment_date",
+            "type": "TIMESTAMP",
+            "constraints": "NOT NULL"
+          },
+          {
+            "name": "last_update",
+            "type": "TIMESTAMP",
+            "constraints": "NOT NULL"
+          }
+        ]
+      },
+      "rental": {
+        "columns": [
+          {
+            "name": "rental_id",
+            "type": "INTEGER",
+            "constraints": "NOT NULL"
+          },
+          {
+            "name": "rental_date",
+            "type": "TIMESTAMP",
+            "constraints": "NOT NULL"
+          },
+          {
+            "name": "inventory_id",
+            "type": "INT",
+            "constraints": "NOT NULL"
+          },
+          {
+            "name": "customer_id",
+            "type": "INT",
+            "constraints": "NOT NULL"
+          },
+          {
+            "name": "return_date",
+            "type": "TIMESTAMP",
+            "constraints": ""
+          },
+          {
+            "name": "staff_id",
+            "type": "INT",
+            "constraints": "NOT NULL"
+          },
+          {
+            "name": "last_update",
+            "type": "TIMESTAMP",
+            "constraints": "NOT NULL"
+          }
+        ]
+      }
+    },
+    "relationships": [
+      {
+        "from_column": "country_id",
+        "to_table": "country",
+        "to_column": "country_id",
+        "relationship_type": "many-to-one"
+      },
+      {
+        "from_column": "city_id",
+        "to_table": "city",
+        "to_column": "city_id",
+        "relationship_type": "many-to-one"
+      },
+      {
+        "from_column": "store_id",
+        "to_table": "store",
+        "to_column": "store_id",
+        "relationship_type": "many-to-one"
+      },
+      {
+        "from_column": "address_id",
+        "to_table": "address",
+        "to_column": "address_id",
+        "relationship_type": "many-to-one"
+      },
+      {
+        "from_column": "language_id",
+        "to_table": "language",
+        "to_column": "language_id",
+        "relationship_type": "many-to-one"
+      },
+      {
+        "from_column": "original_language_id",
+        "to_table": "language",
+        "to_column": "language_id",
+        "relationship_type": "many-to-one"
+      },
+      {
+        "from_column": "actor_id",
+        "to_table": "actor",
+        "to_column": "actor_id",
+        "relationship_type": "many-to-one"
+      },
+      {
+        "from_column": "film_id",
+        "to_table": "film",
+        "to_column": "film_id",
+        "relationship_type": "many-to-one"
+      },
+      {
+        "from_column": "film_id",
+        "to_table": "film",
+        "to_column": "film_id",
+        "relationship_type": "many-to-one"
+      },
+      {
+        "from_column": "category_id",
+        "to_table": "category",
+        "to_column": "category_id",
+        "relationship_type": "many-to-one"
+      },
+      {
+        "from_column": "store_id",
+        "to_table": "store",
+        "to_column": "store_id",
+        "relationship_type": "many-to-one"
+      },
+      {
+        "from_column": "film_id",
+        "to_table": "film",
+        "to_column": "film_id",
+        "relationship_type": "many-to-one"
+      },
+      {
+        "from_column": "store_id",
+        "to_table": "store",
+        "to_column": "store_id",
+        "relationship_type": "many-to-one"
+      },
+      {
+        "from_column": "address_id",
+        "to_table": "address",
+        "to_column": "address_id",
+        "relationship_type": "many-to-one"
+      },
+      {
+        "from_column": "manager_staff_id",
+        "to_table": "staff",
+        "to_column": "staff_id",
+        "relationship_type": "many-to-one"
+      },
+      {
+        "from_column": "address_id",
+        "to_table": "address",
+        "to_column": "address_id",
+        "relationship_type": "many-to-one"
+      },
+      {
+        "from_column": "rental_id",
+        "to_table": "rental",
+        "to_column": "rental_id",
+        "relationship_type": "many-to-one"
+      },
+      {
+        "from_column": "customer_id",
+        "to_table": "customer",
+        "to_column": "customer_id",
+        "relationship_type": "many-to-one"
+      },
+      {
+        "from_column": "staff_id",
+        "to_table": "staff",
+        "to_column": "staff_id",
+        "relationship_type": "many-to-one"
+      },
+      {
+        "from_column": "staff_id",
+        "to_table": "staff",
+        "to_column": "staff_id",
+        "relationship_type": "many-to-one"
+      },
+      {
+        "from_column": "inventory_id",
+        "to_table": "inventory",
+        "to_column": "inventory_id",
+        "relationship_type": "many-to-one"
+      },
+      {
+        "from_column": "customer_id",
+        "to_table": "customer",
+        "to_column": "customer_id",
+        "relationship_type": "many-to-one"
+      }
+    ],
+    "sample_data": {
+      "actor": [
+        {
+          "actor_id": 1,
+          "first_name": "David",
+          "last_name": "Miller",
+          "last_update": "2024-08-16"
+        },
+        {
+          "actor_id": 2,
+          "first_name": "Iris",
+          "last_name": "Jones",
+          "last_update": "2022-05-21"
+        },
+        {
+          "actor_id": 3,
+          "first_name": "Iris",
+          "last_name": "Jones",
+          "last_update": "2022-11-05"
+        },
+        {
+          "actor_id": 4,
+          "first_name": "Iris",
+          "last_name": "Johnson",
+          "last_update": "2023-05-18"
+        },
+        {
+          "actor_id": 5,
+          "first_name": "David",
+          "last_name": "Brown",
+          "last_update": "2023-08-10"
+        }
+      ],
+      "country": [
+        {
+          "country_id": 1,
+          "country": "USA",
+          "last_update": "2023-04-18"
+        },
+        {
+          "country_id": 2,
+          "country": "Canada",
+          "last_update": "2022-07-23"
+        },
+        {
+          "country_id": 3,
+          "country": "India",
+          "last_update": "2024-01-04"
+        },
+        {
+          "country_id": 4,
+          "country": "France",
+          "last_update": "2024-01-01"
+        },
+        {
+          "country_id": 5,
+          "country": "Canada",
+          "last_update": "2024-12-28"
+        }
+      ],
+      "city": [
+        {
+          "city_id": 1,
+          "city": "Berlin",
+          "country_id": 1,
+          "last_update": "2023-02-16"
+        },
+        {
+          "city_id": 2,
+          "city": "London",
+          "country_id": 2,
+          "last_update": "2024-12-02"
+        },
+        {
+          "city_id": 3,
+          "city": "Berlin",
+          "country_id": 3,
+          "last_update": "2023-03-02"
+        },
+        {
+          "city_id": 4,
+          "city": "Sydney",
+          "country_id": 4,
+          "last_update": "2023-07-24"
+        },
+        {
+          "city_id": 5,
+          "city": "Tokyo",
+          "country_id": 5,
+          "last_update": "2022-12-28"
+        }
+      ],
+      "address": [
+        {
+          "address_id": 1,
+          "address": "10 Main Street",
+          "address2": "10 Main Street",
+          "district": "Addre 1",
+          "city_id": 1,
+          "postal_code": "10001",
+          "phone": "+1-555-1001",
+          "last_update": "2023-10-25"
+        },
+        {
+          "address_id": 2,
+          "address": "20 Main Street",
+          "address2": "20 Main Street",
+          "district": "Addre 2",
+          "city_id": 2,
+          "postal_code": "10002",
+          "phone": "+1-555-1002",
+          "last_update": "2024-09-02"
+        },
+        {
+          "address_id": 3,
+          "address": "30 Main Street",
+          "address2": "30 Main Street",
+          "district": "Addre 3",
+          "city_id": 3,
+          "postal_code": "10003",
+          "phone": "+1-555-1003",
+          "last_update": "2024-04-08"
+        },
+        {
+          "address_id": 4,
+          "address": "40 Main Street",
+          "address2": "40 Main Street",
+          "district": "Addre 4",
+          "city_id": 4,
+          "postal_code": "10004",
+          "phone": "+1-555-1004",
+          "last_update": "2022-12-13"
+        },
+        {
+          "address_id": 5,
+          "address": "50 Main Street",
+          "address2": "50 Main Street",
+          "district": "Addre 5",
+          "city_id": 5,
+          "postal_code": "10005",
+          "phone": "+1-555-1005",
+          "last_update": "2024-12-25"
+        }
+      ],
+      "language": [
+        {
+          "language_id": 1,
+          "name": "Language 1",
+          "last_update": "2024-08-07"
+        },
+        {
+          "language_id": 2,
+          "name": "Language 2",
+          "last_update": "2023-06-10"
+        },
+        {
+          "language_id": 3,
+          "name": "Language 3",
+          "last_update": "2024-12-06"
+        },
+        {
+          "language_id": 4,
+          "name": "Language 4",
+          "last_update": "2022-09-17"
+        },
+        {
+          "language_id": 5,
+          "name": "Language 5",
+          "last_update": "2024-07-08"
+        }
+      ],
+      "category": [
+        {
+          "category_id": 1,
+          "name": "Electronics",
+          "last_update": "2023-07-05"
+        },
+        {
+          "category_id": 2,
+          "name": "Clothing",
+          "last_update": "2023-12-12"
+        },
+        {
+          "category_id": 3,
+          "name": "Food",
+          "last_update": "2023-04-02"
+        },
+        {
+          "category_id": 4,
+          "name": "Books",
+          "last_update": "2023-10-06"
+        },
+        {
+          "category_id": 5,
+          "name": "Sports",
+          "last_update": "2022-06-12"
+        }
+      ],
+      "customer": [
+        {
+          "customer_id": 1,
+          "store_id": 1,
+          "first_name": "Frank",
+          "last_name": "Johnson",
+          "email": "user1@example.com",
+          "address_id": 1,
+          "active": 0,
+          "create_date": "2023-07-08",
+          "last_update": "2023-01-29"
+        },
+        {
+          "customer_id": 2,
+          "store_id": 2,
+          "first_name": "Iris",
+          "last_name": "Miller",
+          "email": "user2@example.com",
+          "address_id": 2,
+          "active": 1,
+          "create_date": "2024-10-30",
+          "last_update": "2024-07-02"
+        },
+        {
+          "customer_id": 3,
+          "store_id": 3,
+          "first_name": "Emma",
+          "last_name": "Davis",
+          "email": "user3@example.com",
+          "address_id": 3,
+          "active": 1,
+          "create_date": "2023-11-22",
+          "last_update": "2023-12-27"
+        },
+        {
+          "customer_id": 4,
+          "store_id": 4,
+          "first_name": "Alice",
+          "last_name": "Jones",
+          "email": "user4@example.com",
+          "address_id": 4,
+          "active": 1,
+          "create_date": "2024-02-15",
+          "last_update": "2022-10-11"
+        },
+        {
+          "customer_id": 5,
+          "store_id": 5,
+          "first_name": "David",
+          "last_name": "Moore",
+          "email": "user5@example.com",
+          "address_id": 5,
+          "active": 1,
+          "create_date": "2023-04-29",
+          "last_update": "2022-11-28"
+        }
+      ],
+      "film": [
+        {
+          "film_id": 1,
+          "title": "Film 1",
+          "description": "Description for film 1",
+          "release_year": "Film 1",
+          "language_id": 1,
+          "original_language_id": 1,
+          "rental_duration": 11,
+          "rental_rate": 994.53,
+          "length": 1,
+          "replacement_cost": 1252.75,
+          "rating": 1.1,
+          "special_features": "Trailers",
+          "last_update": "2024-04-06"
+        },
+        {
+          "film_id": 2,
+          "title": "Film 2",
+          "description": "Description for film 2",
+          "release_year": "Film 2",
+          "language_id": 2,
+          "original_language_id": 2,
+          "rental_duration": 33,
+          "rental_rate": 572.07,
+          "length": 2,
+          "replacement_cost": 4697.0,
+          "rating": 3.8,
+          "special_features": "Commentaries",
+          "last_update": "2024-02-15"
+        },
+        {
+          "film_id": 3,
+          "title": "Film 3",
+          "description": "Description for film 3",
+          "release_year": "Film 3",
+          "language_id": 3,
+          "original_language_id": 3,
+          "rental_duration": 78,
+          "rental_rate": 168.5,
+          "length": 3,
+          "replacement_cost": 4243.54,
+          "rating": 3.0,
+          "special_features": "Commentaries",
+          "last_update": "2023-10-07"
+        },
+        {
+          "film_id": 4,
+          "title": "Film 4",
+          "description": "Description for film 4",
+          "release_year": "Film 4",
+          "language_id": 4,
+          "original_language_id": 4,
+          "rental_duration": 46,
+          "rental_rate": 684.08,
+          "length": 4,
+          "replacement_cost": 3604.67,
+          "rating": 2.6,
+          "special_features": "Behind the Scenes",
+          "last_update": "2023-02-05"
+        },
+        {
+          "film_id": 5,
+          "title": "Film 5",
+          "description": "Description for film 5",
+          "release_year": "Film 5",
+          "language_id": 5,
+          "original_language_id": 5,
+          "rental_duration": 35,
+          "rental_rate": 453.53,
+          "length": 5,
+          "replacement_cost": 1307.8,
+          "rating": 1.5,
+          "special_features": "None",
+          "last_update": "2024-10-15"
+        }
+      ],
+      "film_actor": [
+        {
+          "actor_id": 1,
+          "film_id": 1,
+          "last_update": "2024-09-27"
+        },
+        {
+          "actor_id": 2,
+          "film_id": 2,
+          "last_update": "2023-06-04"
+        },
+        {
+          "actor_id": 3,
+          "film_id": 3,
+          "last_update": "2022-10-13"
+        },
+        {
+          "actor_id": 4,
+          "film_id": 4,
+          "last_update": "2024-11-28"
+        },
+        {
+          "actor_id": 5,
+          "film_id": 5,
+          "last_update": "2022-09-28"
+        }
+      ],
+      "film_category": [
+        {
+          "film_id": 1,
+          "category_id": 1,
+          "last_update": "2023-12-11"
+        },
+        {
+          "film_id": 2,
+          "category_id": 2,
+          "last_update": "2024-10-12"
+        },
+        {
+          "film_id": 3,
+          "category_id": 3,
+          "last_update": "2024-05-26"
+        },
+        {
+          "film_id": 4,
+          "category_id": 4,
+          "last_update": "2024-07-20"
+        },
+        {
+          "film_id": 5,
+          "category_id": 5,
+          "last_update": "2023-08-22"
+        }
+      ],
+      "film_text": [
+        {
+          "film_id": 1,
+          "title": "Film_Text 1",
+          "description": "Description for film_text 1"
+        },
+        {
+          "film_id": 2,
+          "title": "Film_Text 2",
+          "description": "Description for film_text 2"
+        },
+        {
+          "film_id": 3,
+          "title": "Film_Text 3",
+          "description": "Description for film_text 3"
+        },
+        {
+          "film_id": 4,
+          "title": "Film_Text 4",
+          "description": "Description for film_text 4"
+        },
+        {
+          "film_id": 5,
+          "title": "Film_Text 5",
+          "description": "Description for film_text 5"
+        }
+      ],
+      "inventory": [
+        {
+          "inventory_id": 1,
+          "film_id": 1,
+          "store_id": 1,
+          "last_update": "2022-01-24"
+        },
+        {
+          "inventory_id": 2,
+          "film_id": 2,
+          "store_id": 2,
+          "last_update": "2022-03-27"
+        },
+        {
+          "inventory_id": 3,
+          "film_id": 3,
+          "store_id": 3,
+          "last_update": "2024-05-19"
+        },
+        {
+          "inventory_id": 4,
+          "film_id": 4,
+          "store_id": 4,
+          "last_update": "2023-11-17"
+        },
+        {
+          "inventory_id": 5,
+          "film_id": 5,
+          "store_id": 5,
+          "last_update": "2024-01-05"
+        }
+      ],
+      "staff": [
+        {
+          "staff_id": 1,
+          "first_name": "Grace",
+          "last_name": "Jones",
+          "address_id": 1,
+          "picture": "/images/staff_1.png",
+          "email": "user1@example.com",
+          "store_id": 1,
+          "active": 1,
+          "username": "henry1",
+          "password": "Staff 1",
+          "last_update": "2024-01-03"
+        },
+        {
+          "staff_id": 2,
+          "first_name": "Grace",
+          "last_name": "Williams",
+          "address_id": 2,
+          "picture": "/images/staff_2.png",
+          "email": "user2@example.com",
+          "store_id": 2,
+          "active": 0,
+          "username": "david2",
+          "password": "Staff 2",
+          "last_update": "2024-12-10"
+        },
+        {
+          "staff_id": 3,
+          "first_name": "Grace",
+          "last_name": "Garcia",
+          "address_id": 3,
+          "picture": "/images/staff_3.png",
+          "email": "user3@example.com",
+          "store_id": 3,
+          "active": 1,
+          "username": "alice3",
+          "password": "Staff 3",
+          "last_update": "2024-04-18"
+        },
+        {
+          "staff_id": 4,
+          "first_name": "Emma",
+          "last_name": "Johnson",
+          "address_id": 4,
+          "picture": "/images/staff_4.png",
+          "email": "user4@example.com",
+          "store_id": 4,
+          "active": 1,
+          "username": "carol4",
+          "password": "Staff 4",
+          "last_update": "2022-05-24"
+        },
+        {
+          "staff_id": 5,
+          "first_name": "Frank",
+          "last_name": "Garcia",
+          "address_id": 5,
+          "picture": "/images/staff_5.png",
+          "email": "user5@example.com",
+          "store_id": 5,
+          "active": 1,
+          "username": "iris5",
+          "password": "Staff 5",
+          "last_update": "2022-09-19"
+        }
+      ],
+      "store": [
+        {
+          "store_id": 1,
+          "manager_staff_id": 1,
+          "address_id": 1,
+          "last_update": "2024-11-23"
+        },
+        {
+          "store_id": 2,
+          "manager_staff_id": 2,
+          "address_id": 2,
+          "last_update": "2022-09-01"
+        },
+        {
+          "store_id": 3,
+          "manager_staff_id": 3,
+          "address_id": 3,
+          "last_update": "2022-08-27"
+        },
+        {
+          "store_id": 4,
+          "manager_staff_id": 4,
+          "address_id": 4,
+          "last_update": "2022-08-20"
+        },
+        {
+          "store_id": 5,
+          "manager_staff_id": 5,
+          "address_id": 5,
+          "last_update": "2024-06-06"
+        }
+      ],
+      "payment": [
+        {
+          "payment_id": 1,
+          "customer_id": 1,
+          "staff_id": 1,
+          "rental_id": 1,
+          "amount": 3326.93,
+          "payment_date": "2022-05-30",
+          "last_update": "2024-02-04"
+        },
+        {
+          "payment_id": 2,
+          "customer_id": 2,
+          "staff_id": 2,
+          "rental_id": 2,
+          "amount": 2967.09,
+          "payment_date": "2022-04-16",
+          "last_update": "2022-08-12"
+        },
+        {
+          "payment_id": 3,
+          "customer_id": 3,
+          "staff_id": 3,
+          "rental_id": 3,
+          "amount": 4819.21,
+          "payment_date": "2022-02-11",
+          "last_update": "2024-11-15"
+        },
+        {
+          "payment_id": 4,
+          "customer_id": 4,
+          "staff_id": 4,
+          "rental_id": 4,
+          "amount": 2400.31,
+          "payment_date": "2023-11-14",
+          "last_update": "2022-03-30"
+        },
+        {
+          "payment_id": 5,
+          "customer_id": 5,
+          "staff_id": 5,
+          "rental_id": 5,
+          "amount": 2403.66,
+          "payment_date": "2023-04-12",
+          "last_update": "2023-07-16"
+        }
+      ],
+      "rental": [
+        {
+          "rental_id": 1,
+          "rental_date": "2023-11-06",
+          "inventory_id": 1,
+          "customer_id": 1,
+          "return_date": "2022-06-17",
+          "staff_id": 1,
+          "last_update": "2024-07-23"
+        },
+        {
+          "rental_id": 2,
+          "rental_date": "2023-07-25",
+          "inventory_id": 2,
+          "customer_id": 2,
+          "return_date": "2023-08-29",
+          "staff_id": 2,
+          "last_update": "2022-09-26"
+        },
+        {
+          "rental_id": 3,
+          "rental_date": "2022-08-31",
+          "inventory_id": 3,
+          "customer_id": 3,
+          "return_date": "2023-02-16",
+          "staff_id": 3,
+          "last_update": "2022-01-22"
+        },
+        {
+          "rental_id": 4,
+          "rental_date": "2024-07-02",
+          "inventory_id": 4,
+          "customer_id": 4,
+          "return_date": "2024-01-27",
+          "staff_id": 4,
+          "last_update": "2024-09-12"
+        },
+        {
+          "rental_id": 5,
+          "rental_date": "2022-06-05",
+          "inventory_id": 5,
+          "customer_id": 5,
+          "return_date": "2024-08-18",
+          "staff_id": 5,
+          "last_update": "2022-05-09"
+        }
+      ]
+    },
+    "difficulty_levels": [
+      "easy",
+      "medium",
+      "hard"
+    ],
+    "sql_categories": [
+      "select",
+      "join",
+      "aggregation",
+      "subquery",
+      "window",
+      "cte"
+    ],
+    "metadata": {
+      "table_count": 16,
+      "total_columns": 89,
+      "has_foreign_keys": true,
+      "has_numeric_columns": true,
+      "has_date_columns": true
+    }
+  },
+  {
+    "schema_id": "classic_hr_employees",
+    "name": "Classic - Hr",
+    "domain": "hr",
+    "description": "Employee database with departments, salaries, titles, managers",
+    "source": "classic_database",
+    "tables": {
+      "employees": {
+        "columns": [
+          {
+            "name": "emp_no",
+            "type": "INT",
+            "constraints": "NOT NULL"
+          },
+          {
+            "name": "birth_date",
+            "type": "DATE",
+            "constraints": "NOT NULL"
+          },
+          {
+            "name": "first_name",
+            "type": "VARCHAR(14)",
+            "constraints": "NOT NULL"
+          },
+          {
+            "name": "last_name",
+            "type": "VARCHAR(16)",
+            "constraints": "NOT NULL"
+          },
+          {
+            "name": "gender",
+            "type": "ENUM",
+            "constraints": "NOT NULL"
+          },
+          {
+            "name": "hire_date",
+            "type": "DATE",
+            "constraints": "NOT NULL"
+          }
+        ]
+      },
+      "departments": {
+        "columns": [
+          {
+            "name": "dept_no",
+            "type": "CHAR(4)",
+            "constraints": "NOT NULL"
+          },
+          {
+            "name": "dept_name",
+            "type": "VARCHAR(40)",
+            "constraints": "NOT NULL"
+          }
+        ]
+      },
+      "dept_manager": {
+        "columns": [
+          {
+            "name": "emp_no",
+            "type": "INT",
+            "constraints": "NOT NULL"
+          },
+          {
+            "name": "dept_no",
+            "type": "CHAR(4)",
+            "constraints": "NOT NULL"
+          },
+          {
+            "name": "from_date",
+            "type": "DATE",
+            "constraints": "NOT NULL"
+          },
+          {
+            "name": "to_date",
+            "type": "DATE",
+            "constraints": "NOT NULL"
+          }
+        ]
+      },
+      "dept_emp": {
+        "columns": [
+          {
+            "name": "emp_no",
+            "type": "INT",
+            "constraints": "NOT NULL"
+          },
+          {
+            "name": "dept_no",
+            "type": "CHAR(4)",
+            "constraints": "NOT NULL"
+          },
+          {
+            "name": "from_date",
+            "type": "DATE",
+            "constraints": "NOT NULL"
+          },
+          {
+            "name": "to_date",
+            "type": "DATE",
+            "constraints": "NOT NULL"
+          }
+        ]
+      },
+      "titles": {
+        "columns": [
+          {
+            "name": "emp_no",
+            "type": "INT",
+            "constraints": "NOT NULL"
+          },
+          {
+            "name": "title",
+            "type": "VARCHAR(50)",
+            "constraints": "NOT NULL"
+          },
+          {
+            "name": "from_date",
+            "type": "DATE",
+            "constraints": "NOT NULL"
+          },
+          {
+            "name": "to_date",
+            "type": "DATE",
+            "constraints": ""
+          }
+        ]
+      },
+      "salaries": {
+        "columns": [
+          {
+            "name": "emp_no",
+            "type": "INT",
+            "constraints": "NOT NULL"
+          },
+          {
+            "name": "salary",
+            "type": "INT",
+            "constraints": "NOT NULL"
+          },
+          {
+            "name": "from_date",
+            "type": "DATE",
+            "constraints": "NOT NULL"
+          },
+          {
+            "name": "to_date",
+            "type": "DATE",
+            "constraints": "NOT NULL"
+          }
+        ]
+      }
+    },
+    "relationships": [
+      {
+        "from_column": "emp_no",
+        "to_table": "employees",
+        "to_column": "emp_no",
+        "relationship_type": "many-to-one"
+      },
+      {
+        "from_column": "dept_no",
+        "to_table": "departments",
+        "to_column": "dept_no",
+        "relationship_type": "many-to-one"
+      },
+      {
+        "from_column": "emp_no",
+        "to_table": "employees",
+        "to_column": "emp_no",
+        "relationship_type": "many-to-one"
+      },
+      {
+        "from_column": "dept_no",
+        "to_table": "departments",
+        "to_column": "dept_no",
+        "relationship_type": "many-to-one"
+      },
+      {
+        "from_column": "emp_no",
+        "to_table": "employees",
+        "to_column": "emp_no",
+        "relationship_type": "many-to-one"
+      },
+      {
+        "from_column": "emp_no",
+        "to_table": "employees",
+        "to_column": "emp_no",
+        "relationship_type": "many-to-one"
+      }
+    ],
+    "sample_data": {
+      "employees": [
+        {
+          "emp_no": 1,
+          "birth_date": "2024-01-09",
+          "first_name": "Emma",
+          "last_name": "Williams",
+          "gender": "Male",
+          "hire_date": "2023-11-27"
+        },
+        {
+          "emp_no": 2,
+          "birth_date": "2023-06-07",
+          "first_name": "Alice",
+          "last_name": "Smith",
+          "gender": "Male",
+          "hire_date": "2022-12-10"
+        },
+        {
+          "emp_no": 3,
+          "birth_date": "2023-09-27",
+          "first_name": "Frank",
+          "last_name": "Davis",
+          "gender": "Male",
+          "hire_date": "2022-03-08"
+        },
+        {
+          "emp_no": 4,
+          "birth_date": "2024-07-22",
+          "first_name": "Henry",
+          "last_name": "Garcia",
+          "gender": "Male",
+          "hire_date": "2023-08-19"
+        },
+        {
+          "emp_no": 5,
+          "birth_date": "2023-03-25",
+          "first_name": "David",
+          "last_name": "Wilson",
+          "gender": "Male",
+          "hire_date": "2022-01-16"
+        }
+      ],
+      "departments": [
+        {
+          "dept_no": "d001",
+          "dept_name": "Finance"
+        },
+        {
+          "dept_no": "d002",
+          "dept_name": "Marketing"
+        },
+        {
+          "dept_no": "d003",
+          "dept_name": "Engineering"
+        },
+        {
+          "dept_no": "d004",
+          "dept_name": "Sales"
+        },
+        {
+          "dept_no": "d005",
+          "dept_name": "Marketing"
+        }
+      ],
+      "dept_manager": [
+        {
+          "emp_no": 1,
+          "dept_no": "d001",
+          "from_date": "2024-11-02",
+          "to_date": "2024-08-03"
+        },
+        {
+          "emp_no": 2,
+          "dept_no": "d002",
+          "from_date": "2024-11-03",
+          "to_date": "2022-03-01"
+        },
+        {
+          "emp_no": 3,
+          "dept_no": "d003",
+          "from_date": "2024-08-14",
+          "to_date": "2023-03-15"
+        },
+        {
+          "emp_no": 4,
+          "dept_no": "d004",
+          "from_date": "2023-07-10",
+          "to_date": "2024-07-13"
+        },
+        {
+          "emp_no": 5,
+          "dept_no": "d005",
+          "from_date": "2022-03-11",
+          "to_date": "2023-10-27"
+        }
+      ],
+      "dept_emp": [
+        {
+          "emp_no": 1,
+          "dept_no": "d001",
+          "from_date": "2022-08-25",
+          "to_date": "2024-09-20"
+        },
+        {
+          "emp_no": 2,
+          "dept_no": "d002",
+          "from_date": "2022-09-11",
+          "to_date": "2024-04-09"
+        },
+        {
+          "emp_no": 3,
+          "dept_no": "d003",
+          "from_date": "2024-12-18",
+          "to_date": "2024-01-12"
+        },
+        {
+          "emp_no": 4,
+          "dept_no": "d004",
+          "from_date": "2022-05-03",
+          "to_date": "2022-12-10"
+        },
+        {
+          "emp_no": 5,
+          "dept_no": "d005",
+          "from_date": "2024-10-16",
+          "to_date": "2024-03-21"
+        }
+      ],
+      "titles": [
+        {
+          "emp_no": 1,
+          "title": "Title 1",
+          "from_date": "2023-01-07",
+          "to_date": "2022-08-23"
+        },
+        {
+          "emp_no": 2,
+          "title": "Title 2",
+          "from_date": "2024-09-30",
+          "to_date": "2024-08-07"
+        },
+        {
+          "emp_no": 3,
+          "title": "Title 3",
+          "from_date": "2024-05-15",
+          "to_date": "2024-09-14"
+        },
+        {
+          "emp_no": 4,
+          "title": "Title 4",
+          "from_date": "2024-03-28",
+          "to_date": "2022-12-08"
+        },
+        {
+          "emp_no": 5,
+          "title": "Title 5",
+          "from_date": "2024-05-14",
+          "to_date": "2024-01-29"
+        }
+      ],
+      "salaries": [
+        {
+          "emp_no": 1,
+          "salary": 4440.82,
+          "from_date": "2023-01-10",
+          "to_date": "2022-10-31"
+        },
+        {
+          "emp_no": 2,
+          "salary": 3266.02,
+          "from_date": "2024-02-21",
+          "to_date": "2022-04-02"
+        },
+        {
+          "emp_no": 3,
+          "salary": 2717.76,
+          "from_date": "2024-02-06",
+          "to_date": "2022-02-28"
+        },
+        {
+          "emp_no": 4,
+          "salary": 3993.89,
+          "from_date": "2024-02-25",
+          "to_date": "2022-10-21"
+        },
+        {
+          "emp_no": 5,
+          "salary": 968.91,
+          "from_date": "2023-07-31",
+          "to_date": "2022-08-25"
+        }
+      ]
+    },
+    "difficulty_levels": [
+      "easy",
+      "medium",
+      "hard"
+    ],
+    "sql_categories": [
+      "select",
+      "join",
+      "aggregation",
+      "subquery",
+      "window",
+      "cte"
+    ],
+    "metadata": {
+      "table_count": 6,
+      "total_columns": 24,
+      "has_foreign_keys": true,
+      "has_numeric_columns": true,
+      "has_date_columns": true
+    }
+  }
+]

@@ -29,46 +29,43 @@ logger = logging.getLogger(__name__)
 
 _cache: TTLCache = TTLCache(maxsize=500, ttl=3600)
 
+def _clear_none_from_cache():
+    """Remove any None values from cache (from previous failed runs)"""
+    keys_to_delete = [k for k, v in list(_cache.items()) if v is None]
+    for k in keys_to_delete:
+        try:
+            del _cache[k]
+        except Exception:
+            pass
+
+# Clear stale None entries on module load
+_clear_none_from_cache()
+
 # ─────────────────────────────────────────────────────────────
 # System prompts
 # ─────────────────────────────────────────────────────────────
 
-_TERMINAL_SYSTEM_PROMPT = """You are a strict DevOps/Cloud submission evaluator.
+_TERMINAL_SYSTEM_PROMPT = """You are an automated DevOps/Cloud evaluator. Return ONLY raw JSON, no markdown, no fences.
 
-Analyse the candidate's terminal commands and outputs against the question requirements.
-Derive exactly 3 to 7 concrete, verifiable tasks from the question.
-For each task, decide completed: true or false based on execution evidence.
-Use validation_signals.passed and validation_signals.reasons as supporting evidence only.
+Identify ALL tasks from the question description (up to 10 tasks). Each task = 100/total_tasks marks.
+Evaluate each task from terminal_history: completed=true only if command ran AND produced correct result.
+IMPORTANT: If a task is NOT present in terminal_history, mark it completed=false and score=0.
 
-Return ONLY valid JSON — no markdown, no code fences, no explanation:
-{"derived_tasks":[{"task":"<concise task>","completed":true,"evidence":"<what supports this>","reasoning":"<1 sentence>"}],"feedback_summary":"<2-3 sentences>","one_liner":"<single sentence verdict>","ideal_answer_summary":"<what a perfect submission looks like>","code_quality":{"score":0,"comments":"<comment on command structure and conventions>"},"correctness":{"score":0,"comments":"<comment on whether commands produce correct results>"},"library_usage":{"score":0,"comments":"<comment on correct use of CLI tools and flags>"},"output_quality":{"score":0,"comments":"<comment on output and verification steps>"},"strengths":["<strength>"],"areas_for_improvement":["<area>"],"suggestions":["<suggestion>"],"deduction_reasons":["<reason>"]}
+JSON format (MUST be complete and valid):
+{"derived_tasks":[{"task":"<task>","completed":true,"score":<marks>,"max_score":<marks_per_task>,"evidence":"<cmd>","reasoning":"<short>"}],"overall_score":<0-100>,"feedback_summary":"<1 sentence>","one_liner":"<verdict>","ideal_answer_summary":"<brief>","code_quality":{"score":0,"comments":"<short>"},"correctness":{"score":0,"comments":"<short>"},"library_usage":{"score":0,"comments":"<short>"},"output_quality":{"score":0,"comments":"<short>"},"strengths":["<s1>"],"areas_for_improvement":["<a1>"],"improvement_suggestions":["<i1>"],"suggestions":["<s1>"],"deduction_reasons":["<d1>"]}
 
-Rules:
-- Derive between 3 and 7 tasks. Never fewer, never more.
-- Base task completion strictly on execution evidence in terminal_history and engine_response.
-- If terminal_history is empty, mark all tasks incomplete and set all scores to 0.
-- Do not invent evidence. If unsure, mark incomplete.
-- Score each of code_quality, correctness, library_usage, output_quality from 0 to 100.
-- Keep each string under 120 characters.
-- Max 3 items per list field."""
+Rules: Up to 10 tasks. Max 2 list items. Keep all strings under 80 chars. No truncation."""
 
-_SCENARIO_SYSTEM_PROMPT = """You are a strict DevOps/Cloud written-answer evaluator.
+_SCENARIO_SYSTEM_PROMPT = """You are an automated DevOps/Cloud written-answer evaluator. Return ONLY raw JSON, no markdown, no fences.
 
-Analyse the candidate's written answer against the question requirements.
-Derive exactly 3 to 7 concrete, verifiable tasks from the question.
-For each task, decide completed: true or false based on the written answer.
-Use question instructions, hints, and constraints as the evaluation rubric.
+Identify ALL tasks from the question description (up to 10 tasks). Each task = 100/total_tasks marks.
+Evaluate each task from the written answer: completed=true only if correct explanation/command provided.
+IMPORTANT: If a task is NOT addressed in the answer, mark it completed=false and score=0.
 
-Return ONLY valid JSON — no markdown, no code fences, no explanation:
-{"derived_tasks":[{"task":"<concise task>","completed":true,"evidence":"<quote or paraphrase>","reasoning":"<1 sentence>"}],"feedback_summary":"<2-3 sentences>","one_liner":"<single sentence verdict>","ideal_answer_summary":"<what a perfect answer covers>","code_quality":{"score":0,"comments":"<comment on technical accuracy of any code or commands mentioned>"},"correctness":{"score":0,"comments":"<comment on correctness of the proposed solution>"},"library_usage":{"score":0,"comments":"<comment on correct use of tools, services, or APIs mentioned>"},"output_quality":{"score":0,"comments":"<comment on clarity and completeness of the explanation>"},"strengths":["<strength>"],"areas_for_improvement":["<area>"],"suggestions":["<suggestion>"],"deduction_reasons":["<reason>"]}
+JSON format (MUST be complete and valid):
+{"derived_tasks":[{"task":"<task>","completed":true,"score":<marks>,"max_score":<marks_per_task>,"evidence":"<quote>","reasoning":"<short>"}],"overall_score":<0-100>,"feedback_summary":"<1 sentence>","one_liner":"<verdict>","ideal_answer_summary":"<brief>","code_quality":{"score":0,"comments":"<short>"},"correctness":{"score":0,"comments":"<short>"},"library_usage":{"score":0,"comments":"<short>"},"output_quality":{"score":0,"comments":"<short>"},"strengths":["<s1>"],"areas_for_improvement":["<a1>"],"improvement_suggestions":["<i1>"],"suggestions":["<s1>"],"deduction_reasons":["<d1>"]}
 
-Rules:
-- Derive between 3 and 7 tasks. Never fewer, never more.
-- If the answer is empty or fewer than 20 characters, mark all tasks incomplete and set all scores to 0.
-- Do not invent evidence. If unsure, mark incomplete.
-- Score each of code_quality, correctness, library_usage, output_quality from 0 to 100.
-- Keep each string under 120 characters.
-- Max 3 items per list field."""
+Rules: Up to 10 tasks. Max 2 list items. Keep all strings under 80 chars. No truncation."""
 
 
 # ─────────────────────────────────────────────────────────────
@@ -110,18 +107,17 @@ def _empty_response() -> dict:
 
 def _compute_scores(derived_tasks: list[dict]) -> tuple[int, int, int]:
     """
-    Compute overall_score and per-task scores from derived_tasks.
+    Compute overall_score from derived_tasks.
+    Uses LLM-provided scores if available, otherwise computes from completed flag.
     Returns (overall_score, completed_count, total_count).
-    Mutates each task dict to set task["score"].
     """
     total = len(derived_tasks)
     if total == 0:
         return 0, 0, 0
     completed = sum(1 for t in derived_tasks if t.get("completed", False))
-    overall_score = round((completed / total) * 100)
-    per_task_score = round(100 / total)
-    for t in derived_tasks:
-        t["score"] = per_task_score if t.get("completed", False) else 0
+    # Use LLM-provided overall score if tasks have scores
+    total_score = sum(float(t.get("score", 0)) for t in derived_tasks)
+    overall_score = round(min(100, total_score))
     return overall_score, completed, total
 
 
@@ -148,55 +144,36 @@ def _build_terminal_user_prompt(question: dict, submission: dict) -> str:
     vs = (s.get("validation_signals") or {})
     er = (s.get("engine_response") or {})
 
-    # Cap terminal history to last 10 entries, each output capped at 300 chars
+    # Cap history to last 10 entries, commands to 100 chars, output to 100 chars
     history = s.get("terminal_history") or []
     history_lines = []
     for entry in history[-10:]:
-        cmd = str(entry.get("command") or "")
-        out = str(entry.get("output") or "")[:300]
-        history_lines.append(f"$ {cmd}\n{out}")
+        cmd = str(entry.get("command") or "")[:100]
+        out = str(entry.get("output") or "")[:100]
+        history_lines.append(f"$ {cmd}\n{out}" if out.strip() else f"$ {cmd}")
     history_block = "\n".join(history_lines) or "(empty)"
 
     return (
-        f"question_id: {q.get('id', '')}\n"
-        f"title: {q.get('title', '')}\n"
-        f"description: {str(q.get('description', ''))[:600]}\n"
-        f"instructions: {str(q.get('instructions', ''))[:400]}\n"
-        f"constraints: {q.get('constraints', [])}\n"
-        f"expected_submission_contains: {q.get('expected_submission_contains', [])}\n"
-        f"expected_exit_code: {q.get('expected_exit_code')}\n\n"
-        f"terminal_history (last 10 commands):\n{history_block}\n\n"
-        f"engine_response:\n"
-        f"  exit_code: {er.get('exit_code')}\n"
-        f"  stdout: {str(er.get('stdout', ''))[:300]}\n"
-        f"  stderr: {str(er.get('stderr', ''))[:200]}\n\n"
-        f"validation_signals:\n"
-        f"  passed: {vs.get('passed', False)}\n"
-        f"  question_score: {vs.get('question_score')}\n"
-        f"  max_score: {vs.get('max_score')}\n"
-        f"  reasons: {vs.get('reasons', [])}\n\n"
-        f"Return ONLY the JSON described in the system prompt."
+        f"QUESTION:\n"
+        f"title: {q.get('title', '')[:100]}\n"
+        f"description: {str(q.get('description', ''))[:500]}\n\n"
+        f"STUDENT ANSWER:\n{history_block}\n\n"
+        f"passed: {vs.get('passed', False)} | exit_code: {er.get('exit_code')}\n\n"
+        f"Return ONLY the JSON."
     )
 
 
 def _build_scenario_user_prompt(question: dict, submission: dict) -> str:
     q = question
     s = submission
-    vs = (s.get("validation_signals") or {})
-    answer = str(s.get("answer") or "")[:1500]
+    answer = str(s.get("answer") or "")[:600]
 
     return (
-        f"question_id: {q.get('id', '')}\n"
-        f"title: {q.get('title', '')}\n"
-        f"description: {str(q.get('description', ''))[:600]}\n"
-        f"instructions: {str(q.get('instructions', ''))[:400]}\n"
-        f"constraints: {q.get('constraints', [])}\n"
-        f"hints: {q.get('hints', [])}\n\n"
-        f"candidate_answer:\n{answer}\n\n"
-        f"validation_signals:\n"
-        f"  passed: {vs.get('passed', False)}\n"
-        f"  reasons: {vs.get('reasons', [])}\n\n"
-        f"Return ONLY the JSON described in the system prompt."
+        f"QUESTION:\n"
+        f"title: {q.get('title', '')[:100]}\n"
+        f"description: {str(q.get('description', ''))[:500]}\n\n"
+        f"STUDENT ANSWER:\n{answer}\n\n"
+        f"Return ONLY the JSON."
     )
 
 
@@ -230,18 +207,35 @@ def _normalize_response(raw: dict, validation_signals: dict | None = None) -> di
     # Derived tasks — source of truth for scoring
     raw_tasks = raw.get("derived_tasks") or []
     derived_tasks: list[dict] = []
+    total_tasks = len([t for t in raw_tasks if isinstance(t, dict)])
+    per_task_score = round(100 / total_tasks, 2) if total_tasks > 0 else 0
+
     if isinstance(raw_tasks, list):
         for t in raw_tasks:
             if not isinstance(t, dict):
                 continue
+            # Use LLM-provided score if available, else compute from completed
+            llm_score = t.get("score")
+            llm_max = t.get("max_score", per_task_score)
+            completed = bool(t.get("completed", False))
+            if llm_score is not None:
+                try:
+                    task_score = float(llm_score)
+                except Exception:
+                    task_score = per_task_score if completed else 0
+            else:
+                task_score = per_task_score if completed else 0
+
             derived_tasks.append({
                 "task":      _str(t.get("task"), 200),
-                "score":     0,  # filled by _compute_scores
-                "completed": bool(t.get("completed", False)),
+                "score":     round(task_score, 2),
+                "max_score": round(float(llm_max) if llm_max else per_task_score, 2),
+                "completed": completed,
                 "evidence":  _str(t.get("evidence"), 300),
                 "reasoning": _str(t.get("reasoning"), 200),
             })
 
+    # Compute overall_score from task scores (don't trust LLM's overall_score)
     overall_score, completed_count, total_count = _compute_scores(derived_tasks)
     base["derived_tasks"] = derived_tasks
     base["overall_score"] = overall_score
@@ -267,7 +261,7 @@ def _normalize_response(raw: dict, validation_signals: dict | None = None) -> di
     base["improvement_suggestions"] = _list_of_str(raw.get("improvement_suggestions") or raw.get("suggestions"))
     base["deduction_reasons"]       = _list_of_str(raw.get("deduction_reasons"))
 
-    # Scored sub-objects — LLM may or may not provide these; default to 0
+    # Scored sub-objects
     for key in ("code_quality", "correctness", "library_usage", "output_quality"):
         raw_sub = raw.get(key)
         if isinstance(raw_sub, dict):
@@ -332,10 +326,17 @@ def get_devops_feedback(
 
     # Cache lookup
     cache_key = _cache_key(question_id, submission)
+    logger.info(f"[DEVOPS_EVAL] question_id={question_id}, use_cache={use_cache}, cache_key={cache_key[:8]}, in_cache={cache_key in _cache}")
     if use_cache and cache_key in _cache:
-        logger.info("[DEVOPS_EVAL] cache hit question_id=%s", question_id)
-        emit_eval_usage(usage_meta, route, latency_ms=0, cache_hit=True)
-        return _cache[cache_key]
+        cached = _cache[cache_key]
+        if cached is not None:
+            logger.info("[DEVOPS_EVAL] cache hit question_id=%s", question_id)
+            emit_eval_usage(usage_meta, route, latency_ms=0, cache_hit=True)
+            return cached
+        else:
+            # Remove stale None from cache
+            logger.warning(f"[DEVOPS_EVAL] Removing stale None from cache for question_id={question_id}")
+            del _cache[cache_key]
 
     # Detect mode and build prompt
     mode = _detect_mode(submission)
@@ -356,6 +357,8 @@ def get_devops_feedback(
         raw, prompt_tokens, completion_tokens = _llm_chat_coder(messages=messages, temperature=0.1, max_tokens=900)
         latency_ms = (time.time() - start) * 1000
 
+        logger.info(f"[DEVOPS_EVAL] Raw LLM response (first 300 chars): {raw[:300]}")
+
         parsed = safe_parse(raw)
         if parsed.get("parse_error") is True:
             raise ValueError(f"safe_parse returned parse_error: {parsed.get('overall_summary', '')[:200]}")
@@ -374,6 +377,12 @@ def get_devops_feedback(
             error_detail=str(e),
         )
         result = _fallback_response(vs)
+        # Use validation_signals score if available
+        if vs.get("question_score") is not None:
+            result["overall_score"] = int(vs.get("question_score", 0))
 
-    _cache[cache_key] = result
+    if result is not None:
+        _cache[cache_key] = result
+    else:
+        logger.error(f"[DEVOPS_EVAL] result is None for question_id={question_id}! This should never happen.")
     return result

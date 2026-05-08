@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
@@ -54,7 +54,7 @@ export default function RagPage() {
     setRebuildingFor(competency);
     try {
       const res = await rebuildMutation.mutateAsync(competency);
-      toast.success(`Rebuilt '${competency}' — ${res.vectors} vectors in ${res.time_seconds}s`);
+      toast.success(`Rebuilt '${competency}' â€” ${res.vectors} vectors in ${res.time_seconds}s`);
     } catch {
       toast.error(`Rebuild failed for '${competency}'`);
     } finally {
@@ -107,7 +107,7 @@ export default function RagPage() {
               : "border-red-500/30 bg-red-500/10 text-red-300"
           }`}>
             <span className={`h-2 w-2 rounded-full ${ragOnline ? "bg-emerald-400" : healthQuery.isLoading ? "bg-zinc-500" : "bg-red-400"}`} />
-            {healthQuery.isLoading ? "Connecting…" : ragOnline ? "RAG Service Online" : "RAG Service Offline"}
+            {healthQuery.isLoading ? "Connectingâ€¦" : ragOnline ? "RAG Service Online" : "RAG Service Offline"}
           </span>
           <Button variant="outline" className="border-white/10" onClick={() => healthQuery.refetch()}>
             <RefreshCw className="mr-1.5 h-3.5 w-3.5" /> Refresh
@@ -158,13 +158,13 @@ export default function RagPage() {
                     <div className="rounded-lg border border-white/5 bg-white/5 px-3 py-2">
                       <div className="text-xs text-zinc-500">Vectors</div>
                       <div className="mt-0.5 text-lg font-semibold tabular-nums text-zinc-100">
-                        {stats?.vectors?.toLocaleString() ?? "—"}
+                        {stats?.vectors?.toLocaleString() ?? "â€”"}
                       </div>
                     </div>
                     <div className="rounded-lg border border-white/5 bg-white/5 px-3 py-2">
                       <div className="text-xs text-zinc-500">Catalog entries</div>
                       <div className="mt-0.5 text-lg font-semibold tabular-nums text-zinc-100">
-                        {stats?.catalog_entries?.toLocaleString() ?? "—"}
+                        {stats?.catalog_entries?.toLocaleString() ?? "â€”"}
                       </div>
                     </div>
                   </div>
@@ -185,7 +185,7 @@ export default function RagPage() {
                       disabled={isRebuilding || !ragOnline}
                     >
                       <RefreshCw className={`mr-1.5 h-3.5 w-3.5 ${isRebuilding ? "animate-spin" : ""}`} />
-                      {isRebuilding ? "Rebuilding…" : "Rebuild"}
+                      {isRebuilding ? "Rebuildingâ€¦" : "Rebuild"}
                     </Button>
                     <Button
                       variant="outline"
@@ -194,7 +194,7 @@ export default function RagPage() {
                       disabled={isUploading || !ragOnline}
                     >
                       <Upload className="mr-1.5 h-3.5 w-3.5" />
-                      {isUploading ? "…" : "Upload"}
+                      {isUploading ? "â€¦" : "Upload"}
                     </Button>
                   </div>
                 </>
@@ -204,6 +204,43 @@ export default function RagPage() {
         })}
       </div>
 
+
+      {/* SQL Schema Management */}
+      <div className="rounded-xl border border-cyan-500/20 bg-cyan-500/5 p-5 space-y-4">
+        <div className="flex items-start justify-between gap-3">
+          <div className="flex items-center gap-2">
+            <Database className="h-4 w-4 text-cyan-400" />
+            <div>
+              <div className="font-medium text-zinc-100">SQL Schema Store</div>
+              <div className="text-xs text-zinc-500">MongoDB RAG — 160 schemas, 106 domains, 100 rows/table</div>
+            </div>
+          </div>
+          <span className="inline-flex items-center gap-1 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-2 py-0.5 text-xs text-emerald-300">
+            <CheckCircle2 className="h-3 w-3" /> Active
+          </span>
+        </div>
+        <div className="grid grid-cols-3 gap-3">
+          <div className="rounded-lg border border-white/5 bg-white/5 px-3 py-2">
+            <div className="text-xs text-zinc-500">Schemas</div>
+            <div className="mt-0.5 text-lg font-semibold tabular-nums text-zinc-100">160</div>
+          </div>
+          <div className="rounded-lg border border-white/5 bg-white/5 px-3 py-2">
+            <div className="text-xs text-zinc-500">Domains</div>
+            <div className="mt-0.5 text-lg font-semibold tabular-nums text-zinc-100">106</div>
+          </div>
+          <div className="rounded-lg border border-white/5 bg-white/5 px-3 py-2">
+            <div className="text-xs text-zinc-500">Rows/table</div>
+            <div className="mt-0.5 text-lg font-semibold tabular-nums text-emerald-400">100</div>
+          </div>
+        </div>
+        <Button
+          variant="outline"
+          className="w-full border-cyan-500/30 text-cyan-300 hover:bg-cyan-500/10 text-xs"
+          onClick={() => router.push("/rag/sql-schemas")}
+        >
+          <ArrowRight className="mr-1.5 h-3.5 w-3.5" /> Manage SQL Schemas
+        </Button>
+      </div>
       {/* Hidden file input */}
       <input
         ref={fileInputRef}

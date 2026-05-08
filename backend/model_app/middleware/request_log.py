@@ -33,16 +33,9 @@ class RequestLogMiddleware(BaseHTTPMiddleware):
         else:
             cache_hit = bool(getattr(request.state, "cache_hit", False))
 
-        job_id = None
-        try:
-            raw = getattr(response, "body", None)
-            if isinstance(raw, (bytes, bytearray)) and raw:
-                payload = json.loads(raw.decode("utf-8"))
-                if isinstance(payload, dict):
-                    jid = payload.get("job_id")
-                    job_id = str(jid) if jid is not None else None
-        except Exception:
-            job_id = None
+        # Don't try to read response body - it consumes the stream and breaks responses
+        # Job ID tracking can be done via headers if needed
+        job_id = response.headers.get("x-job-id") or None
 
         record = {
             "request_id": str(uuid.uuid4()),

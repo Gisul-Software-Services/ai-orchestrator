@@ -1,14 +1,15 @@
 """
-Import SQL schemas from sql_dataset_clean_v2.json into MongoDB
+Import SQL schemas from sql_dataset_clean_v2.json to MongoDB via RAG service API
 
 This script extracts unique database schemas from the existing SQL dataset
-and stores them in MongoDB for dynamic question generation.
+and sends them to the RAG service for import into MongoDB.
 """
 import asyncio
 import json
 import hashlib
 import os
 import sys
+import requests
 from datetime import datetime
 from pathlib import Path
 from typing import Dict, List, Any
@@ -17,15 +18,14 @@ from collections import defaultdict
 # Add parent directory to path
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
-from motor.motor_asyncio import AsyncIOMotorClient
 from dotenv import load_dotenv
 
 # Load environment variables
 load_dotenv()
 
-# Use local RAG MongoDB (same as aaptor-rag-service on port 27018)
-MONGODB_URI = os.getenv("RAG_MONGODB_URI", "mongodb://localhost:27018")
-RAG_DB_NAME = "rag_db"
+# RAG Service URL (uses port 7003 which is accessible)
+RAG_SERVICE_URL = os.getenv("RAG_SERVICE_URL", "http://103.173.99.217:7003")
+ADMIN_API_KEY = os.getenv("ADMIN_API_KEY", "")
 
 
 def generate_schema_signature(schemas: dict) -> str:
@@ -173,29 +173,28 @@ def group_by_schema(dataset: List[dict]) -> Dict[str, List[dict]]:
     return schema_groups
 
 
-async def import_schemas():
+def import_schemas():
     """
-    Main import function
+    Main import function - sends schemas to RAG service API
     """
     print("=" * 70)
-    print("SQL Schema Import Tool")
+    print("SQL Schema Import Tool (via RAG Service API)")
     print("=" * 70)
     
-    # Connect to MongoDB
-    print(f"\n1. Connecting to MongoDB...")
-    print(f"   URI: {MONGODB_URI[:50]}...")
-    print(f"   Database: {RAG_DB_NAME}")
+    # Check RAG service
+    print(f"\n1. Checking RAG service...")
+    print(f"   URL: {RAG_SERVICE_URL}")
     
-    client = AsyncIOMotorClient(MONGODB_URI)
-    db = client[RAG_DB_NAME]
-    collection = db["sql_schemas"]
-    
-    # Test connection
     try:
-        await client.admin.command('ping')
-        print("   ✓ Connected successfully")
+        response = requests.get(f"{RAG_SERVICE_URL}/api/v1/health", timeout=5)
+        if response.status_code == 200:
+            print("   ✓ RAG service is accessible")
+        else:
+            print(f"   ✗ RAG service returned status {response.status_code}")
+            return
     except Exception as e:
-        print(f"   ✗ Connection failed: {e}")
+        print(f"   ✗ Cannot reach RAG service: {e}")
+        print(f"   Make sure RAG service is running at {RAG_SERVICE_URL}")
         return
     
     # Load dataset
@@ -216,10 +215,9 @@ async def import_schemas():
     schema_groups = group_by_schema(dataset)
     print(f"   ✓ Found {len(schema_groups)} unique schemas")
     
-    # Import schemas
-    print(f"\n4. Importing schemas to MongoDB...")
-    imported_count = 0
-    updated_count = 0
+    # Build schema documents
+    print(f"\n4. Building schema documents...")
+    schemas_list = []
     
     for schema_sig, questions in schema_groups.items():
         # Use first question as representative
@@ -239,80 +237,77 @@ async def import_schemas():
             "metadata": calculate_metadata(representative.get("schemas", {})),
             "usage_count": 0,
             "last_used_at": None,
-            "created_at": datetime.utcnow(),
-            "updated_at": datetime.utcnow(),
+            "created_at": datetime.utcnow().isoformat(),
+            "updated_at": datetime.utcnow().isoformat(),
             "source": "sql_dataset_clean_v2.json",
             "question_count": len(questions)  # How many questions use this schema
         }
         
-        # Upsert
-        result = await collection.update_one(
-            {"schema_id": schema_id},
-            {"$set": schema_doc},
-            upsert=True
+        schemas_list.append(schema_doc)
+    
+    print(f"   ✓ Built {len(schemas_list)} schema documents")
+    
+    # Send to RAG service
+    print(f"\n5. Sending schemas to RAG service...")
+    
+    try:
+        headers = {
+            "Content-Type": "application/json"
+        }
+        if ADMIN_API_KEY:
+            headers["X-Admin-Api-Key"] = ADMIN_API_KEY
+        
+        response = requests.post(
+            f"{RAG_SERVICE_URL}/api/v1/import-sql-schemas",
+            headers=headers,
+            json={"schemas": schemas_list},
+            timeout=60
         )
         
-        if result.upserted_id:
-            imported_count += 1
+        if response.status_code == 200:
+            result = response.json()
+            print(f"   ✓ Imported: {result['imported']} new schemas")
+            print(f"   ✓ Updated: {result['updated']} existing schemas")
+            print(f"   ✓ Total: {result['total']} schemas processed")
+            if not result['success']:
+                print(f"   ⚠ Warning: {result['message']}")
         else:
-            updated_count += 1
-        
-        print(f"   [{imported_count + updated_count}/{len(schema_groups)}] {schema_id[:50]}...")
+            print(f"   ✗ Import failed: {response.status_code}")
+            print(f"   Error: {response.text}")
+            return
+            
+    except Exception as e:
+        print(f"   ✗ Failed to send schemas: {e}")
+        return
     
-    print(f"\n   ✓ Imported: {imported_count} new schemas")
-    print(f"   ✓ Updated: {updated_count} existing schemas")
-    
-    # Create indexes
-    print(f"\n5. Creating indexes...")
-    await collection.create_index("schema_id", unique=True)
-    await collection.create_index([("domain", 1), ("difficulty_levels", 1), ("sql_categories", 1)])
-    await collection.create_index([("usage_count", 1), ("last_used_at", 1)])
-    print(f"   ✓ Indexes created")
-    
-    # Show statistics
+    # Get statistics
     print(f"\n6. Schema Statistics:")
     
-    # Count by domain
-    pipeline = [
-        {"$group": {"_id": "$domain", "count": {"$sum": 1}}},
-        {"$sort": {"count": -1}}
-    ]
-    domain_stats = await collection.aggregate(pipeline).to_list(length=100)
-    
-    print(f"\n   Schemas by Domain:")
-    for stat in domain_stats:
-        print(f"   - {stat['_id']}: {stat['count']}")
-    
-    # Count by difficulty
-    pipeline = [
-        {"$unwind": "$difficulty_levels"},
-        {"$group": {"_id": "$difficulty_levels", "count": {"$sum": 1}}},
-        {"$sort": {"_id": 1}}
-    ]
-    difficulty_stats = await collection.aggregate(pipeline).to_list(length=100)
-    
-    print(f"\n   Schemas by Difficulty:")
-    for stat in difficulty_stats:
-        print(f"   - {stat['_id']}: {stat['count']}")
-    
-    # Count by SQL category
-    pipeline = [
-        {"$unwind": "$sql_categories"},
-        {"$group": {"_id": "$sql_categories", "count": {"$sum": 1}}},
-        {"$sort": {"count": -1}}
-    ]
-    category_stats = await collection.aggregate(pipeline).to_list(length=100)
-    
-    print(f"\n   Schemas by SQL Category:")
-    for stat in category_stats:
-        print(f"   - {stat['_id']}: {stat['count']}")
+    try:
+        response = requests.get(f"{RAG_SERVICE_URL}/api/v1/sql-schemas/stats", timeout=10)
+        if response.status_code == 200:
+            stats = response.json()
+            
+            print(f"\n   Total Schemas: {stats['total_schemas']}")
+            
+            print(f"\n   Schemas by Domain:")
+            for stat in stats['by_domain']:
+                print(f"   - {stat['_id']}: {stat['count']}")
+            
+            print(f"\n   Schemas by Difficulty:")
+            for stat in stats['by_difficulty']:
+                print(f"   - {stat['_id']}: {stat['count']}")
+            
+            print(f"\n   Schemas by SQL Category:")
+            for stat in stats['by_category']:
+                print(f"   - {stat['_id']}: {stat['count']}")
+    except Exception as e:
+        print(f"   ⚠ Could not fetch statistics: {e}")
     
     print(f"\n" + "=" * 70)
     print(f"✓ Import completed successfully!")
     print(f"=" * 70)
-    
-    client.close()
 
 
 if __name__ == "__main__":
-    asyncio.run(import_schemas())
+    import_schemas()

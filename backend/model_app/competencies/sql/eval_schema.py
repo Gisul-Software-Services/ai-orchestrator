@@ -1,25 +1,37 @@
 """Pydantic models for SQL AI evaluation request and response."""
 from __future__ import annotations
 
-from typing import Any, Literal, Optional
+from typing import Any, List, Literal, Optional, Union
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
 
 
 class TestResult(BaseModel):
     passed: bool
-    user_output: str = ""
-    expected_output: str = ""
+    # Accept both string (JSON-encoded) and list (structured) for outputs
+    user_output: Union[str, List[Any]] = ""
+    expected_output: Union[str, List[Any]] = ""
     error: Optional[str] = None
+
+    @field_validator("user_output", "expected_output", mode="before")
+    @classmethod
+    def normalize_output(cls, v):
+        """Accept string, list, or None — normalize to string for backward compat."""
+        if v is None:
+            return ""
+        if isinstance(v, (list, dict)):
+            import json
+            return json.dumps(v)
+        return str(v)
 
 
 class SQLEvaluationRequest(BaseModel):
     question_id: str
     question_description: str
     user_query: str
-    reference_query: str
+    reference_query: str = ""
     max_marks: float
-    schemas: dict[str, Any]
+    schemas: dict[str, Any] = Field(default_factory=dict)
     test_result: TestResult
     order_sensitive: bool = False
     difficulty: str = "medium"
@@ -62,5 +74,5 @@ class SQLAIFeedback(BaseModel):
     benchmarking: dict[str, Any] = Field(default_factory=dict)
     insights: dict[str, Any] = Field(default_factory=dict)
     flags: dict[str, Any] = Field(default_factory=dict)
-    evaluation_version: str = "2.1.0"
+    evaluation_version: str = "2.2.0"
     ai_generated: bool = True

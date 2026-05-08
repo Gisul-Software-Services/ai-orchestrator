@@ -1,10 +1,9 @@
-version: '3.8'
-
 # ─────────────────────────────────────────────────────────────
 # Gisul Model — Production Stack
 #
 # Services:
 #   redis          — job queue + cache (official image, no build)
+#   postgres       — SQL query validation engine (port 5432)
 #   model-service  — Qwen/vLLM evaluators + generation (port 7001, GPU)
 #   backend-api    — FastAPI gateway, auth, billing (port 7000)
 #   frontend       — Next.js admin UI (port 7002)
@@ -28,6 +27,25 @@ services:
       timeout: 5s
       retries: 5
 
+  # ── PostgreSQL (SQL validation engine) ────────────────────
+  postgres:
+    image: postgres:16-alpine
+    container_name: aaptor-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: aaptor
+      POSTGRES_PASSWORD: aaptor_validation
+      POSTGRES_DB: validation_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U aaptor -d validation_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
   # ── Model Service (Qwen/vLLM, GPU) ────────────────────────
   model-service:
     build:
@@ -42,10 +60,13 @@ services:
     environment:
       - REDIS_URL=redis://redis:6379
       - ASSETS_DIR=/app/assets
+      - VALIDATION_DB_URL=postgresql://aaptor:aaptor_validation@postgres:5432/validation_db
     volumes:
       - ~/.cache/huggingface:/root/.cache/huggingface
     depends_on:
       redis:
+        condition: service_healthy
+      postgres:
         condition: service_healthy
     deploy:
       resources:
@@ -99,3 +120,6 @@ services:
     depends_on:
       - backend-api
     restart: unless-stopped
+
+volumes:
+  postgres_data:

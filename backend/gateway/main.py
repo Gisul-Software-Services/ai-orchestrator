@@ -65,6 +65,7 @@ _ORG_GATED_POST_PATHS = frozenset(
         "/api/v1/generate-coding",
         "/api/v1/generate-sql",
         "/api/v1/generate-sql-question",
+        "/api/v1/generate-sql-question-async",
         "/api/v1/generate-aiml",
         "/api/v1/generate-dsa-question",
         "/api/v1/generate-devops-question",

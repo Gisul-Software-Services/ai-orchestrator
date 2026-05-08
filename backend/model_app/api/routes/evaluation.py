@@ -128,8 +128,12 @@ async def evaluate_devops_async(
                 result = await asyncio.to_thread(
                     get_devops_feedback, payload=payload_dict, usage_meta=usage_meta
                 )
+            if result is None:
+                result = {"overall_score": 0, "error": "Evaluator returned None", "ai_generated": True}
             await _job_store_set(job_id, {"status": "complete", "result": result, "error": None})
         except Exception as exc:
+            import logging
+            logging.getLogger(__name__).error(f"[DEVOPS_ASYNC] Job {job_id} failed: {exc}", exc_info=True)
             await _job_store_set(job_id, {"status": "failed", "result": None, "error": str(exc)})
 
     asyncio.create_task(_run())
@@ -168,8 +172,12 @@ async def evaluate_cloud_async(
                 result = await asyncio.to_thread(
                     get_cloud_feedback, payload=payload_dict, usage_meta=usage_meta
                 )
+            if result is None:
+                result = {"overall_score": 0, "error": "Evaluator returned None", "ai_generated": True}
             await _job_store_set(job_id, {"status": "complete", "result": result, "error": None})
         except Exception as exc:
+            import logging
+            logging.getLogger(__name__).error(f"[CLOUD_ASYNC] Job {job_id} failed: {exc}", exc_info=True)
             await _job_store_set(job_id, {"status": "failed", "result": None, "error": str(exc)})
 
     asyncio.create_task(_run())
